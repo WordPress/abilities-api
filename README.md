@@ -1,6 +1,6 @@
 # Abilities API  
-_Part of the **AI Building Blocks for WordPress** initiative_
-
+[_Part of the **AI Building Blocks for WordPress** initiative_
+](https://make.wordpress.org/ai/2025/07/17/ai-building-blocks)
 ## Overview
 * **Purpose:** provide a common way for WordPress core, plugins, and themes to describe what they can do (“abilities”) in a machine‑readable, human‑friendly form.  
 * **Scope:** discovery, permissioning, and execution metadata only. Actual business logic stays inside the registering component.  
