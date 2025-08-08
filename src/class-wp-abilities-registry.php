@@ -29,7 +29,7 @@ final class WP_Abilities_Registry {
 	 * Container for the main instance of the class.
 	 *
 	 * @since 0.1.0
-	 * @var WP_Abilities_Registry|null
+	 * @var ?WP_Abilities_Registry
 	 */
 	private static ?WP_Abilities_Registry $instance = null;
 
@@ -229,7 +229,7 @@ final class WP_Abilities_Registry {
 	 * @since 0.1.0
 	 *
 	 * @param string $name The name of the registered ability, with its namespace.
-	 * @return WP_Ability|null The registered ability instance, or null if it is not registered.
+	 * @return ?WP_Ability The registered ability instance, or null if it is not registered.
 	 */
 	public function get_registered( $name ): ?WP_Ability {
 		if ( ! $this->is_registered( $name ) ) {
