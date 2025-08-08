@@ -71,7 +71,7 @@ class AbilitiesAPITest extends WP_UnitTestCase {
 	/**
 	 * Tests registering an ability with invalid name.
 	 *
-	 * @expectedIncorrectUsage wp_register_ability
+	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
 	public function test_register_ability_invalid_name(): void {
 		do_action( 'abilities_api_init' );
@@ -131,6 +131,7 @@ class AbilitiesAPITest extends WP_UnitTestCase {
 	/**
 	 * Tests executing an ability with input not matching schema.
 	 *
+	 * @expectedIncorrectUsage WP_Ability::validate_input
 	 * @expectedIncorrectUsage WP_Ability::execute
 	 */
 	public function test_execute_ability_no_input_schema_match(): void {
@@ -144,7 +145,7 @@ class AbilitiesAPITest extends WP_UnitTestCase {
 	/**
 	 * Tests executing an ability with output not matching schema.
 	 *
-	 * @expectedIncorrectUsage WP_Ability::execute
+	 * @expectedIncorrectUsage WP_Ability::validate_output
 	 */
 	public function test_execute_ability_no_output_schema_match(): void {
 		do_action( 'abilities_api_init' );
@@ -160,7 +161,7 @@ class AbilitiesAPITest extends WP_UnitTestCase {
 	/**
 	 * Tests permission callback receiving input not matching schema.
 	 *
-	 * @expectedIncorrectUsage WP_Ability::has_permission
+	 * @expectedIncorrectUsage WP_Ability::validate_input
 	 */
 	public function test_permission_callback_no_input_schema_match(): void {
 		do_action( 'abilities_api_init' );
