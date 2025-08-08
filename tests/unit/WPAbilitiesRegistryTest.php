@@ -185,7 +185,7 @@ class WPAbilitiesRegistryTest extends WP_UnitTestCase {
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
 	public function test_register_invalid_missing_execute_callback() {
-		// Remove the get_value_callback from the properties.
+		// Remove the execute_callback from the properties.
 		unset( self::$test_ability_properties['execute_callback'] );
 
 		$result = $this->registry->register( self::$test_ability_name, self::$test_ability_properties );
