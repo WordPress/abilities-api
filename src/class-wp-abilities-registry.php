@@ -232,7 +232,16 @@ final class WP_Abilities_Registry {
 	 * @return WP_Ability|null The registered ability instance, or null if it is not registered.
 	 */
 	public function get_registered( $name ): ?WP_Ability {
-		return $this->registered_abilities[ $name ] ?? null;
+		if ( ! $this->is_registered( $name ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				/* translators: %s: Ability name. */
+				sprintf( esc_html__( 'Ability "%s" not found.' ), esc_attr( $name ) ),
+				'0.1.0'
+			);
+			return null;
+		}
+		return $this->registered_abilities[ $name ];
 	}
 
 	/**
