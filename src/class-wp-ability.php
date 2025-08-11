@@ -27,7 +27,7 @@ class WP_Ability {
 	 * @since 0.1.0
 	 * @var string
 	 */
-	protected string $name;
+	protected $name;
 
 	/**
 	 * The human-readable ability label.
@@ -35,7 +35,7 @@ class WP_Ability {
 	 * @since 0.1.0
 	 * @var string
 	 */
-	protected string $label;
+	protected $label;
 
 	/**
 	 * The detailed ability description.
@@ -43,7 +43,7 @@ class WP_Ability {
 	 * @since 0.1.0
 	 * @var string
 	 */
-	protected string $description;
+	protected $description;
 
 	/**
 	 * The optional ability input schema.
@@ -51,7 +51,7 @@ class WP_Ability {
 	 * @since 0.1.0
 	 * @var array
 	 */
-	protected array $input_schema = [];
+	protected $input_schema = array();
 
 	/**
 	 * The optional ability output schema.
@@ -59,7 +59,7 @@ class WP_Ability {
 	 * @since 0.1.0
 	 * @var array
 	 */
-	protected array $output_schema = [];
+	protected $output_schema = array();
 
 	/**
 	 * The ability execute callback.
@@ -83,7 +83,7 @@ class WP_Ability {
 	 * @since 0.1.0
 	 * @var array
 	 */
-	protected array $meta = [];
+	protected $meta = array();
 
 	/**
 	 * Constructor.
@@ -197,7 +197,7 @@ class WP_Ability {
 						__( 'Invalid input provided for ability "%1$s": %2$s.' ),
 						$this->name,
 						$valid_input->get_error_message()
-					),
+					)
 				),
 				'0.1.0'
 			);
@@ -243,7 +243,7 @@ class WP_Ability {
 				__METHOD__,
 				esc_html(
 					/* translators: %s ability name. */
-					sprintf( __( 'Ability "%s" does not have a valid execute callback.' ), $this->name ),
+					sprintf( __( 'Ability "%s" does not have a valid execute callback.' ), $this->name )
 				),
 				'0.1.0'
 			);
@@ -276,7 +276,7 @@ class WP_Ability {
 						__( 'Invalid output provided for ability "%1$s": %2$s.' ),
 						$this->name,
 						$valid_output->get_error_message()
-					),
+					)
 				),
 				'0.1.0'
 			);

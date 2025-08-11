@@ -5,10 +5,10 @@
  *
  * @group abilities-api
  */
-class WPAbilitiesRegistryTest extends WP_UnitTestCase {
+class Tests_Abilities_API_wpAbilitiesRegistry extends WP_UnitTestCase {
 
 	public static $test_ability_name       = 'test/add-numbers';
-	public static $test_ability_properties = [];
+	public static $test_ability_properties = array();
 
 	/**
 	 * Mock abilities registry.
@@ -25,40 +25,40 @@ class WPAbilitiesRegistryTest extends WP_UnitTestCase {
 
 		$this->registry = new WP_Abilities_Registry();
 
-		self::$test_ability_properties = [
+		self::$test_ability_properties = array(
 			'label'               => 'Add numbers',
 			'description'         => 'Calculates the result of adding two numbers.',
-			'input_schema'        => [
+			'input_schema'        => array(
 				'type'                 => 'object',
-				'properties'           => [
-					'a' => [
+				'properties'           => array(
+					'a' => array(
 						'type'        => 'number',
 						'description' => 'First number.',
 						'required'    => true,
-					],
-					'b' => [
+					),
+					'b' => array(
 						'type'        => 'number',
 						'description' => 'Second number.',
 						'required'    => true,
-					],
-				],
+					),
+				),
 				'additionalProperties' => false,
-			],
-			'output_schema'       => [
+			),
+			'output_schema'       => array(
 				'type'        => 'number',
 				'description' => 'The result of adding the two numbers.',
 				'required'    => true,
-			],
+			),
 			'execute_callback'    => function ( array $input ): int {
 				return $input['a'] + $input['b'];
 			},
 			'permission_callback' => function (): bool {
 				return true;
 			},
-			'meta'                => [
+			'meta'                => array(
 				'category' => 'math',
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -115,7 +115,7 @@ class WPAbilitiesRegistryTest extends WP_UnitTestCase {
 	 */
 	public function test_register_invalid_name_using_instance() {
 		$ability = new WP_Ability( 'invalid_name', array() );
-		$result = $this->registry->register( $ability );
+		$result  = $this->registry->register( $ability );
 		$this->assertNull( $result );
 	}
 
@@ -314,7 +314,7 @@ class WPAbilitiesRegistryTest extends WP_UnitTestCase {
 	 */
 	public function test_register_new_ability_using_instance() {
 		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
-		$result = $this->registry->register( $ability );
+		$result  = $this->registry->register( $ability );
 
 		$this->assertSame( $ability, $result );
 	}
@@ -407,13 +407,13 @@ class WPAbilitiesRegistryTest extends WP_UnitTestCase {
 	 * @covers WP_Abilities_Registry::get_all_registered
 	 */
 	public function test_get_all_registered() {
-		$ability_one_name       = 'test/one';
+		$ability_one_name = 'test/one';
 		$this->registry->register( $ability_one_name, self::$test_ability_properties );
 
-		$ability_two_name       = 'test/two';
+		$ability_two_name = 'test/two';
 		$this->registry->register( $ability_two_name, self::$test_ability_properties );
 
-		$ability_three_name       = 'test/three';
+		$ability_three_name = 'test/three';
 		$this->registry->register( $ability_three_name, self::$test_ability_properties );
 
 		$result = $this->registry->get_all_registered();

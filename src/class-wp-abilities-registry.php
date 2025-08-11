@@ -23,7 +23,7 @@ final class WP_Abilities_Registry {
 	 * @since 0.1.0
 	 * @var WP_Ability[]
 	 */
-	private array $registered_abilities = [];
+	private $registered_abilities = array();
 
 	/**
 	 * Container for the main instance of the class.
@@ -31,7 +31,7 @@ final class WP_Abilities_Registry {
 	 * @since 0.1.0
 	 * @var ?WP_Abilities_Registry
 	 */
-	private static ?WP_Abilities_Registry $instance = null;
+	private static $instance = null;
 
 	/**
 	 * Registers a new ability.
@@ -152,11 +152,11 @@ final class WP_Abilities_Registry {
 			array(
 				'label'               => $properties['label'],
 				'description'         => $properties['description'],
-				'input_schema'        => $properties['input_schema'] ?? [],
-				'output_schema'       => $properties['output_schema'] ?? [],
+				'input_schema'        => $properties['input_schema'] ?? array(),
+				'output_schema'       => $properties['output_schema'] ?? array(),
 				'execute_callback'    => $properties['execute_callback'],
 				'permission_callback' => $properties['permission_callback'] ?? null,
-				'meta'                => $properties['meta'] ?? [],
+				'meta'                => $properties['meta'] ?? array(),
 			)
 		);
 		$this->registered_abilities[ $name ] = $ability;
