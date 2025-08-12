@@ -195,11 +195,10 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			),
 		);
 
-		if ( $ability->get_execute_callback() ) {
-			$links['run'] = array(
-				'href' => rest_url( sprintf( '%s/%s/%s/run', $this->namespace, $this->rest_base, $ability->get_name() ) ),
-			);
-		}
+		// Add run link for all abilities
+		$links['run'] = array(
+			'href' => rest_url( sprintf( '%s/%s/%s/run', $this->namespace, $this->rest_base, $ability->get_name() ) ),
+		);
 
 		$response->add_links( $links );
 
