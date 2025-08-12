@@ -43,7 +43,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[a-zA-Z0-9\-\/]+)/run',
+			'/' . $this->rest_base . '/(?P<id>[a-zA-Z0-9\-\/]+?)/run',
 			array(
 				'args' => array(
 					'id' => array(
@@ -52,18 +52,63 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 						'pattern'     => '^[a-zA-Z0-9\-\/]+$',
 					),
 				),
+
+				// TODO: We register ALLMETHODS because at route registration time, we don't know
+				// which abilities exist or their types (resource vs tool). This is due to WordPress
+				// load order - routes are registered early, before plugins have registered their abilities.
+				// This approach works but could be improved with lazy route registration or a different
+				// architecture that allows type-specific routes after abilities are registered.
+				// This was the same issue that we ended up seeing with the Feature API.
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'run_ability' ),
+					'methods'             => WP_REST_Server::ALLMETHODS,
+					'callback'            => array( $this, 'run_ability_with_method_check' ),
 					'permission_callback' => array( $this, 'run_ability_permissions_check' ),
-					// Note: We could dynamically set args based on the ability's input_schema,
-					// but that would require knowing the ability at route registration time.
-					// Instead, we validate manually in the callback.
 					'args'                => $this->get_run_args(),
 				),
 				'schema' => array( $this, 'get_run_schema' ),
 			)
 		);
+	}
+
+	/**
+	 * Executes an ability with HTTP method validation.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function run_ability_with_method_check( $request ) {
+		$ability = wp_get_ability( $request['id'] );
+
+		if ( ! $ability ) {
+			return new WP_Error(
+				'rest_ability_not_found',
+				__( 'Ability not found.' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// Check if the HTTP method matches the ability type
+		$meta = $ability->get_meta();
+		$type = isset( $meta['type'] ) ? $meta['type'] : 'tool';
+		$method = $request->get_method();
+
+		if ( 'resource' === $type && 'GET' !== $method ) {
+			return new WP_Error(
+				'rest_invalid_method',
+				__( 'Resource abilities require GET method.' ),
+				array( 'status' => 405 )
+			);
+		} elseif ( 'resource' !== $type && 'POST' !== $method ) {
+			return new WP_Error(
+				'rest_invalid_method',
+				__( 'Tool abilities require POST method.' ),
+				array( 'status' => 405 )
+			);
+		}
+
+		return $this->run_ability( $request );
 	}
 
 	/**
@@ -85,7 +130,12 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$input = $request->get_json_params() ?: array();
+		if ( 'GET' === $request->get_method() ) {
+			$input = $request->get_query_params();
+			unset( $input['_locale'], $input['context'], $input['page'], $input['per_page'] );
+		} else {
+			$input = $request->get_json_params() ?: array();
+		}
 
 		$input_validation = $this->validate_input( $ability, $input );
 		if ( is_wp_error( $input_validation ) ) {
@@ -115,9 +165,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			return $output_validation;
 		}
 
-		return rest_ensure_response( array(
-			'result' => $result,
-		) );
+		return rest_ensure_response( $result );
 	}
 
 	/**
@@ -139,7 +187,12 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$input = $request->get_json_params() ?: array();
+		if ( 'GET' === $request->get_method() ) {
+			$input = $request->get_query_params();
+			unset( $input['_locale'], $input['context'], $input['page'], $input['per_page'] );
+		} else {
+			$input = $request->get_json_params() ?: array();
+		}
 
 		if ( ! $ability->has_permission( $input ) ) {
 			return new WP_Error(
