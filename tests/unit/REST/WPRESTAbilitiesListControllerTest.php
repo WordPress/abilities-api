@@ -1,0 +1,397 @@
+<?php declare( strict_types=1 );
+
+/**
+ * @covers WP_REST_Abilities_List_Controller
+ * @group abilities-api
+ * @group rest-api
+ */
+class WPRESTAbilitiesListControllerTest extends WP_UnitTestCase {
+
+	/**
+	 * REST Server instance.
+	 *
+	 * @var WP_REST_Server
+	 */
+	protected $server;
+
+	/**
+	 * Test user ID.
+	 *
+	 * @var int
+	 */
+	protected static $user_id;
+
+	/**
+	 * Set up before class.
+	 */
+	public static function set_up_before_class(): void {
+		parent::set_up_before_class();
+
+		// Create a test user with read capabilities
+		self::$user_id = self::factory()->user->create(
+			array(
+				'role' => 'subscriber',
+			)
+		);
+	}
+
+	/**
+	 * Set up before each test.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+
+		// Set up REST server
+		global $wp_rest_server;
+		$this->server = $wp_rest_server = new WP_REST_Server();
+		do_action( 'rest_api_init' );
+
+		// Initialize abilities API
+		do_action( 'abilities_api_init' );
+
+		// Register test abilities
+		$this->register_test_abilities();
+
+		// Set default user for tests
+		wp_set_current_user( self::$user_id );
+	}
+
+	/**
+	 * Tear down after each test.
+	 */
+	public function tear_down(): void {
+		// Clean up test abilities
+		foreach ( wp_get_abilities() as $ability ) {
+			if ( str_starts_with( $ability->get_name(), 'test/' ) ) {
+				wp_unregister_ability( $ability->get_name() );
+			}
+		}
+
+		// Reset REST server
+		global $wp_rest_server;
+		$wp_rest_server = null;
+
+		parent::tear_down();
+	}
+
+	/**
+	 * Register test abilities for testing.
+	 */
+	private function register_test_abilities(): void {
+		// Register a tool ability
+		wp_register_ability(
+			'test/calculator',
+			array(
+				'label'               => 'Calculator',
+				'description'         => 'Performs basic calculations',
+				'input_schema'        => array(
+					'type'       => 'object',
+					'properties' => array(
+						'operation' => array(
+							'type' => 'string',
+							'enum' => array( 'add', 'subtract', 'multiply', 'divide' ),
+						),
+						'a'         => array( 'type' => 'number' ),
+						'b'         => array( 'type' => 'number' ),
+					),
+				),
+				'output_schema'       => array(
+					'type' => 'number',
+				),
+				'execute_callback'    => function ( array $input ) {
+					switch ( $input['operation'] ) {
+						case 'add':
+							return $input['a'] + $input['b'];
+						case 'subtract':
+							return $input['a'] - $input['b'];
+						case 'multiply':
+							return $input['a'] * $input['b'];
+						case 'divide':
+							return $input['b'] !== 0 ? $input['a'] / $input['b'] : null;
+						default:
+							return null;
+					}
+				},
+				'permission_callback' => function () {
+					return current_user_can( 'read' );
+				},
+				'meta'                => array(
+					'type'     => 'tool',
+					'category' => 'math',
+				),
+			)
+		);
+
+		// Register a resource ability
+		wp_register_ability(
+			'test/system-info',
+			array(
+				'label'               => 'System Info',
+				'description'         => 'Returns system information',
+				'input_schema'        => array(
+					'type'       => 'object',
+					'properties' => array(
+						'detail_level' => array(
+							'type'    => 'string',
+							'enum'    => array( 'basic', 'full' ),
+							'default' => 'basic',
+						),
+					),
+				),
+				'output_schema'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'php_version' => array( 'type' => 'string' ),
+						'wp_version'  => array( 'type' => 'string' ),
+					),
+				),
+				'execute_callback'    => function ( array $input ) {
+					$info = array(
+						'php_version' => phpversion(),
+						'wp_version'  => get_bloginfo( 'version' ),
+					);
+					if ( 'full' === ( $input['detail_level'] ?? 'basic' ) ) {
+						$info['memory_limit'] = ini_get( 'memory_limit' );
+					}
+					return $info;
+				},
+				'permission_callback' => function () {
+					return current_user_can( 'read' );
+				},
+				'meta'                => array(
+					'type'     => 'resource',
+					'category' => 'system',
+				),
+			)
+		);
+
+		// Register multiple abilities for pagination testing
+		for ( $i = 1; $i <= 60; $i++ ) {
+			wp_register_ability(
+				"test/ability-{$i}",
+				array(
+					'label'               => "Test Ability {$i}",
+					'description'         => "Test ability number {$i}",
+					'execute_callback'    => function () use ( $i ) {
+						return "Result from ability {$i}";
+					},
+					'permission_callback' => '__return_true',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Test listing all abilities.
+	 */
+	public function test_get_items(): void {
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data );
+		$this->assertNotEmpty( $data );
+
+		$ability_ids = wp_list_pluck( $data, 'id' );
+		$this->assertContains( 'test/calculator', $ability_ids );
+		$this->assertContains( 'test/system-info', $ability_ids );
+	}
+
+	/**
+	 * Test getting a specific ability.
+	 */
+	public function test_get_item(): void {
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/calculator' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEquals( 'test/calculator', $data['id'] );
+		$this->assertEquals( 'Calculator', $data['label'] );
+		$this->assertEquals( 'Performs basic calculations', $data['description'] );
+		$this->assertArrayHasKey( 'input_schema', $data );
+		$this->assertArrayHasKey( 'output_schema', $data );
+		$this->assertArrayHasKey( 'meta', $data );
+		$this->assertEquals( 'tool', $data['meta']['type'] );
+	}
+
+	/**
+	 * Test getting a non-existent ability returns 404.
+	 *
+	 * @expectedIncorrectUsage WP_Abilities_Registry::get_registered
+	 */
+	public function test_get_item_not_found(): void {
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/non/existent' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_ability_not_found', $data['code'] );
+	}
+
+	/**
+	 * Test permission check for listing abilities.
+	 */
+	public function test_get_items_permission_denied(): void {
+		// Test with non-logged-in user
+		wp_set_current_user( 0 );
+
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test pagination headers.
+	 */
+	public function test_pagination_headers(): void {
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		$request->set_param( 'per_page', 10 );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$headers = $response->get_headers();
+		$this->assertArrayHasKey( 'X-WP-Total', $headers );
+		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers );
+
+		$total_abilities = count( wp_get_abilities() );
+		$this->assertEquals( $total_abilities, (int) $headers['X-WP-Total'] );
+		$this->assertEquals( ceil( $total_abilities / 10 ), (int) $headers['X-WP-TotalPages'] );
+	}
+
+	/**
+	 * Test pagination links.
+	 */
+	public function test_pagination_links(): void {
+		// Test first page (should have 'next' link but no 'prev')
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		$request->set_param( 'per_page', 10 );
+		$request->set_param( 'page', 1 );
+		$response = $this->server->dispatch( $request );
+
+		$links = $response->get_links();
+		$this->assertArrayHasKey( 'next', $links );
+		$this->assertArrayNotHasKey( 'prev', $links );
+
+		// Test middle page (should have both 'next' and 'prev' links)
+		$request->set_param( 'page', 3 );
+		$response = $this->server->dispatch( $request );
+
+		$links = $response->get_links();
+		$this->assertArrayHasKey( 'next', $links );
+		$this->assertArrayHasKey( 'prev', $links );
+
+		// Test last page (should have 'prev' link but no 'next')
+		$total_abilities = count( wp_get_abilities() );
+		$last_page = ceil( $total_abilities / 10 );
+		$request->set_param( 'page', $last_page );
+		$response = $this->server->dispatch( $request );
+
+		$links = $response->get_links();
+		$this->assertArrayNotHasKey( 'next', $links );
+		$this->assertArrayHasKey( 'prev', $links );
+	}
+
+	/**
+	 * Test collection parameters.
+	 */
+	public function test_collection_params(): void {
+		// Test per_page parameter
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		$request->set_param( 'per_page', 5 );
+		$response = $this->server->dispatch( $request );
+
+		$data = $response->get_data();
+		$this->assertCount( 5, $data );
+
+		// Test page parameter
+		$request->set_param( 'page', 2 );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertCount( 5, $data );
+
+		// Verify we got different abilities on page 2
+		$page1_request = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		$page1_request->set_param( 'per_page', 5 );
+		$page1_request->set_param( 'page', 1 );
+		$page1_response = $this->server->dispatch( $page1_request );
+		$page1_ids      = wp_list_pluck( $page1_response->get_data(), 'id' );
+		$page2_ids      = wp_list_pluck( $data, 'id' );
+
+		$this->assertNotEquals( $page1_ids, $page2_ids );
+	}
+
+	/**
+	 * Test response links for individual abilities.
+	 */
+	public function test_ability_response_links(): void {
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/calculator' );
+		$response = $this->server->dispatch( $request );
+
+		$links = $response->get_links();
+		$this->assertArrayHasKey( 'self', $links );
+		$this->assertArrayHasKey( 'collection', $links );
+		$this->assertArrayHasKey( 'run', $links );
+
+		// Verify link URLs
+		$self_link = $links['self'][0]['href'];
+		$this->assertStringContainsString( '/wp/v2/abilities/test/calculator', $self_link );
+
+		$collection_link = $links['collection'][0]['href'];
+		$this->assertStringContainsString( '/wp/v2/abilities', $collection_link );
+
+		$run_link = $links['run'][0]['href'];
+		$this->assertStringContainsString( '/wp/v2/abilities/test/calculator/run', $run_link );
+	}
+
+	/**
+	 * Test context parameter.
+	 */
+	public function test_context_parameter(): void {
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/calculator' );
+		$request->set_param( 'context', 'view' );
+		$response = $this->server->dispatch( $request );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'description', $data );
+
+		$request->set_param( 'context', 'embed' );
+		$response = $this->server->dispatch( $request );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'label', $data );
+	}
+
+	/**
+	 * Test schema retrieval.
+	 */
+	public function test_get_schema(): void {
+		$request = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'schema', $data );
+		$schema = $data['schema'];
+
+		$this->assertEquals( 'ability', $schema['title'] );
+		$this->assertEquals( 'object', $schema['type'] );
+		$this->assertArrayHasKey( 'properties', $schema );
+
+		$properties = $schema['properties'];
+		$this->assertArrayHasKey( 'id', $properties );
+		$this->assertArrayHasKey( 'label', $properties );
+		$this->assertArrayHasKey( 'description', $properties );
+		$this->assertArrayHasKey( 'input_schema', $properties );
+		$this->assertArrayHasKey( 'output_schema', $properties );
+		$this->assertArrayHasKey( 'meta', $properties );
+	}
+}

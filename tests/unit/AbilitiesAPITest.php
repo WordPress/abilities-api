@@ -87,7 +87,20 @@ class AbilitiesAPITest extends WP_UnitTestCase {
 	 * @expectedIncorrectUsage wp_register_ability
 	 */
 	public function test_register_ability_no_abilities_api_init_hook(): void {
+		global $wp_actions;
+
+		// Store the original action count
+		$original_count = isset( $wp_actions['abilities_api_init'] ) ? $wp_actions['abilities_api_init'] : 0;
+
+		// Reset the action count to simulate it not being fired
+		unset( $wp_actions['abilities_api_init'] );
+
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_properties );
+
+		// Restore the original action count
+		if ( $original_count > 0 ) {
+			$wp_actions['abilities_api_init'] = $original_count;
+		}
 
 		$this->assertNull( $result );
 	}

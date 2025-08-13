@@ -1,43 +1,32 @@
 <?php
 /**
- * Bootstrap the PHPUnit tests.
- *
- * @package abilities-api
- *
- * phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
- * phpcs:disable WordPressVIPMinimum.Files.IncludingFile.UsingVariable
+ * PHPUnit bootstrap file for the Abilities API plugin.
  */
 
-define( 'TESTS_REPO_ROOT_DIR', dirname( __DIR__ ) );
+// Load PHPUnit Polyfills before the WP test suite.
+require_once dirname( __DIR__ ) . '/vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php';
 
-// Load Composer dependencies if applicable.
-if ( file_exists( TESTS_REPO_ROOT_DIR . '/vendor/autoload.php' ) ) {
-	require_once TESTS_REPO_ROOT_DIR . '/vendor/autoload.php';
+// Get the WordPress tests directory.
+$_tests_dir = getenv( 'WP_TESTS_DIR' );
+
+if ( ! $_tests_dir ) {
+	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 }
 
-// Detect where to load the WordPress tests environment from.
-if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
-	$_test_root = getenv( 'WP_TESTS_DIR' );
-} elseif ( false !== getenv( 'WP_DEVELOP_DIR' ) ) {
-	$_test_root = getenv( 'WP_DEVELOP_DIR' ) . '/tests/phpunit';
-} elseif ( false !== getenv( 'WP_PHPUNIT__DIR' ) ) {
-	$_test_root = getenv( 'WP_PHPUNIT__DIR' );
-} elseif ( file_exists( TESTS_REPO_ROOT_DIR . '/../../../../../tests/phpunit/includes/functions.php' ) ) {
-	$_test_root = TESTS_REPO_ROOT_DIR . '/../../../../../tests/phpunit';
-} else { // Fallback.
-	$_test_root = '/tmp/wordpress-tests-lib';
+if ( ! file_exists( "{$_tests_dir}/includes/functions.php" ) ) {
+	echo "Could not find {$_tests_dir}/includes/functions.php, have you run bin/install-wp-tests.sh ?" . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	exit( 1 );
 }
 
-// Give access to tests_add_filter() function.
-require_once $_test_root . '/includes/functions.php';
+require_once "{$_tests_dir}/includes/functions.php";
 
-// Activate the plugin.
-tests_add_filter(
-	'muplugins_loaded',
-	static function (): void {
-		require_once dirname( __DIR__ ) . '/abilities-api.php';
-	}
-);
+/**
+ * Manually load the plugin being tested.
+ */
+function _manually_load_plugin() {
+	require dirname( __DIR__ ) . '/abilities-api.php';
+}
 
-// Start up the WP testing environment.
-require $_test_root . '/includes/bootstrap.php';
+tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
+
+require "{$_tests_dir}/includes/bootstrap.php";

@@ -114,13 +114,13 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
 			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
+			$response->add_link( 'prev', $prev_link );
 		}
 
 		if ( $page < $max_pages ) {
 			$next_page = $page + 1;
 			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
+			$response->add_link( 'next', $next_link );
 		}
 
 		return $response;
