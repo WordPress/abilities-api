@@ -8,7 +8,7 @@
  * phpcs:disable WordPressVIPMinimum.Files.IncludingFile.UsingVariable
  */
 
-define( 'TESTS_REPO_ROOT_DIR', dirname( __DIR__, 2 ) );
+define( 'TESTS_REPO_ROOT_DIR', dirname( __DIR__ ) );
 
 // Load Composer dependencies if applicable.
 if ( file_exists( TESTS_REPO_ROOT_DIR . '/vendor/autoload.php' ) ) {
