@@ -1,4 +1,12 @@
-<?php declare( strict_types = 1 );
+<?php
+/**
+ * REST API initialization for Abilities API.
+ *
+ * @package abilities-api
+ * @since   0.1.0
+ */
+
+declare( strict_types = 1 );
 
 /**
  * REST API: WP_REST_Abilities_Init class
@@ -20,7 +28,7 @@ class WP_REST_Abilities_Init {
 	 *
 	 * @since 0.1.0
 	 */
-	public static function register_routes() {
+	public static function register_routes(): void {
 		require_once __DIR__ . '/class-wp-rest-abilities-run-controller.php';
 		require_once __DIR__ . '/class-wp-rest-abilities-list-controller.php';
 

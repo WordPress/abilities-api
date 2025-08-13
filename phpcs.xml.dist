@@ -254,6 +254,7 @@
 				<element value="WP_Ability" />
 				<element value="WP_Abilities" />
 				<element value="WP_ABILITIES_API" />
+				<element value="WP_REST_Abilities" />
 			</property>
 		</properties>
 	</rule>

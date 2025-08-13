@@ -1,4 +1,12 @@
-<?php declare( strict_types = 1 );
+<?php
+/**
+ * REST API list controller for Abilities API.
+ *
+ * @package abilities-api
+ * @since   0.1.0
+ */
+
+declare( strict_types = 1 );
 
 /**
  * REST API: WP_REST_Abilities_List_Controller class
@@ -40,7 +48,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 *
 	 * @see register_rest_route()
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -59,9 +67,9 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-zA-Z0-9\-\/]+)',
 			array(
-				'args' => array(
+				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the ability.' ),
+						'description' => __( 'Unique identifier for the ability.', 'abilities-api' ),
 						'type'        => 'string',
 						'pattern'     => '^[a-zA-Z0-9\-\/]+$',
 					),
@@ -81,10 +89,10 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Response Response object on success.
 	 */
-	public function get_items( $request ) {
+	public function get_items( \WP_REST_Request $request ): \WP_REST_Response {
 		$abilities = wp_get_abilities();
 
 		// Handle pagination.
@@ -105,11 +113,11 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 
 		$response = rest_ensure_response( $data );
 
-		$response->header( 'X-WP-Total', $total_abilities );
-		$response->header( 'X-WP-TotalPages', $max_pages );
+		$response->header( 'X-WP-Total', (string) $total_abilities );
+		$response->header( 'X-WP-TotalPages', (string) $max_pages );
 
 		$request_params = $request->get_query_params();
-		$base = add_query_arg( urlencode_deep( $request_params ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
+		$base           = add_query_arg( urlencode_deep( $request_params ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
 
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
@@ -131,16 +139,16 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function get_item( $request ) {
+	public function get_item( \WP_REST_Request $request ) {
 		$ability = wp_get_ability( $request['id'] );
 
 		if ( ! $ability ) {
-			return new WP_Error(
+			return new \WP_Error(
 				'rest_ability_not_found',
-				__( 'Ability not found.' ),
+				__( 'Ability not found.', 'abilities-api' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -154,10 +162,10 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return boolean True if the request has read access.
 	 */
-	public function get_items_permissions_check( $request ) {
+	public function get_items_permissions_check( \WP_REST_Request $request ): bool {
 		return current_user_can( 'read' );
 	}
 
@@ -166,11 +174,11 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param WP_Ability      $ability The ability object.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response Response object.
+	 * @param \WP_Ability      $ability The ability object.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response Response object.
 	 */
-	public function prepare_item_for_response( $ability, $request ) {
+	public function prepare_item_for_response( \WP_Ability $ability, \WP_REST_Request $request ): \WP_REST_Response {
 		$data = array(
 			'id'            => $ability->get_name(),
 			'label'         => $ability->get_label(),
@@ -181,13 +189,13 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data = $this->add_additional_fields_to_object( $data, $request );
-		$data = $this->filter_response_by_context( $data, $context );
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
 
 		$response = rest_ensure_response( $data );
 
 		$links = array(
-			'self' => array(
+			'self'       => array(
 				'href' => rest_url( sprintf( '%s/%s/%s', $this->namespace, $this->rest_base, $ability->get_name() ) ),
 			),
 			'collection' => array(
@@ -195,7 +203,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			),
 		);
 
-		// Add run link for all abilities
+		// Add run link for all abilities.
 		$links['run'] = array(
 			'href' => rest_url( sprintf( '%s/%s/%s/run', $this->namespace, $this->rest_base, $ability->get_name() ) ),
 		);
@@ -210,46 +218,46 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return array Item schema data.
+	 * @return array<string, mixed> Item schema data.
 	 */
-	public function get_item_schema() {
+	public function get_item_schema(): array {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'ability',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
-					'description' => __( 'Unique identifier for the ability.' ),
+				'id'            => array(
+					'description' => __( 'Unique identifier for the ability.', 'abilities-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
-				'label' => array(
-					'description' => __( 'Display label for the ability.' ),
+				'label'         => array(
+					'description' => __( 'Display label for the ability.', 'abilities-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
-				'description' => array(
-					'description' => __( 'Description of the ability.' ),
+				'description'   => array(
+					'description' => __( 'Description of the ability.', 'abilities-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'input_schema' => array(
-					'description' => __( 'JSON Schema for the ability input.' ),
+				'input_schema'  => array(
+					'description' => __( 'JSON Schema for the ability input.', 'abilities-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'output_schema' => array(
-					'description' => __( 'JSON Schema for the ability output.' ),
+					'description' => __( 'JSON Schema for the ability output.', 'abilities-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'meta' => array(
-					'description' => __( 'Meta information about the ability.' ),
+				'meta'          => array(
+					'description' => __( 'Meta information about the ability.', 'abilities-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -265,13 +273,13 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return array Collection parameters.
+	 * @return array<string, mixed> Collection parameters.
 	 */
-	public function get_collection_params() {
+	public function get_collection_params(): array {
 		return array(
-			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
-			'page' => array(
-				'description'       => __( 'Current page of the collection.' ),
+			'context'  => $this->get_context_param( array( 'default' => 'view' ) ),
+			'page'     => array(
+				'description'       => __( 'Current page of the collection.', 'abilities-api' ),
 				'type'              => 'integer',
 				'default'           => 1,
 				'sanitize_callback' => 'absint',
@@ -279,7 +287,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 				'minimum'           => 1,
 			),
 			'per_page' => array(
-				'description'       => __( 'Maximum number of items to be returned in result set.' ),
+				'description'       => __( 'Maximum number of items to be returned in result set.', 'abilities-api' ),
 				'type'              => 'integer',
 				'default'           => 50,
 				'minimum'           => 1,
