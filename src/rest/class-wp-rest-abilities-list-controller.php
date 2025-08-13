@@ -31,7 +31,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @since 0.1.0
 	 * @var int
 	 */
-	const DEFAULT_PER_PAGE = 50;
+	public const DEFAULT_PER_PAGE = 50;
 
 	/**
 	 * REST API namespace.

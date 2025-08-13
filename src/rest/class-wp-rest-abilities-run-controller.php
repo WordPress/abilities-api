@@ -280,7 +280,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @since 0.1.0
 	 *
 	 * @param \WP_REST_Request $request The request object.
-	 * @return array The input parameters.
+	 * @return array<string, mixed> The input parameters.
 	 */
 	private function get_input_from_request( $request ) {
 		if ( 'GET' === $request->get_method() ) {
