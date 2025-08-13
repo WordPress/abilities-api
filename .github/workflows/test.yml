@@ -252,11 +252,7 @@ jobs:
         continue-on-error: true
         id: phpunit
         run: |
-          if [ "${{ matrix.coverage }}" == "true" ]; then
-          npm run test:php:coverage
-          else
           npm run test:php
-          fi
 
       - name: Upload code coverage report
         continue-on-error: true
