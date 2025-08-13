@@ -194,9 +194,12 @@ class WPRESTAbilitiesListControllerTest extends WP_UnitTestCase {
 		$this->assertIsArray( $data );
 		$this->assertNotEmpty( $data );
 
-		$ability_ids = wp_list_pluck( $data, 'id' );
-		$this->assertContains( 'test/calculator', $ability_ids );
-		$this->assertContains( 'test/system-info', $ability_ids );
+
+		$this->assertCount( 50, $data, 'First page should return exactly 50 items (default per_page)' );
+
+		$ability_names = wp_list_pluck( $data, 'name' );
+		$this->assertContains( 'test/calculator', $ability_names );
+		$this->assertContains( 'test/system-info', $ability_names );
 	}
 
 	/**
@@ -209,7 +212,7 @@ class WPRESTAbilitiesListControllerTest extends WP_UnitTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
-		$this->assertEquals( 'test/calculator', $data['id'] );
+		$this->assertEquals( 'test/calculator', $data['name'] );
 		$this->assertEquals( 'Calculator', $data['label'] );
 		$this->assertEquals( 'Performs basic calculations', $data['description'] );
 		$this->assertArrayHasKey( 'input_schema', $data );
@@ -323,10 +326,10 @@ class WPRESTAbilitiesListControllerTest extends WP_UnitTestCase {
 		$page1_request->set_param( 'per_page', 5 );
 		$page1_request->set_param( 'page', 1 );
 		$page1_response = $this->server->dispatch( $page1_request );
-		$page1_ids      = wp_list_pluck( $page1_response->get_data(), 'id' );
-		$page2_ids      = wp_list_pluck( $data, 'id' );
+		$page1_names    = wp_list_pluck( $page1_response->get_data(), 'name' );
+		$page2_names    = wp_list_pluck( $data, 'name' );
 
-		$this->assertNotEquals( $page1_ids, $page2_ids );
+		$this->assertNotEquals( $page1_names, $page2_names );
 	}
 
 	/**
@@ -367,7 +370,7 @@ class WPRESTAbilitiesListControllerTest extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 
 		$data = $response->get_data();
-		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'name', $data );
 		$this->assertArrayHasKey( 'label', $data );
 	}
 
@@ -387,7 +390,7 @@ class WPRESTAbilitiesListControllerTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'properties', $schema );
 
 		$properties = $schema['properties'];
-		$this->assertArrayHasKey( 'id', $properties );
+		$this->assertArrayHasKey( 'name', $properties );
 		$this->assertArrayHasKey( 'label', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'input_schema', $properties );

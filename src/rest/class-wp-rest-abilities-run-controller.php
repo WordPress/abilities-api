@@ -47,14 +47,15 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @since 0.1.0
 	 *
 	 * @see register_rest_route()
+	 * @return void
 	 */
 	public function register_routes(): void {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[a-zA-Z0-9\-\/]+?)/run',
+			'/' . $this->rest_base . '/(?P<name>[a-zA-Z0-9\-\/]+?)/run',
 			array(
 				'args'   => array(
-					'id' => array(
+					'name' => array(
 						'description' => __( 'Unique identifier for the ability.', 'abilities-api' ),
 						'type'        => 'string',
 						'pattern'     => '^[a-zA-Z0-9\-\/]+$',
@@ -86,8 +87,8 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function run_ability_with_method_check( \WP_REST_Request $request ) {
-		$ability = wp_get_ability( $request['id'] );
+	public function run_ability_with_method_check( $request ) {
+		$ability = wp_get_ability( $request['name'] );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
@@ -110,7 +111,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			);
 		}
 
-		if ( 'POST' !== $method ) {
+		if ( 'tool' === $type && 'POST' !== $method ) {
 			return new \WP_Error(
 				'rest_invalid_method',
 				__( 'Tool abilities require POST method.', 'abilities-api' ),
@@ -129,8 +130,8 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function run_ability( \WP_REST_Request $request ) {
-		$ability = wp_get_ability( $request['id'] );
+	public function run_ability( $request ) {
+		$ability = wp_get_ability( $request['name'] );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
@@ -140,13 +141,12 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			);
 		}
 
-		if ( 'GET' === $request->get_method() ) {
-			$input = $request->get_query_params();
-			unset( $input['_locale'], $input['context'], $input['page'], $input['per_page'] );
-		} else {
-			$input = $request->get_json_params() ? $request->get_json_params() : array();
-		}
+		$input = $this->get_input_from_request( $request );
 
+		// REST API needs detailed error messages with HTTP status codes.
+		// While WP_Ability::execute() validates internally, it only returns false
+		// and logs with _doing_it_wrong, which doesn't provide capturable error messages.
+		// TODO: Consider updating WP_Ability to return WP_Error for better error handling.
 		$input_validation = $this->validate_input( $ability, $input );
 		if ( is_wp_error( $input_validation ) ) {
 			return $input_validation;
@@ -186,8 +186,8 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return true|\WP_Error True if the request has execution permission, WP_Error object otherwise.
 	 */
-	public function run_ability_permissions_check( \WP_REST_Request $request ) {
-		$ability = wp_get_ability( $request['id'] );
+	public function run_ability_permissions_check( $request ) {
+		$ability = wp_get_ability( $request['name'] );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
@@ -197,12 +197,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			);
 		}
 
-		if ( 'GET' === $request->get_method() ) {
-			$input = $request->get_query_params();
-			unset( $input['_locale'], $input['context'], $input['page'], $input['per_page'] );
-		} else {
-			$input = $request->get_json_params() ? $request->get_json_params() : array();
-		}
+		$input = $this->get_input_from_request( $request );
 
 		if ( ! $ability->has_permission( $input ) ) {
 			return new \WP_Error(
@@ -224,7 +219,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param array<string, mixed> $input   The input data to validate.
 	 * @return true|\WP_Error True if validation passes, WP_Error object on failure.
 	 */
-	private function validate_input( \WP_Ability $ability, array $input ) {
+	private function validate_input( $ability, $input ) {
 		$input_schema = $ability->get_input_schema();
 
 		if ( empty( $input_schema ) ) {
@@ -256,7 +251,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param mixed       $output  The output data to validate.
 	 * @return true|\WP_Error True if validation passes, WP_Error object on failure.
 	 */
-	private function validate_output( \WP_Ability $ability, $output ) {
+	private function validate_output( $ability, $output ) {
 		$output_schema = $ability->get_output_schema();
 
 		if ( empty( $output_schema ) ) {
@@ -277,6 +272,30 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Extracts input parameters from the request.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param \WP_REST_Request $request The request object.
+	 * @return array The input parameters.
+	 */
+	private function get_input_from_request( $request ) {
+		if ( 'GET' === $request->get_method() ) {
+			// For GET requests, look for 'input' query parameter.
+			$query_params = $request->get_query_params();
+			return isset( $query_params['input'] ) && is_array( $query_params['input'] )
+				? $query_params['input']
+				: array();
+		}
+
+		// For POST requests, look for 'input' in JSON body.
+		$json_params = $request->get_json_params();
+		return isset( $json_params['input'] ) && is_array( $json_params['input'] )
+			? $json_params['input']
+			: array();
 	}
 
 	/**

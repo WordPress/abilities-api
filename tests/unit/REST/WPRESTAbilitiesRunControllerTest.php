@@ -277,8 +277,10 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'a' => 5,
-					'b' => 3,
+					'input' => array(
+						'a' => 5,
+						'b' => 3,
+					),
 				)
 			)
 		);
@@ -296,7 +298,9 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/user-info/run' );
 		$request->set_query_params(
 			array(
-				'user_id' => self::$user_id,
+				'input' => array(
+					'user_id' => self::$user_id,
+				),
 			)
 		);
 
@@ -385,8 +389,10 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'a' => 5,
-					'b' => 3,
+					'input' => array(
+						'a' => 5,
+						'b' => 3,
+					),
 				)
 			)
 		);
@@ -407,8 +413,10 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'secret' => 'wrong_secret',
-					'data'   => 'test data',
+					'input' => array(
+						'secret' => 'wrong_secret',
+						'data'   => 'test data',
+					),
 				)
 			)
 		);
@@ -419,8 +427,10 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'secret' => 'valid_secret',
-					'data'   => 'test data',
+					'input' => array(
+						'secret' => 'valid_secret',
+						'data'   => 'test data',
+					),
 				)
 			)
 		);
