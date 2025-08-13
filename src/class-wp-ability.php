@@ -1,5 +1,4 @@
-<?php declare( strict_types = 1 );
-
+<?php
 /**
  * Abilities API
  *
@@ -9,6 +8,8 @@
  * @subpackage Abilities API
  * @since 0.1.0
  */
+
+declare( strict_types = 1 );
 
 /**
  * Encapsulates the properties and methods related to a specific ability in the registry.
@@ -235,7 +236,7 @@ class WP_Ability {
 	 * @since 0.1.0
 	 *
 	 * @param array $input The input data for the ability.
-	 * @return mixed|WP_Error The result of the ability execution, or WP_Error on failure.
+	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
 	protected function do_execute( array $input ) {
 		if ( ! is_callable( $this->execute_callback ) ) {
@@ -293,7 +294,7 @@ class WP_Ability {
 	 * @since 0.1.0
 	 *
 	 * @param array $input Optional. The input data for the ability.
-	 * @return mixed|WP_Error The result of the ability execution, or WP_Error on failure.
+	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
 	public function execute( array $input = array() ) {
 		if ( ! $this->has_permission( $input ) ) {
@@ -326,6 +327,6 @@ class WP_Ability {
 	 * @since 0.1.0
 	 */
 	public function __wakeup(): void {
-		throw new \LogicException( __CLASS__ . ' should never be unserialized.' );
+		throw new \LogicException( self::class . ' should never be unserialized.' );
 	}
 }
