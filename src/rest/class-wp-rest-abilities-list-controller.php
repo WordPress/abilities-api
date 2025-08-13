@@ -9,14 +9,6 @@
 declare( strict_types = 1 );
 
 /**
- * REST API: WP_REST_Abilities_List_Controller class
- *
- * @package WordPress
- * @subpackage REST_API
- * @since 0.1.0
- */
-
-/**
  * Core controller used to access abilities via the REST API.
  *
  * @since 0.1.0
@@ -100,7 +92,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_REST_Response Response object on success.
 	 */
-	public function get_items( \WP_REST_Request $request ): \WP_REST_Response {
+	public function get_items( $request ) {
 		// TODO: Add HEAD method support for performance optimization.
 		// Should return early with empty body but include X-WP-Total and X-WP-TotalPages headers.
 		// See: https://github.com/WordPress/wordpress-develop/blob/trunk/src/wp-includes/rest-api/endpoints/class-wp-rest-comments-controller.php#L316-L318
@@ -154,7 +146,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function get_item( \WP_REST_Request $request ) {
+	public function get_item( $request ) {
 		$ability = wp_get_ability( $request['name'] );
 
 		if ( ! $ability ) {
@@ -177,7 +169,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return boolean True if the request has read access.
 	 */
-	public function get_permissions_check( \WP_REST_Request $request ): bool {
+	public function get_permissions_check( $request ) {
 		return current_user_can( 'read' );
 	}
 
@@ -190,7 +182,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response Response object.
 	 */
-	public function prepare_item_for_response( \WP_Ability $ability, \WP_REST_Request $request ): \WP_REST_Response {
+	public function prepare_item_for_response( $ability, $request ) {
 		$data = array(
 			'name'          => $ability->get_name(),
 			'label'         => $ability->get_label(),

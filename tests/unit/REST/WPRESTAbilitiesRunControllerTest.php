@@ -506,4 +506,441 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'result', $schema['properties'] );
 	}
 
+	/**
+	 * Test that invalid JSON in POST body is handled correctly.
+	 */
+	public function test_invalid_json_in_post_body(): void {
+		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		// Set raw body with invalid JSON
+		$request->set_body( '{"input": {invalid json}' );
+
+		$response = $this->server->dispatch( $request );
+		
+		// When JSON is invalid, WordPress returns 400 Bad Request
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Test GET request with complex nested input array.
+	 */
+	public function test_get_request_with_nested_input_array(): void {
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/query-params/run' );
+		$request->set_query_params( array(
+			'input' => array(
+				'level1' => array(
+					'level2' => array(
+						'value' => 'nested',
+					),
+				),
+				'array' => array( 1, 2, 3 ),
+			),
+		) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		
+		$data = $response->get_data();
+		$this->assertEquals( 'nested', $data['level1']['level2']['value'] );
+		$this->assertEquals( array( 1, 2, 3 ), $data['array'] );
+	}
+
+	/**
+	 * Test GET request with non-array input parameter.
+	 */
+	public function test_get_request_with_non_array_input(): void {
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/query-params/run' );
+		$request->set_query_params( array(
+			'input' => 'not-an-array', // String instead of array
+		) );
+
+		$response = $this->server->dispatch( $request );
+		// When input is not an array, WordPress returns 400 Bad Request
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Test POST request with non-array input in JSON body.
+	 */
+	public function test_post_request_with_non_array_input(): void {
+		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array(
+			'input' => 'string-value', // String instead of array
+		) ) );
+
+		$response = $this->server->dispatch( $request );
+		// When input is not an array, WordPress returns 400 Bad Request
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Test ability with invalid output that fails validation.
+	 * @expectedIncorrectUsage WP_Ability::validate_output
+	 */
+	public function test_output_validation_failure_returns_error(): void {
+		// Register ability with strict output schema.
+		wp_register_ability(
+			'test/strict-output',
+			array(
+				'label'            => 'Strict Output',
+				'description'      => 'Ability with strict output schema',
+				'output_schema'    => array(
+					'type'       => 'object',
+					'properties' => array(
+						'status' => array(
+							'type' => 'string',
+							'enum' => array( 'success', 'failure' ),
+						),
+					),
+					'required'   => array( 'status' ),
+				),
+				'execute_callback' => function( $input ) {
+					// Return invalid output that doesn't match schema
+					return array( 'wrong_field' => 'value' );
+				},
+				'permission_callback' => '__return_true',
+				'meta'             => array( 'type' => 'tool' ),
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/strict-output/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'input' => array() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		
+		// Should return error when output validation fails
+		$this->assertEquals( 500, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_ability_execution_failed', $data['code'] );
+	}
+
+	/**
+	 * Test ability with invalid input that fails validation.
+	 * @expectedIncorrectUsage WP_Ability::validate_input
+	 */
+	public function test_input_validation_failure_returns_error(): void {
+		// Register ability with strict input schema.
+		wp_register_ability(
+			'test/strict-input',
+			array(
+				'label'         => 'Strict Input',
+				'description'   => 'Ability with strict input schema',
+				'input_schema'  => array(
+					'type'       => 'object',
+					'properties' => array(
+						'required_field' => array(
+							'type' => 'string',
+						),
+					),
+					'required'   => array( 'required_field' ),
+				),
+				'execute_callback' => function( $input ) {
+					return array( 'status' => 'success' );
+				},
+				'permission_callback' => '__return_true',
+				'meta'          => array( 'type' => 'tool' ),
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/strict-input/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		// Missing required field
+		$request->set_body( wp_json_encode( array( 'input' => array( 'other_field' => 'value' ) ) ) );
+
+		$response = $this->server->dispatch( $request );
+		
+		// Should return error when input validation fails (403 due to permission check)
+		$this->assertEquals( 403, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_cannot_execute', $data['code'] );
+	}
+
+	/**
+	 * Test ability type not set defaults to tool.
+	 */
+	public function test_ability_without_type_defaults_to_tool(): void {
+		// Register ability without type in meta.
+		wp_register_ability(
+			'test/no-type',
+			array(
+				'label'            => 'No Type',
+				'description'      => 'Ability without type',
+				'execute_callback' => function( $input ) {
+					return array( 'executed' => true );
+				},
+				'permission_callback' => '__return_true',
+				'meta'             => array(), // No type specified
+			)
+		);
+
+		// Should require POST (default tool behavior)
+		$get_request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/no-type/run' );
+		$get_response = $this->server->dispatch( $get_request );
+		$this->assertEquals( 405, $get_response->get_status() );
+
+		// Should work with POST
+		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/no-type/run' );
+		$post_request->set_header( 'Content-Type', 'application/json' );
+		$post_request->set_body( wp_json_encode( array( 'input' => array() ) ) );
+		
+		$post_response = $this->server->dispatch( $post_request );
+		$this->assertEquals( 200, $post_response->get_status() );
+	}
+
+	/**
+	 * Test permission check with null permission callback.
+	 */
+	public function test_permission_check_passes_when_callback_not_set(): void {
+		// Register ability without permission callback.
+		wp_register_ability(
+			'test/no-permission-callback',
+			array(
+				'label'            => 'No Permission Callback',
+				'description'      => 'Ability without permission callback',
+				'execute_callback' => function( $input ) {
+					return array( 'executed' => true );
+				},
+				'meta'             => array( 'type' => 'tool' ),
+				// No permission_callback set
+			)
+		);
+
+		wp_set_current_user( 0 ); // Not logged in
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/no-permission-callback/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'input' => array() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		
+		// Should succeed when no permission callback is set
+		$this->assertEquals( 200, $response->get_status() );
+		
+		// Restore user for other tests
+		wp_set_current_user( self::$user_id );
+	}
+
+	/**
+	 * Test edge case with empty input for both GET and POST.
+	 */
+	public function test_empty_input_handling(): void {
+		// Register abilities for empty input testing
+		wp_register_ability(
+			'test/resource-empty',
+			array(
+				'label'            => 'Resource Empty',
+				'description'      => 'Resource with empty input',
+				'execute_callback' => function( $input ) {
+					return array( 'input_was_empty' => empty( $input ) );
+				},
+				'permission_callback' => '__return_true',
+				'meta'             => array( 'type' => 'resource' ),
+			)
+		);
+
+		wp_register_ability(
+			'test/tool-empty',
+			array(
+				'label'            => 'Tool Empty',
+				'description'      => 'Tool with empty input',
+				'execute_callback' => function( $input ) {
+					return array( 'input_was_empty' => empty( $input ) );
+				},
+				'permission_callback' => '__return_true',
+				'meta'             => array( 'type' => 'tool' ),
+			)
+		);
+
+		// Test GET with no input parameter
+		$get_request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/resource-empty/run' );
+		$get_response = $this->server->dispatch( $get_request );
+		$this->assertEquals( 200, $get_response->get_status() );
+		$this->assertTrue( $get_response->get_data()['input_was_empty'] );
+
+		// Test POST with no body
+		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/tool-empty/run' );
+		$post_request->set_header( 'Content-Type', 'application/json' );
+		$post_request->set_body( '{}' ); // Empty JSON object
+		
+		$post_response = $this->server->dispatch( $post_request );
+		$this->assertEquals( 200, $post_response->get_status() );
+		$this->assertTrue( $post_response->get_data()['input_was_empty'] );
+	}
+
+	/**
+	 * Data provider for malformed JSON tests.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function malformed_json_provider(): array {
+		return array(
+			'Missing value'              => array( '{"input": }' ),
+			'Trailing comma in array'    => array( '{"input": [1, 2, }' ),
+			'Missing quotes on key'      => array( '{input: {}}' ),
+			'JavaScript undefined'       => array( '{"input": undefined}' ),
+			'JavaScript NaN'             => array( '{"input": NaN}' ),
+			'Missing quotes nested keys' => array( '{"input": {a: 1, b: 2}}' ),
+			'Single quotes'              => array( '\'{"input": {}}\'' ),
+			'Unclosed object'            => array( '{"input": {"key": "value"' ),
+		);
+	}
+
+	/**
+	 * Test malformed JSON in POST body.
+	 *
+	 * @dataProvider malformed_json_provider
+	 * @param string $json Malformed JSON to test.
+	 */
+	public function test_malformed_json_post_body( string $json ): void {
+		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( $json );
+
+		$response = $this->server->dispatch( $request );
+		
+		// Malformed JSON should result in 400 Bad Request
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+
+	/**
+	 * Test input with various PHP types as strings.
+	 */
+	public function test_php_type_strings_in_input(): void {
+		// Register ability that accepts any input
+		wp_register_ability(
+			'test/echo',
+			array(
+				'label'            => 'Echo',
+				'description'      => 'Echoes input',
+				'execute_callback' => function( $input ) {
+					return array( 'echo' => $input );
+				},
+				'permission_callback' => '__return_true',
+				'meta'             => array( 'type' => 'tool' ),
+			)
+		);
+
+		$inputs = array(
+			'null'     => null,
+			'true'     => true,
+			'false'    => false,
+			'int'      => 123,
+			'float'    => 123.456,
+			'string'   => 'test',
+			'empty'    => '',
+			'zero'     => 0,
+			'negative' => -1,
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/echo/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'input' => $inputs ) ) );
+
+		$response = $this->server->dispatch( $request );
+		
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( $inputs, $data['echo'] );
+	}
+
+	/**
+	 * Test input with mixed encoding.
+	 */
+	public function test_mixed_encoding_in_input(): void {
+		// Register ability that accepts any input
+		wp_register_ability(
+			'test/echo-encoding',
+			array(
+				'label'            => 'Echo Encoding',
+				'description'      => 'Echoes input with encoding',
+				'execute_callback' => function( $input ) {
+					return array( 'echo' => $input );
+				},
+				'permission_callback' => '__return_true',
+				'meta'             => array( 'type' => 'tool' ),
+			)
+		);
+
+		$input = array(
+			'utf8'     => 'Hello 世界',
+			'emoji'    => '🎉🎊🎈',
+			'html'     => '<script>alert("xss")</script>',
+			'encoded'  => '&lt;test&gt;',
+			'newlines' => "line1\nline2\rline3\r\nline4",
+			'tabs'     => "col1\tcol2\tcol3",
+			'quotes'   => "It's \"quoted\"",
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/echo-encoding/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'input' => $input ) ) );
+
+		$response = $this->server->dispatch( $request );
+		
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		
+		// Input should be preserved exactly
+		$this->assertEquals( $input['utf8'], $data['echo']['utf8'] );
+		$this->assertEquals( $input['emoji'], $data['echo']['emoji'] );
+		$this->assertEquals( $input['html'], $data['echo']['html'] );
+	}
+
+	/**
+	 * Data provider for invalid HTTP methods.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function invalid_http_methods_provider(): array {
+		return array(
+			'PATCH'  => array( 'PATCH' ),
+			'PUT'    => array( 'PUT' ),
+			'DELETE' => array( 'DELETE' ),
+			'HEAD'   => array( 'HEAD' ),
+		);
+	}
+
+	/**
+	 * Test request with invalid HTTP methods.
+	 *
+	 * @dataProvider invalid_http_methods_provider
+	 * @param string $method HTTP method to test.
+	 */
+	public function test_invalid_http_methods( string $method ): void {
+		// Register an ability with no permission requirements for this test
+		wp_register_ability(
+			'test/method-test',
+			array(
+				'label'               => 'Method Test',
+				'description'         => 'Test ability for HTTP method validation',
+				'execute_callback'    => function() {
+					return array( 'success' => true );
+				},
+				'permission_callback' => '__return_true', // No permission requirements
+				'meta'                => array( 'type' => 'tool' ),
+			)
+		);
+
+		$request = new WP_REST_Request( $method, '/wp/v2/abilities/test/method-test/run' );
+		$response = $this->server->dispatch( $request );
+		
+		// Tool abilities should only accept POST, so these should return 405
+		$this->assertEquals( 405, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_invalid_method', $data['code'] );
+	}
+
+	/**
+	 * Test OPTIONS method handling.
+	 */
+	public function test_options_method_handling(): void {
+		$request = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities/test/calculator/run' );
+		$response = $this->server->dispatch( $request );
+		// OPTIONS requests return 200 with allowed methods
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
 }

@@ -9,14 +9,6 @@
 declare( strict_types = 1 );
 
 /**
- * REST API: WP_REST_Abilities_Run_Controller class
- *
- * @package WordPress
- * @subpackage REST_API
- * @since 0.1.0
- */
-
-/**
  * Core controller used to execute abilities via the REST API.
  *
  * @since 0.1.0
@@ -86,7 +78,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function run_ability_with_method_check( \WP_REST_Request $request ) {
+	public function run_ability_with_method_check( $request ) {
 		$ability = wp_get_ability( $request['name'] );
 
 		if ( ! $ability ) {
@@ -129,7 +121,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function run_ability( \WP_REST_Request $request ) {
+	public function run_ability( $request ) {
 		$ability = wp_get_ability( $request['name'] );
 
 		if ( ! $ability ) {
@@ -185,7 +177,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return true|\WP_Error True if the request has execution permission, WP_Error object otherwise.
 	 */
-	public function run_ability_permissions_check( \WP_REST_Request $request ) {
+	public function run_ability_permissions_check( $request ) {
 		$ability = wp_get_ability( $request['name'] );
 
 		if ( ! $ability ) {
@@ -218,7 +210,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param array<string, mixed> $input   The input data to validate.
 	 * @return true|\WP_Error True if validation passes, WP_Error object on failure.
 	 */
-	private function validate_input( \WP_Ability $ability, array $input ) {
+	private function validate_input( $ability, $input ) {
 		$input_schema = $ability->get_input_schema();
 
 		if ( empty( $input_schema ) ) {
@@ -250,7 +242,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param mixed       $output  The output data to validate.
 	 * @return true|\WP_Error True if validation passes, WP_Error object on failure.
 	 */
-	private function validate_output( \WP_Ability $ability, $output ) {
+	private function validate_output( $ability, $output ) {
 		$output_schema = $ability->get_output_schema();
 
 		if ( empty( $output_schema ) ) {
@@ -281,7 +273,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request The request object.
 	 * @return array<string, mixed> The input parameters.
 	 */
-	private function get_input_from_request( \WP_REST_Request $request ): array {
+	private function get_input_from_request( $request ) {
 		if ( 'GET' === $request->get_method() ) {
 			// For GET requests, look for 'input' query parameter.
 			$query_params = $request->get_query_params();

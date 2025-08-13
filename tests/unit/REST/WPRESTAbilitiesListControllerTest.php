@@ -397,4 +397,113 @@ class WPRESTAbilitiesListControllerTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'output_schema', $properties );
 		$this->assertArrayHasKey( 'meta', $properties );
 	}
+
+	/**
+	 * Test ability name with valid special characters.
+	 */
+	public function test_ability_name_with_valid_special_characters(): void {
+		// Register ability with hyphen (valid)
+		wp_register_ability(
+			'test-hyphen/ability',
+			array(
+				'label'            => 'Test Hyphen Ability',
+				'description'      => 'Test ability with hyphen',
+				'execute_callback' => function( $input ) {
+					return array( 'success' => true );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		// Test valid special characters (hyphen, forward slash)
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test-hyphen/ability' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Data provider for invalid ability names.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function invalid_ability_names_provider(): array {
+		return array(
+			'@ symbol'          => array( 'test@ability' ),
+			'space'             => array( 'test ability' ),
+			'dot'               => array( 'test.ability' ),
+			'hash'              => array( 'test#ability' ),
+			'URL encoded space' => array( 'test%20ability' ),
+			'angle brackets'    => array( 'test<ability>' ),
+			'pipe'              => array( 'test|ability' ),
+			'backslash'         => array( 'test\\ability' ),
+		);
+	}
+
+	/**
+	 * Test ability names with invalid special characters.
+	 *
+	 * @dataProvider invalid_ability_names_provider
+	 * @param string $name Invalid ability name to test.
+	 */
+	public function test_ability_name_with_invalid_special_characters( string $name ): void {
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/' . $name );
+		$response = $this->server->dispatch( $request );
+		// Should return 404 as the regex pattern won't match
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+
+	/**
+	 * Test extremely long ability names.
+	 * @expectedIncorrectUsage WP_Abilities_Registry::get_registered
+	 */
+	public function test_extremely_long_ability_names(): void {
+		// Create a very long but valid ability name
+		$long_name = 'test/' . str_repeat( 'a', 1000 );
+		
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/' . $long_name );
+		$response = $this->server->dispatch( $request );
+		
+		// Should return 404 as ability doesn't exist
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Data provider for invalid pagination parameters.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function invalid_pagination_params_provider(): array {
+		return array(
+			'Zero page'            => array( array( 'page' => 0 ) ),
+			'Negative page'        => array( array( 'page' => -1 ) ),
+			'Non-numeric page'     => array( array( 'page' => 'abc' ) ),
+			'Zero per page'        => array( array( 'per_page' => 0 ) ),
+			'Negative per page'    => array( array( 'per_page' => -10 ) ),
+			'Exceeds maximum'      => array( array( 'per_page' => 1000 ) ),
+			'Non-numeric per page' => array( array( 'per_page' => 'all' ) ),
+		);
+	}
+
+	/**
+	 * Test pagination parameters with invalid values.
+	 *
+	 * @dataProvider invalid_pagination_params_provider
+	 * @param array<string, mixed> $params Invalid pagination parameters.
+	 */
+	public function test_invalid_pagination_parameters( array $params ): void {
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		$request->set_query_params( $params );
+		
+		$response = $this->server->dispatch( $request );
+		
+		// Should either use defaults or return error
+		$this->assertContains( $response->get_status(), array( 200, 400 ) );
+		
+		if ( $response->get_status() === 200 ) {
+			// Check that reasonable defaults were used
+			$data = $response->get_data();
+			$this->assertIsArray( $data );
+		}
+	}
 }

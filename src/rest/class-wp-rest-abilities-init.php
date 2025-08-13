@@ -9,14 +9,6 @@
 declare( strict_types = 1 );
 
 /**
- * REST API: WP_REST_Abilities_Init class
- *
- * @package WordPress
- * @subpackage REST_API
- * @since 0.1.0
- */
-
-/**
  * Handles initialization of Abilities REST API endpoints.
  *
  * @since 0.1.0
@@ -27,6 +19,7 @@ class WP_REST_Abilities_Init {
 	 * Registers the REST API routes for abilities.
 	 *
 	 * @since 0.1.0
+	 * @return void
 	 */
 	public static function register_routes(): void {
 		require_once __DIR__ . '/class-wp-rest-abilities-run-controller.php';
