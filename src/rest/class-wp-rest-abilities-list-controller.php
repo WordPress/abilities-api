@@ -55,7 +55,6 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @since 0.1.0
 	 *
 	 * @see register_rest_route()
-	 * @return void
 	 */
 	public function register_routes(): void {
 		register_rest_route(
@@ -101,7 +100,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_REST_Response Response object on success.
 	 */
-	public function get_items( $request ) {
+	public function get_items( \WP_REST_Request $request ): \WP_REST_Response {
 		// TODO: Add HEAD method support for performance optimization.
 		// Should return early with empty body but include X-WP-Total and X-WP-TotalPages headers.
 		// See: https://github.com/WordPress/wordpress-develop/blob/trunk/src/wp-includes/rest-api/endpoints/class-wp-rest-comments-controller.php#L316-L318
@@ -155,7 +154,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function get_item( $request ) {
+	public function get_item( \WP_REST_Request $request ) {
 		$ability = wp_get_ability( $request['name'] );
 
 		if ( ! $ability ) {
@@ -178,7 +177,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return boolean True if the request has read access.
 	 */
-	public function get_permissions_check( $request ) {
+	public function get_permissions_check( \WP_REST_Request $request ): bool {
 		return current_user_can( 'read' );
 	}
 
@@ -191,7 +190,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response Response object.
 	 */
-	public function prepare_item_for_response( $ability, $request ) {
+	public function prepare_item_for_response( \WP_Ability $ability, \WP_REST_Request $request ): \WP_REST_Response {
 		$data = array(
 			'name'          => $ability->get_name(),
 			'label'         => $ability->get_label(),
@@ -278,7 +277,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 					'readonly'    => true,
 				),
 			),
-			'required' => array( 'name', 'label', 'description' ),
+			'required'   => array( 'name', 'label', 'description' ),
 		);
 
 		return $this->add_additional_fields_schema( $schema );
