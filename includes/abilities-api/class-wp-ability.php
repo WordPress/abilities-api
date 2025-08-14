@@ -261,7 +261,7 @@ class WP_Ability {
 	 * @param mixed $output The output data to validate.
 	 * @return bool Returns true if valid, false if validation fails.
 	 */
-	protected function validate_output( mixed $output ): bool {
+	protected function validate_output( $output ): bool {
 		$output_schema = $this->get_output_schema();
 		if ( empty( $output_schema ) ) {
 			return true;
