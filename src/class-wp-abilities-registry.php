@@ -27,14 +27,6 @@ final class WP_Abilities_Registry {
 	private $registered_abilities = array();
 
 	/**
-	 * Container for the main instance of the class.
-	 *
-	 * @since 0.1.0
-	 * @var ?\WP_Abilities_Registry
-	 */
-	private static $instance = null;
-
-	/**
 	 * Registers a new ability.
 	 *
 	 * Do not use this method directly. Instead, use the `wp_register_ability()` function.
