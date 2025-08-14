@@ -21,7 +21,7 @@ parameters:
 				- abilities-api.php
 		paths:
 				- abilities-api.php
-				- src/
+				- includes/
 		excludePaths:
 			analyse:
 				- tests/
@@ -38,5 +38,5 @@ parameters:
 			-
 				message: '#has parameter \$request with generic class WP_REST_Request but does not specify its types#'
 				paths:
-					- src/rest/*.php
+					- includes/rest-api/**/*.php
 

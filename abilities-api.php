@@ -34,19 +34,19 @@ define( 'WP_ABILITIES_API_VERSION', '0.0.1' );
 /**
  * First the WP_Ability class that users can extend.
  */
-require_once WP_ABILITIES_API_DIR . 'src/class-wp-ability.php';
+require_once WP_ABILITIES_API_DIR . 'includes/abilities-api/class-wp-ability.php';
 
 /**
  * Then the WP_Abilities_Registry class that manages the abilities.
  */
-require_once WP_ABILITIES_API_DIR . 'src/class-wp-abilities-registry.php';
+require_once WP_ABILITIES_API_DIR . 'includes/abilities-api/class-wp-abilities-registry.php';
 
 /**
  * Then the public access functions that users can use to interact with the abilities.
  */
-require_once WP_ABILITIES_API_DIR . 'src/abilities-api.php';
+require_once WP_ABILITIES_API_DIR . 'includes/abilities-api.php';
 
 /**
  * Initialize REST API controllers.
  */
-require_once WP_ABILITIES_API_DIR . 'src/rest/class-wp-rest-abilities-init.php';
+require_once WP_ABILITIES_API_DIR . 'includes/rest/class-wp-rest-abilities-init.php';

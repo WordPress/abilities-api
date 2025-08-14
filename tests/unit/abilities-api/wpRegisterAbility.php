@@ -8,7 +8,7 @@
  *
  * @group abilities-api
  */
-class AbilitiesAPITest extends WP_UnitTestCase {
+class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 	public static $test_ability_name       = 'test/add-numbers';
 	public static $test_ability_properties = array();

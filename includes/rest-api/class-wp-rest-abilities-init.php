@@ -22,8 +22,8 @@ class WP_REST_Abilities_Init {
 	 * @return void
 	 */
 	public static function register_routes(): void {
-		require_once __DIR__ . '/class-wp-rest-abilities-run-controller.php';
-		require_once __DIR__ . '/class-wp-rest-abilities-list-controller.php';
+		require_once __DIR__ . '/endpoints/class-wp-rest-abilities-run-controller.php';
+		require_once __DIR__ . '/endpoints/class-wp-rest-abilities-list-controller.php';
 
 		$run_controller = new WP_REST_Abilities_Run_Controller();
 		$run_controller->register_routes();

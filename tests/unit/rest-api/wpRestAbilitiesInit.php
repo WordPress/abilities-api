@@ -2,12 +2,12 @@
 
 /**
  * Tests for WP_REST_Abilities_Init
- * 
+ *
  * @covers WP_REST_Abilities_Init
  * @group abilities-api
  * @group rest-api
  */
-class WPRESTAbilitiesInitTest extends WP_UnitTestCase {
+class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 
 	/**
 	 * REST Server instance.
@@ -64,14 +64,14 @@ class WPRESTAbilitiesInitTest extends WP_UnitTestCase {
 		do_action( 'rest_api_init' );
 
 		$routes = $this->server->get_routes();
-		
+
 		// Check list controller
 		$this->assertArrayHasKey( '/wp/v2/abilities', $routes );
 		$list_route = $routes['/wp/v2/abilities'][0];
 		$this->assertIsArray( $list_route['callback'] );
 		$this->assertInstanceOf( 'WP_REST_Abilities_List_Controller', $list_route['callback'][0] );
-		
-		// Check run controller  
+
+		// Check run controller
 		$this->assertArrayHasKey( '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run', $routes );
 		$run_route = $routes['/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run'][0];
 		$this->assertIsArray( $run_route['callback'] );
@@ -95,7 +95,7 @@ class WPRESTAbilitiesInitTest extends WP_UnitTestCase {
 		do_action( 'rest_api_init' );
 
 		$routes = $this->server->get_routes();
-		
+
 		// List endpoint should support GET
 		$list_methods = $routes['/wp/v2/abilities'][0]['methods'];
 		// Methods can be a string like 'GET' or an array of method constants
@@ -105,7 +105,7 @@ class WPRESTAbilitiesInitTest extends WP_UnitTestCase {
 			// Just check it's set, don't check specific values
 			$this->assertNotEmpty( $list_methods );
 		}
-		
+
 		// Single ability endpoint should support GET
 		$single_methods = $routes['/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+)'][0]['methods'];
 		// Methods can be a string like 'GET' or an array of method constants
@@ -115,7 +115,7 @@ class WPRESTAbilitiesInitTest extends WP_UnitTestCase {
 			// Just check it's set, don't check specific values
 			$this->assertNotEmpty( $single_methods );
 		}
-		
+
 		// Run endpoint should support all methods (for type-based routing)
 		$run_route = $routes['/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run'][0];
 		// ALLMETHODS can be a string or array
@@ -151,17 +151,17 @@ class WPRESTAbilitiesInitTest extends WP_UnitTestCase {
 	public function test_no_duplicate_routes_on_multiple_init(): void {
 		// First init
 		do_action( 'rest_api_init' );
-		
+
 		$routes_first = $this->server->get_routes();
 		$abilities_route_count_first = count( $routes_first['/wp/v2/abilities'] ?? array() );
-		
+
 		// Second init (simulating multiple calls)
 		// Note: WordPress doesn't prevent duplicate registration, so we expect 2x routes
 		WP_REST_Abilities_Init::register_routes();
-		
+
 		$routes_second = $this->server->get_routes();
 		$abilities_route_count_second = count( $routes_second['/wp/v2/abilities'] ?? array() );
-		
+
 		// WordPress allows duplicate route registration
 		$this->assertEquals( $abilities_route_count_first * 2, $abilities_route_count_second );
 	}
