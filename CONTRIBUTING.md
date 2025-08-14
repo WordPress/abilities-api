@@ -10,10 +10,10 @@ Join the `#core-ai` channel [on WordPress Slack](http://wordpress.slack.com) ([s
 
 ## Coding standards
 
-In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). All code in the Performance Lab plugin must follow these requirements:
+In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). All code in the Abilities API plugin must follow these requirements:
 
 - **WordPress**: As of Performance Lab v0.0.1, released {@todo}, the plugin's minimum WordPress version requirement is 6.7.
-- **PHP**: The minimum required version right now is 7.4. This is subject to change and will be brought in sync with the WordPress core minimum PHP version requirement closer to release.
+- **PHP**: The minimum required version of the code slated for WordPress Core includes is PHP7.2, but the tooling and development environment requires PHP 7.4 or higher.
 
 We include [several tools](#useful-commands) to help ensure your code meets contribution
 
