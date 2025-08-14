@@ -59,6 +59,7 @@
 		<exclude name="WordPressVIPMinimum.JS" />
 	</rule>
 	<rule ref="WordPress-Extra">
+		<!-- @todo: Determine a strategy on namespacing/merging into core. -->
 		<exclude name="WordPress.WP.I18n.MissingArgDomain" />
 		<exclude name="WordPress.NamingConventions.PrefixAllGlobals" />
 		<!-- Needed to typehint, see: https://github.com/WordPress/WordPress-Coding-Standards/issues/403 -->
@@ -166,52 +167,6 @@
 	<rule ref="SlevomatCodingStandard.TypeHints.LongTypeHints" />
 	<rule ref="SlevomatCodingStandard.TypeHints.NullableTypeForNullDefaultValue" />
 	<rule ref="SlevomatCodingStandard.TypeHints.NullTypeHintOnLastPosition" />
-	<rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint">
-		<properties>
-			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
-			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
-			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
-			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in
-			PHP 8.2+ -->
-		</properties>
-	</rule>
-	<rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint">
-		<properties>
-			<property name="enableNativeTypeHint" value="false" /><!-- Only available in PHP 7.4+ -->
-			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
-			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
-			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
-			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in
-			PHP 8.2+ -->
-		</properties>
-	</rule>
-	<rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint">
-		<properties>
-			<property name="enableStaticTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
-			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
-			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
-			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
-			<property name="enableNeverTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
-			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in
-			PHP 8.2+ -->
-		</properties>
-	</rule>
-
-	<!--
-		Exclude REST controllers from type hint requirements.
-		WordPress core's WP_REST_Controller doesn't have type hints on its methods.
-		Adding type hints to our overridden methods causes fatal errors at runtime
-		due to signature mismatch. We must match the parent class signatures exactly.
-	-->
-	<rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint">
-		<exclude-pattern>includes/rest-api/endpoints/class-wp-rest-abilities-*-controller.php</exclude-pattern>
-	</rule>
-	<rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingNativeTypeHint">
-		<exclude-pattern>includes/rest-api/endpoints/class-wp-rest-abilities-*-controller.php</exclude-pattern>
-	</rule>
-	<rule ref="Squiz.Commenting.FunctionComment.TypeHintMissing">
-		<exclude-pattern>includes/rest-api/endpoints/class-wp-rest-abilities-*-controller.php</exclude-pattern>
-	</rule>
 
 	<rule ref="SlevomatCodingStandard.Variables.DisallowVariableVariable" />
 	<rule ref="SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable" />
