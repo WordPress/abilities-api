@@ -59,6 +59,8 @@
 		<exclude name="WordPressVIPMinimum.JS" />
 	</rule>
 	<rule ref="WordPress-Extra">
+		<exclude name="WordPress.WP.I18n.MissingArgDomain" />
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals" />
 		<!-- Needed to typehint, see: https://github.com/WordPress/WordPress-Coding-Standards/issues/403 -->
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
 	</rule>
