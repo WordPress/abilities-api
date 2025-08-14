@@ -194,6 +194,22 @@
 			PHP 8.2+ -->
 		</properties>
 	</rule>
+	
+	<!-- 
+		Exclude REST controllers from type hint requirements.
+		WordPress core's WP_REST_Controller doesn't have type hints on its methods.
+		Adding type hints to our overridden methods causes fatal errors at runtime
+		due to signature mismatch. We must match the parent class signatures exactly.
+	-->
+	<rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint">
+		<exclude-pattern>src/rest/class-wp-rest-abilities-*-controller.php</exclude-pattern>
+	</rule>
+	<rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingNativeTypeHint">
+		<exclude-pattern>src/rest/class-wp-rest-abilities-*-controller.php</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FunctionComment.TypeHintMissing">
+		<exclude-pattern>src/rest/class-wp-rest-abilities-*-controller.php</exclude-pattern>
+	</rule>
 
 	<rule ref="SlevomatCodingStandard.Variables.DisallowVariableVariable" />
 	<rule ref="SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable" />
@@ -228,6 +244,7 @@
 				<element value="WP_Ability" />
 				<element value="WP_Abilities" />
 				<element value="WP_ABILITIES_API" />
+				<element value="WP_REST_Abilities" />
 			</property>
 		</properties>
 	</rule>

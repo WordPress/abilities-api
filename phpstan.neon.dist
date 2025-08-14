@@ -29,3 +29,14 @@ parameters:
 			analyseAndScan:
 				- node_modules (?)
 
+		# Ignore specific errors
+		ignoreErrors:
+			# WP_REST_Request is not actually a generic class in WordPress core.
+			# PHPStan's WordPress stubs appear to define it as generic for type checking,
+			# but WordPress itself doesn't use generics. This seems to be an incompatibility
+			# between static analysis tools and WordPress's actual implementation.
+			-
+				message: '#has parameter \$request with generic class WP_REST_Request but does not specify its types#'
+				paths:
+					- src/rest/*.php
+
