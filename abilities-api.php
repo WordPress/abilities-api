@@ -45,3 +45,8 @@ require_once WP_ABILITIES_API_DIR . 'src/class-wp-abilities-registry.php';
  * Then the public access functions that users can use to interact with the abilities.
  */
 require_once WP_ABILITIES_API_DIR . 'src/abilities-api.php';
+
+/**
+ * Initialize REST API controllers.
+ */
+require_once WP_ABILITIES_API_DIR . 'src/rest/class-wp-rest-abilities-init.php';
