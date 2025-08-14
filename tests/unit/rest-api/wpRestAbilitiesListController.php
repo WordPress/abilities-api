@@ -5,7 +5,7 @@
  * @group abilities-api
  * @group rest-api
  */
-class WPRESTAbilitiesListControllerTest extends WP_UnitTestCase {
+class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 
 	/**
 	 * REST Server instance.
@@ -460,10 +460,10 @@ class WPRESTAbilitiesListControllerTest extends WP_UnitTestCase {
 	public function test_extremely_long_ability_names(): void {
 		// Create a very long but valid ability name
 		$long_name = 'test/' . str_repeat( 'a', 1000 );
-		
+
 		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/' . $long_name );
 		$response = $this->server->dispatch( $request );
-		
+
 		// Should return 404 as ability doesn't exist
 		$this->assertEquals( 404, $response->get_status() );
 	}
@@ -494,12 +494,12 @@ class WPRESTAbilitiesListControllerTest extends WP_UnitTestCase {
 	public function test_invalid_pagination_parameters( array $params ): void {
 		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
 		$request->set_query_params( $params );
-		
+
 		$response = $this->server->dispatch( $request );
-		
+
 		// Should either use defaults or return error
 		$this->assertContains( $response->get_status(), array( 200, 400 ) );
-		
+
 		if ( $response->get_status() === 200 ) {
 			// Check that reasonable defaults were used
 			$data = $response->get_data();

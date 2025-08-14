@@ -5,7 +5,7 @@
  * @group abilities-api
  * @group rest-api
  */
-class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
+class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * REST Server instance.
@@ -516,7 +516,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( '{"input": {invalid json}' );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		// When JSON is invalid, WordPress returns 400 Bad Request
 		$this->assertEquals( 400, $response->get_status() );
 	}
@@ -539,7 +539,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
-		
+
 		$data = $response->get_data();
 		$this->assertEquals( 'nested', $data['level1']['level2']['value'] );
 		$this->assertEquals( array( 1, 2, 3 ), $data['array'] );
@@ -609,7 +609,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array( 'input' => array() ) ) );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		// Should return error when output validation fails
 		$this->assertEquals( 500, $response->get_status() );
 		$data = $response->get_data();
@@ -650,7 +650,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array( 'input' => array( 'other_field' => 'value' ) ) ) );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		// Should return error when input validation fails (403 due to permission check)
 		$this->assertEquals( 403, $response->get_status() );
 		$data = $response->get_data();
@@ -684,7 +684,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/no-type/run' );
 		$post_request->set_header( 'Content-Type', 'application/json' );
 		$post_request->set_body( wp_json_encode( array( 'input' => array() ) ) );
-		
+
 		$post_response = $this->server->dispatch( $post_request );
 		$this->assertEquals( 200, $post_response->get_status() );
 	}
@@ -714,10 +714,10 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array( 'input' => array() ) ) );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		// Should succeed when no permission callback is set
 		$this->assertEquals( 200, $response->get_status() );
-		
+
 		// Restore user for other tests
 		wp_set_current_user( self::$user_id );
 	}
@@ -763,7 +763,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/tool-empty/run' );
 		$post_request->set_header( 'Content-Type', 'application/json' );
 		$post_request->set_body( '{}' ); // Empty JSON object
-		
+
 		$post_response = $this->server->dispatch( $post_request );
 		$this->assertEquals( 200, $post_response->get_status() );
 		$this->assertTrue( $post_response->get_data()['input_was_empty'] );
@@ -799,7 +799,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( $json );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		// Malformed JSON should result in 400 Bad Request
 		$this->assertEquals( 400, $response->get_status() );
 	}
@@ -840,7 +840,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array( 'input' => $inputs ) ) );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( $inputs, $data['echo'] );
@@ -879,10 +879,10 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array( 'input' => $input ) ) );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
-		
+
 		// Input should be preserved exactly
 		$this->assertEquals( $input['utf8'], $data['echo']['utf8'] );
 		$this->assertEquals( $input['emoji'], $data['echo']['emoji'] );
@@ -926,7 +926,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 
 		$request = new WP_REST_Request( $method, '/wp/v2/abilities/test/method-test/run' );
 		$response = $this->server->dispatch( $request );
-		
+
 		// Tool abilities should only accept POST, so these should return 405
 		$this->assertEquals( 405, $response->get_status() );
 		$data = $response->get_data();
