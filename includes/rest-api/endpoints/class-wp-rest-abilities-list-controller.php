@@ -167,7 +167,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @since 0.1.0
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return boolean True if the request has read access.
+	 * @return bool True if the request has read access.
 	 */
 	public function get_permissions_check( $request ) {
 		return current_user_can( 'read' );

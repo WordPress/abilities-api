@@ -49,4 +49,4 @@ require_once WP_ABILITIES_API_DIR . 'includes/abilities-api.php';
 /**
  * Initialize REST API controllers.
  */
-require_once WP_ABILITIES_API_DIR . 'includes/rest/class-wp-rest-abilities-init.php';
+require_once WP_ABILITIES_API_DIR . 'includes/rest-api/class-wp-rest-abilities-init.php';
