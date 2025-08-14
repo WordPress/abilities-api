@@ -36,7 +36,7 @@ function wp_register_ability( $name, array $properties = array() ): ?WP_Ability 
 				/* translators: 1: abilities_api_init, 2: string value of the ability name. */
 				esc_html__( 'Abilities must be registered on the %1$s action. The ability %2$s was not registered.' ),
 				'<code>abilities_api_init</code>',
-				'<code>' . esc_html( $name ) . '</code>'
+				'<code>' . esc_html( $name instanceof WP_Ability ? $name->get_name() : $name ) . '</code>'
 			),
 			'0.1.0'
 		);
