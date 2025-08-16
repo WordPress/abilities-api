@@ -79,7 +79,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function run_ability_with_method_check( $request ) {
-		$ability = wp_get_ability( $request['name'] );
+		$ability = wp_get_ability( $request->get_param( 'name' ) );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
@@ -122,7 +122,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function run_ability( $request ) {
-		$ability = wp_get_ability( $request['name'] );
+		$ability = wp_get_ability( $request->get_param( 'name' ) );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
@@ -178,7 +178,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @return true|\WP_Error True if the request has execution permission, WP_Error object otherwise.
 	 */
 	public function run_ability_permissions_check( $request ) {
-		$ability = wp_get_ability( $request['name'] );
+		$ability = wp_get_ability( $request->get_param( 'name' ) );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
