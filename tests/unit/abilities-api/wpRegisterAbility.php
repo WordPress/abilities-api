@@ -43,10 +43,10 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 				'description' => 'The result of adding the two numbers.',
 				'required'    => true,
 			),
-			'execute_callback'    => function ( array $input ): int {
+			'execute_callback'    => static function ( array $input ): int {
 				return $input['a'] + $input['b'];
 			},
-			'permission_callback' => function (): bool {
+			'permission_callback' => static function (): bool {
 				return true;
 			},
 			'meta'                => array(
@@ -60,9 +60,11 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	 */
 	public function tear_down(): void {
 		foreach ( wp_get_abilities() as $ability ) {
-			if ( str_starts_with( $ability->get_name(), 'test/' ) ) {
-				wp_unregister_ability( $ability->get_name() );
+			if ( ! str_starts_with( $ability->get_name(), 'test/' ) ) {
+				continue;
 			}
+
+			wp_unregister_ability( $ability->get_name() );
 		}
 
 		parent::tear_down();
@@ -141,13 +143,11 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests executing an ability with no permissions.
-	 *
-	 * @expectedIncorrectUsage WP_Ability::execute
 	 */
 	public function test_register_ability_no_permissions(): void {
 		do_action( 'abilities_api_init' );
 
-		self::$test_ability_properties['permission_callback'] = function (): bool {
+		self::$test_ability_properties['permission_callback'] = static function (): bool {
 			return false;
 		};
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_properties );
@@ -160,80 +160,90 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 				)
 			)
 		);
-		$this->assertNull(
-			$result->execute(
-				array(
-					'a' => 2,
-					'b' => 3,
-				)
+
+		$actual = $result->execute(
+			array(
+				'a' => 2,
+				'b' => 3,
 			)
 		);
+		$this->assertWPError(
+			$actual,
+			'Execution should fail due to no permissions'
+		);
+		$this->assertEquals( 'ability_invalid_permissions', $actual->get_error_code() );
 	}
 
 	/**
 	 * Tests executing an ability with input not matching schema.
-	 *
-	 * @expectedIncorrectUsage WP_Ability::validate_input
-	 * @expectedIncorrectUsage WP_Ability::execute
 	 */
 	public function test_execute_ability_no_input_schema_match(): void {
 		do_action( 'abilities_api_init' );
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_properties );
 
-		$this->assertNull(
-			$result->execute(
-				array(
-					'a'       => 2,
-					'b'       => 3,
-					'unknown' => 1,
-				)
+		$this->setExpectedIncorrectUsage( 'WP_Ability::execute' );
+
+		$actual = $result->execute(
+			array(
+				'a'       => 2,
+				'b'       => 3,
+				'unknown' => 1,
 			)
 		);
+
+		$this->assertWPError(
+			$actual,
+			'Execution should fail due to input not matching schema'
+		);
+		$this->assertEquals( 'ability_invalid_permissions', $actual->get_error_code() );
 	}
 
 	/**
 	 * Tests executing an ability with output not matching schema.
-	 *
-	 * @expectedIncorrectUsage WP_Ability::validate_output
 	 */
 	public function test_execute_ability_no_output_schema_match(): void {
 		do_action( 'abilities_api_init' );
 
-		self::$test_ability_properties['execute_callback'] = function (): bool {
+		self::$test_ability_properties['execute_callback'] = static function (): bool {
 			return true;
 		};
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_properties );
 
-		$this->assertNull(
-			$result->execute(
-				array(
-					'a' => 2,
-					'b' => 3,
-				)
+		$actual = $result->execute(
+			array(
+				'a' => 2,
+				'b' => 3,
 			)
 		);
+		$this->assertWPError(
+			$actual,
+			'Execution should fail due to output not matching schema',
+		);
+		$this->assertEquals( 'rest_invalid_type', $actual->get_error_code() );
 	}
 
 	/**
 	 * Tests permission callback receiving input not matching schema.
-	 *
-	 * @expectedIncorrectUsage WP_Ability::validate_input
 	 */
 	public function test_permission_callback_no_input_schema_match(): void {
 		do_action( 'abilities_api_init' );
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_properties );
 
-		$this->assertFalse(
-			$result->has_permission(
-				array(
-					'a'       => 2,
-					'b'       => 3,
-					'unknown' => 1,
-				)
+		$actual = $result->has_permission(
+			array(
+				'a'       => 2,
+				'b'       => 3,
+				'unknown' => 1,
 			)
 		);
+
+		$this->assertWPError(
+			$actual,
+			'Permission check should fail due to input not matching schema'
+		);
+		$this->assertEquals( 'rest_additional_properties_forbidden', $actual->get_error_code() );
 	}
 
 	/**
@@ -243,7 +253,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		do_action( 'abilities_api_init' );
 
 		$received_input                                       = null;
-		self::$test_ability_properties['permission_callback'] = function ( array $input ) use ( &$received_input ): bool {
+		self::$test_ability_properties['permission_callback'] = static function ( array $input ) use ( &$received_input ): bool {
 			$received_input = $input;
 			// Allow only if 'a' is greater than 'b'
 			return $input['a'] > $input['b'];
@@ -310,7 +320,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$name       = self::$test_ability_name;
 		$properties = self::$test_ability_properties;
-		$callback   = function ( $instance ) use ( $name, $properties ) {
+		$callback   = static function ( $instance ) use ( $name, $properties ) {
 			wp_register_ability( $name, $properties );
 		};
 

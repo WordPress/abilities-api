@@ -10,7 +10,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	/**
 	 * REST Server instance.
 	 *
-	 * @var WP_REST_Server
+	 * @var \WP_REST_Server
 	 */
 	protected $server;
 
@@ -70,9 +70,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	 */
 	public function tear_down(): void {
 		foreach ( wp_get_abilities() as $ability ) {
-			if ( str_starts_with( $ability->get_name(), 'test/' ) ) {
-				wp_unregister_ability( $ability->get_name() );
+			if ( ! str_starts_with( $ability->get_name(), 'test/' ) ) {
+				continue;
 			}
+
+			wp_unregister_ability( $ability->get_name() );
 		}
 
 		global $wp_rest_server;
@@ -109,10 +111,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'output_schema'       => array(
 					'type' => 'number',
 				),
-				'execute_callback'    => function ( array $input ) {
+				'execute_callback'    => static function ( array $input ) {
 					return $input['a'] + $input['b'];
 				},
-				'permission_callback' => function ( array $input ) {
+				'permission_callback' => static function ( array $input ) {
 					return current_user_can( 'edit_posts' );
 				},
 				'meta'                => array(
@@ -143,18 +145,18 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 						'login' => array( 'type' => 'string' ),
 					),
 				),
-				'execute_callback'    => function ( array $input ) {
+				'execute_callback'    => static function ( array $input ) {
 					$user_id = $input['user_id'] ?? get_current_user_id();
 					$user    = get_user_by( 'id', $user_id );
 					if ( ! $user ) {
-						return new WP_Error( 'user_not_found', 'User not found' );
+						return new \WP_Error( 'user_not_found', 'User not found' );
 					}
 					return array(
 						'id'    => $user->ID,
 						'login' => $user->user_login,
 					);
 				},
-				'permission_callback' => function ( array $input ) {
+				'permission_callback' => static function ( array $input ) {
 					return is_user_logged_in();
 				},
 				'meta'                => array(
@@ -180,10 +182,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'output_schema'       => array(
 					'type' => 'string',
 				),
-				'execute_callback'    => function ( array $input ) {
+				'execute_callback'    => static function ( array $input ) {
 					return 'Success: ' . $input['data'];
 				},
-				'permission_callback' => function ( array $input ) {
+				'permission_callback' => static function ( array $input ) {
 					// Only allow if secret matches
 					return isset( $input['secret'] ) && 'valid_secret' === $input['secret'];
 				},
@@ -199,7 +201,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Null Return',
 				'description'         => 'Returns null',
-				'execute_callback'    => function () {
+				'execute_callback'    => static function () {
 					return null;
 				},
 				'permission_callback' => '__return_true',
@@ -215,8 +217,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Error Return',
 				'description'         => 'Returns error',
-				'execute_callback'    => function () {
-					return new WP_Error( 'test_error', 'This is a test error' );
+				'execute_callback'    => static function () {
+					return new \WP_Error( 'test_error', 'This is a test error' );
 				},
 				'permission_callback' => '__return_true',
 				'meta'                => array(
@@ -234,7 +236,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'output_schema'       => array(
 					'type' => 'number',
 				),
-				'execute_callback'    => function () {
+				'execute_callback'    => static function () {
 					return 'not a number'; // Invalid - schema expects number
 				},
 				'permission_callback' => '__return_true',
@@ -257,7 +259,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 						'param2' => array( 'type' => 'integer' ),
 					),
 				),
-				'execute_callback'    => function ( array $input ) {
+				'execute_callback'    => static function ( array $input ) {
 					return $input;
 				},
 				'permission_callback' => '__return_true',
@@ -320,7 +322,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Open Tool',
 				'description'         => 'Tool with no permission requirements',
-				'execute_callback'    => function () {
+				'execute_callback'    => static function () {
 					return 'success';
 				},
 				'permission_callback' => '__return_true',
@@ -361,8 +363,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	 * Test output validation against schema.
 	 * Note: When output validation fails in WP_Ability::execute(), it returns null,
 	 * which causes the REST controller to return 'rest_ability_execution_failed'.
-	 *
-	 * @expectedIncorrectUsage WP_Ability::validate_output
 	 */
 	public function test_output_validation(): void {
 		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/invalid-output/run' );
@@ -374,8 +374,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$this->assertEquals( 500, $response->get_status() );
 		$data = $response->get_data();
 
-		$this->assertEquals( 'rest_ability_execution_failed', $data['code'] );
-		$this->assertStringContainsString( 'Ability execution failed', $data['message'] );
+		$this->assertEquals( 'rest_invalid_type', $data['code'] );
+		$this->assertStringContainsString( 'is not of type number.', $data['message'] );
 	}
 
 	/**
@@ -441,7 +441,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test handling of null return from ability.
+	 * Test handling of null is a valid return value.
 	 */
 	public function test_null_return_handling(): void {
 		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/null-return/run' );
@@ -450,10 +450,9 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 500, $response->get_status() );
+		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'rest_ability_execution_failed', $data['code'] );
-		$this->assertStringContainsString( 'Ability execution failed', $data['message'] );
+		$this->assertNull( $data );
 	}
 
 	/**
@@ -468,7 +467,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		$this->assertEquals( 500, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'rest_ability_execution_failed', $data['code'] );
+		$this->assertEquals( 'test_error', $data['code'] );
 		$this->assertEquals( 'This is a test error', $data['message'] );
 	}
 
@@ -526,16 +525,18 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	 */
 	public function test_get_request_with_nested_input_array(): void {
 		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/query-params/run' );
-		$request->set_query_params( array(
-			'input' => array(
-				'level1' => array(
-					'level2' => array(
-						'value' => 'nested',
+		$request->set_query_params(
+			array(
+				'input' => array(
+					'level1' => array(
+						'level2' => array(
+							'value' => 'nested',
+						),
 					),
+					'array'  => array( 1, 2, 3 ),
 				),
-				'array' => array( 1, 2, 3 ),
-			),
-		) );
+			)
+		);
 
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
@@ -550,9 +551,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	 */
 	public function test_get_request_with_non_array_input(): void {
 		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/query-params/run' );
-		$request->set_query_params( array(
-			'input' => 'not-an-array', // String instead of array
-		) );
+		$request->set_query_params(
+			array(
+				'input' => 'not-an-array', // String instead of array
+			)
+		);
 
 		$response = $this->server->dispatch( $request );
 		// When input is not an array, WordPress returns 400 Bad Request
@@ -565,9 +568,13 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	public function test_post_request_with_non_array_input(): void {
 		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body( wp_json_encode( array(
-			'input' => 'string-value', // String instead of array
-		) ) );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'input' => 'string-value', // String instead of array
+				)
+			)
+		);
 
 		$response = $this->server->dispatch( $request );
 		// When input is not an array, WordPress returns 400 Bad Request
@@ -576,16 +583,15 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test ability with invalid output that fails validation.
-	 * @expectedIncorrectUsage WP_Ability::validate_output
 	 */
 	public function test_output_validation_failure_returns_error(): void {
 		// Register ability with strict output schema.
 		wp_register_ability(
 			'test/strict-output',
 			array(
-				'label'            => 'Strict Output',
-				'description'      => 'Ability with strict output schema',
-				'output_schema'    => array(
+				'label'               => 'Strict Output',
+				'description'         => 'Ability with strict output schema',
+				'output_schema'       => array(
 					'type'       => 'object',
 					'properties' => array(
 						'status' => array(
@@ -595,12 +601,12 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					),
 					'required'   => array( 'status' ),
 				),
-				'execute_callback' => function( $input ) {
+				'execute_callback'    => static function ( $input ) {
 					// Return invalid output that doesn't match schema
 					return array( 'wrong_field' => 'value' );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array( 'type' => 'tool' ),
+				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -613,21 +619,20 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		// Should return error when output validation fails
 		$this->assertEquals( 500, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'rest_ability_execution_failed', $data['code'] );
+		$this->assertEquals( 'rest_property_required', $data['code'] );
 	}
 
 	/**
 	 * Test ability with invalid input that fails validation.
-	 * @expectedIncorrectUsage WP_Ability::validate_input
 	 */
 	public function test_input_validation_failure_returns_error(): void {
 		// Register ability with strict input schema.
 		wp_register_ability(
 			'test/strict-input',
 			array(
-				'label'         => 'Strict Input',
-				'description'   => 'Ability with strict input schema',
-				'input_schema'  => array(
+				'label'               => 'Strict Input',
+				'description'         => 'Ability with strict input schema',
+				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(
 						'required_field' => array(
@@ -636,11 +641,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					),
 					'required'   => array( 'required_field' ),
 				),
-				'execute_callback' => function( $input ) {
+				'execute_callback'    => static function ( $input ) {
 					return array( 'status' => 'success' );
 				},
 				'permission_callback' => '__return_true',
-				'meta'          => array( 'type' => 'tool' ),
+				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -651,10 +656,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		// Should return error when input validation fails (403 due to permission check)
-		$this->assertEquals( 403, $response->get_status() );
+		// Should return error when input validation fails.
+		$this->assertEquals( 400, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'rest_cannot_execute', $data['code'] );
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
 	}
 
 	/**
@@ -665,18 +670,18 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/no-type',
 			array(
-				'label'            => 'No Type',
-				'description'      => 'Ability without type',
-				'execute_callback' => function( $input ) {
+				'label'               => 'No Type',
+				'description'         => 'Ability without type',
+				'execute_callback'    => static function ( $input ) {
 					return array( 'executed' => true );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array(), // No type specified
+				'meta'                => array(), // No type specified
 			)
 		);
 
 		// Should require POST (default tool behavior)
-		$get_request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/no-type/run' );
+		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/no-type/run' );
 		$get_response = $this->server->dispatch( $get_request );
 		$this->assertEquals( 405, $get_response->get_status() );
 
@@ -699,7 +704,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'            => 'No Permission Callback',
 				'description'      => 'Ability without permission callback',
-				'execute_callback' => function( $input ) {
+				'execute_callback' => static function ( $input ) {
 					return array( 'executed' => true );
 				},
 				'meta'             => array( 'type' => 'tool' ),
@@ -730,31 +735,31 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/resource-empty',
 			array(
-				'label'            => 'Resource Empty',
-				'description'      => 'Resource with empty input',
-				'execute_callback' => function( $input ) {
+				'label'               => 'Resource Empty',
+				'description'         => 'Resource with empty input',
+				'execute_callback'    => static function ( $input ) {
 					return array( 'input_was_empty' => empty( $input ) );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array( 'type' => 'resource' ),
+				'meta'                => array( 'type' => 'resource' ),
 			)
 		);
 
 		wp_register_ability(
 			'test/tool-empty',
 			array(
-				'label'            => 'Tool Empty',
-				'description'      => 'Tool with empty input',
-				'execute_callback' => function( $input ) {
+				'label'               => 'Tool Empty',
+				'description'         => 'Tool with empty input',
+				'execute_callback'    => static function ( $input ) {
 					return array( 'input_was_empty' => empty( $input ) );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array( 'type' => 'tool' ),
+				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
 		// Test GET with no input parameter
-		$get_request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/resource-empty/run' );
+		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/resource-empty/run' );
 		$get_response = $this->server->dispatch( $get_request );
 		$this->assertEquals( 200, $get_response->get_status() );
 		$this->assertTrue( $get_response->get_data()['input_was_empty'] );
@@ -813,13 +818,13 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/echo',
 			array(
-				'label'            => 'Echo',
-				'description'      => 'Echoes input',
-				'execute_callback' => function( $input ) {
+				'label'               => 'Echo',
+				'description'         => 'Echoes input',
+				'execute_callback'    => static function ( $input ) {
 					return array( 'echo' => $input );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array( 'type' => 'tool' ),
+				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -854,13 +859,13 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/echo-encoding',
 			array(
-				'label'            => 'Echo Encoding',
-				'description'      => 'Echoes input with encoding',
-				'execute_callback' => function( $input ) {
+				'label'               => 'Echo Encoding',
+				'description'         => 'Echoes input with encoding',
+				'execute_callback'    => static function ( $input ) {
 					return array( 'echo' => $input );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array( 'type' => 'tool' ),
+				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -916,7 +921,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Method Test',
 				'description'         => 'Test ability for HTTP method validation',
-				'execute_callback'    => function() {
+				'execute_callback'    => static function () {
 					return array( 'success' => true );
 				},
 				'permission_callback' => '__return_true', // No permission requirements
@@ -924,7 +929,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		$request = new WP_REST_Request( $method, '/wp/v2/abilities/test/method-test/run' );
+		$request  = new WP_REST_Request( $method, '/wp/v2/abilities/test/method-test/run' );
 		$response = $this->server->dispatch( $request );
 
 		// Tool abilities should only accept POST, so these should return 405
@@ -937,10 +942,9 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	 * Test OPTIONS method handling.
 	 */
 	public function test_options_method_handling(): void {
-		$request = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities/test/calculator/run' );
+		$request  = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities/test/calculator/run' );
 		$response = $this->server->dispatch( $request );
 		// OPTIONS requests return 200 with allowed methods
 		$this->assertEquals( 200, $response->get_status() );
 	}
-
 }
