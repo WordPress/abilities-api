@@ -110,8 +110,6 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability instance with invalid name.
 	 *
 	 * @covers WP_Abilities_Registry::register
-	 *
-	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
 	public function test_register_using_instance() {
 		$ability = new WP_Ability( 'invalid_name', array() );
