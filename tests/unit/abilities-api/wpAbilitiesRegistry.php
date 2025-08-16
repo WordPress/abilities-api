@@ -113,10 +113,12 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
-	public function test_register_invalid_name_using_instance() {
+	public function test_register_using_instance() {
 		$ability = new WP_Ability( 'invalid_name', array() );
-		$result  = $this->registry->register( $ability );
-		$this->assertNull( $result );
+		// Expect error
+		$this->expectException( \TypeError::class );
+
+		$this->registry->register( $ability );
 	}
 
 	/**
@@ -278,21 +280,6 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Should reject registration for already registered ability when passing an ability instance.
-	 *
-	 * @covers WP_Abilities_Registry::register
-	 *
-	 * @expectedIncorrectUsage WP_Abilities_Registry::register
-	 */
-	public function test_register_incorrect_already_registered_ability_using_instance() {
-		$ability = $this->registry->register( self::$test_ability_name, self::$test_ability_properties );
-
-		$result = $this->registry->register( $ability );
-
-		$this->assertNull( $result );
-	}
-
-	/**
 	 * Should successfully register a new ability.
 	 *
 	 * @covers WP_Abilities_Registry::register
@@ -304,19 +291,6 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 			new WP_Ability( self::$test_ability_name, self::$test_ability_properties ),
 			$result
 		);
-	}
-
-	/**
-	 * Should successfully register a new ability using an instance.
-	 *
-	 * @covers WP_Abilities_Registry::register
-	 * @covers WP_Ability::construct
-	 */
-	public function test_register_new_ability_using_instance() {
-		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
-		$result  = $this->registry->register( $ability );
-
-		$this->assertSame( $ability, $result );
 	}
 
 	/**

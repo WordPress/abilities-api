@@ -35,21 +35,15 @@ final class WP_Abilities_Registry {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string|\WP_Ability  $name       The name of the ability, or WP_Ability instance. The name must be a string
-	 *                                        containing a namespace prefix, i.e. `my-plugin/my-ability`. It can only
-	 *                                        contain lowercase alphanumeric characters, dashes and the forward slash.
-	 * @param array<string,mixed> $properties Optional. An associative array of properties for the ability. This should
-	 *                                        include `label`, `description`, `input_schema`, `output_schema`,
+	 * @param string              $name       The name of the ability. The name must be a string containing a namespace
+	 *                                        prefix, i.e. `my-plugin/my-ability`. It can only contain lowercase
+	 *                                        alphanumeric characters, dashes and the forward slash.
+	 * @param array<string,mixed> $properties An associative array of properties for the ability. This should include
+	 *                                        `label`, `description`, `input_schema`, `output_schema`,
 	 *                                        `execute_callback`, `permission_callback`, and `meta`.
 	 * @return ?\WP_Ability The registered ability instance on success, null on failure.
 	 */
-	public function register( $name, array $properties = array() ): ?WP_Ability {
-		$ability = null;
-		if ( $name instanceof WP_Ability ) {
-			$ability = $name;
-			$name    = $ability->get_name();
-		}
-
+	public function register( string $name, array $properties = array() ): ?WP_Ability {
 		if ( ! preg_match( '/^[a-z0-9-]+\/[a-z0-9-]+$/', $name ) ) {
 			_doing_it_wrong(
 				__METHOD__,
@@ -69,12 +63,6 @@ final class WP_Abilities_Registry {
 				'0.1.0'
 			);
 			return null;
-		}
-
-		// If the ability is already an instance, we can skip the rest of the validation.
-		if ( null !== $ability ) {
-			$this->registered_abilities[ $name ] = $ability;
-			return $ability;
 		}
 
 		if ( empty( $properties['label'] ) || ! is_string( $properties['label'] ) ) {
