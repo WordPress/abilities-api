@@ -44,9 +44,6 @@ jobs:
         env:
           CI: true
 
-      - name: Build assets
-        run: npm run build:dist
-
       - name: Create Artifact
         run: |
           npm run plugin-zip
