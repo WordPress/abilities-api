@@ -19,6 +19,14 @@ declare( strict_types = 1 );
  */
 final class WP_Abilities_Registry {
 	/**
+	 * The singleton instance of the registry.
+	 *
+	 * @since 0.1.0
+	 * @var ?self
+	 */
+	private static ?self $instance = null;
+
+	/**
 	 * Holds the registered abilities.
 	 *
 	 * @since 0.1.0
@@ -248,11 +256,9 @@ final class WP_Abilities_Registry {
 	 * @return \WP_Abilities_Registry The main registry instance.
 	 */
 	public static function get_instance(): self {
-		/** @var \WP_Abilities_Registry $wp_abilities */
-		global $wp_abilities;
+		if ( null === self::$instance ) {
+			self::$instance = new self();
 
-		if ( empty( $wp_abilities ) ) {
-			$wp_abilities = new self();
 			/**
 			 * Fires when preparing abilities registry.
 			 *
@@ -263,10 +269,10 @@ final class WP_Abilities_Registry {
 			 *
 			 * @param \WP_Abilities_Registry $instance Abilities registry object.
 			 */
-			do_action( 'abilities_api_init', $wp_abilities );
+			do_action( 'abilities_api_init', self::$instance );
 		}
 
-		return $wp_abilities;
+		return self::$instance;
 	}
 
 	/**
