@@ -178,7 +178,7 @@ jobs:
     strategy:
       matrix:
         php: ['8.4', '8.3', '8.2', '8.1', '8.0', '7.4']
-        wp: [latest, trunk, '6.7']
+        wp: [latest, trunk ]
         coverage: [false]
         include:
           - php: '8.4'
