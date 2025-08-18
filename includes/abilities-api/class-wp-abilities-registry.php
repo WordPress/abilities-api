@@ -24,7 +24,7 @@ final class WP_Abilities_Registry {
 	 * @since 0.1.0
 	 * @var ?self
 	 */
-	private static ?self $instance = null;
+	private static $instance = null;
 
 	/**
 	 * Holds the registered abilities.
