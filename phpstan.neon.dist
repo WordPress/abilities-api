@@ -15,13 +15,13 @@ parameters:
 		# Configuration
 		level: 8
 		phpVersion:
-			min: 70400
+			min: 70200
 			max: 80300
 		bootstrapFiles:
 				- abilities-api.php
 		paths:
 				- abilities-api.php
-				- src/
+				- includes/
 		excludePaths:
 			analyse:
 				- tests/
@@ -38,5 +38,5 @@ parameters:
 			-
 				message: '#has parameter \$request with generic class WP_REST_Request but does not specify its types#'
 				paths:
-					- src/rest/*.php
+					- includes/rest-api/**/*.php
 

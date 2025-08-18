@@ -5,7 +5,7 @@
  * @group abilities-api
  * @group rest-api
  */
-class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
+class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * REST Server instance.
@@ -54,7 +54,9 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		parent::set_up();
 
 		global $wp_rest_server;
-		$this->server = $wp_rest_server = new WP_REST_Server();
+		$wp_rest_server = new WP_REST_Server();
+		$this->server   = $wp_rest_server;
+
 		do_action( 'rest_api_init' );
 
 		do_action( 'abilities_api_init' );
@@ -516,7 +518,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( '{"input": {invalid json}' );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		// When JSON is invalid, WordPress returns 400 Bad Request
 		$this->assertEquals( 400, $response->get_status() );
 	}
@@ -526,20 +528,22 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 	 */
 	public function test_get_request_with_nested_input_array(): void {
 		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/query-params/run' );
-		$request->set_query_params( array(
-			'input' => array(
-				'level1' => array(
-					'level2' => array(
-						'value' => 'nested',
+		$request->set_query_params(
+			array(
+				'input' => array(
+					'level1' => array(
+						'level2' => array(
+							'value' => 'nested',
+						),
 					),
+					'array'  => array( 1, 2, 3 ),
 				),
-				'array' => array( 1, 2, 3 ),
-			),
-		) );
+			)
+		);
 
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
-		
+
 		$data = $response->get_data();
 		$this->assertEquals( 'nested', $data['level1']['level2']['value'] );
 		$this->assertEquals( array( 1, 2, 3 ), $data['array'] );
@@ -550,9 +554,11 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 	 */
 	public function test_get_request_with_non_array_input(): void {
 		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/query-params/run' );
-		$request->set_query_params( array(
-			'input' => 'not-an-array', // String instead of array
-		) );
+		$request->set_query_params(
+			array(
+				'input' => 'not-an-array', // String instead of array
+			)
+		);
 
 		$response = $this->server->dispatch( $request );
 		// When input is not an array, WordPress returns 400 Bad Request
@@ -565,9 +571,13 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 	public function test_post_request_with_non_array_input(): void {
 		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body( wp_json_encode( array(
-			'input' => 'string-value', // String instead of array
-		) ) );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'input' => 'string-value', // String instead of array
+				)
+			)
+		);
 
 		$response = $this->server->dispatch( $request );
 		// When input is not an array, WordPress returns 400 Bad Request
@@ -583,9 +593,9 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/strict-output',
 			array(
-				'label'            => 'Strict Output',
-				'description'      => 'Ability with strict output schema',
-				'output_schema'    => array(
+				'label'               => 'Strict Output',
+				'description'         => 'Ability with strict output schema',
+				'output_schema'       => array(
 					'type'       => 'object',
 					'properties' => array(
 						'status' => array(
@@ -595,12 +605,12 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 					),
 					'required'   => array( 'status' ),
 				),
-				'execute_callback' => function( $input ) {
+				'execute_callback'    => function ( $input ) {
 					// Return invalid output that doesn't match schema
 					return array( 'wrong_field' => 'value' );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array( 'type' => 'tool' ),
+				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -609,7 +619,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array( 'input' => array() ) ) );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		// Should return error when output validation fails
 		$this->assertEquals( 500, $response->get_status() );
 		$data = $response->get_data();
@@ -625,9 +635,9 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/strict-input',
 			array(
-				'label'         => 'Strict Input',
-				'description'   => 'Ability with strict input schema',
-				'input_schema'  => array(
+				'label'               => 'Strict Input',
+				'description'         => 'Ability with strict input schema',
+				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(
 						'required_field' => array(
@@ -636,11 +646,11 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 					),
 					'required'   => array( 'required_field' ),
 				),
-				'execute_callback' => function( $input ) {
+				'execute_callback'    => function ( $input ) {
 					return array( 'status' => 'success' );
 				},
 				'permission_callback' => '__return_true',
-				'meta'          => array( 'type' => 'tool' ),
+				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -650,7 +660,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array( 'input' => array( 'other_field' => 'value' ) ) ) );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		// Should return error when input validation fails (403 due to permission check)
 		$this->assertEquals( 403, $response->get_status() );
 		$data = $response->get_data();
@@ -665,18 +675,18 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/no-type',
 			array(
-				'label'            => 'No Type',
-				'description'      => 'Ability without type',
-				'execute_callback' => function( $input ) {
+				'label'               => 'No Type',
+				'description'         => 'Ability without type',
+				'execute_callback'    => function ( $input ) {
 					return array( 'executed' => true );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array(), // No type specified
+				'meta'                => array(), // No type specified
 			)
 		);
 
 		// Should require POST (default tool behavior)
-		$get_request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/no-type/run' );
+		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/no-type/run' );
 		$get_response = $this->server->dispatch( $get_request );
 		$this->assertEquals( 405, $get_response->get_status() );
 
@@ -684,7 +694,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/no-type/run' );
 		$post_request->set_header( 'Content-Type', 'application/json' );
 		$post_request->set_body( wp_json_encode( array( 'input' => array() ) ) );
-		
+
 		$post_response = $this->server->dispatch( $post_request );
 		$this->assertEquals( 200, $post_response->get_status() );
 	}
@@ -699,7 +709,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 			array(
 				'label'            => 'No Permission Callback',
 				'description'      => 'Ability without permission callback',
-				'execute_callback' => function( $input ) {
+				'execute_callback' => function ( $input ) {
 					return array( 'executed' => true );
 				},
 				'meta'             => array( 'type' => 'tool' ),
@@ -714,10 +724,10 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array( 'input' => array() ) ) );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		// Should succeed when no permission callback is set
 		$this->assertEquals( 200, $response->get_status() );
-		
+
 		// Restore user for other tests
 		wp_set_current_user( self::$user_id );
 	}
@@ -730,31 +740,31 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/resource-empty',
 			array(
-				'label'            => 'Resource Empty',
-				'description'      => 'Resource with empty input',
-				'execute_callback' => function( $input ) {
+				'label'               => 'Resource Empty',
+				'description'         => 'Resource with empty input',
+				'execute_callback'    => function ( $input ) {
 					return array( 'input_was_empty' => empty( $input ) );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array( 'type' => 'resource' ),
+				'meta'                => array( 'type' => 'resource' ),
 			)
 		);
 
 		wp_register_ability(
 			'test/tool-empty',
 			array(
-				'label'            => 'Tool Empty',
-				'description'      => 'Tool with empty input',
-				'execute_callback' => function( $input ) {
+				'label'               => 'Tool Empty',
+				'description'         => 'Tool with empty input',
+				'execute_callback'    => function ( $input ) {
 					return array( 'input_was_empty' => empty( $input ) );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array( 'type' => 'tool' ),
+				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
 		// Test GET with no input parameter
-		$get_request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/resource-empty/run' );
+		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/resource-empty/run' );
 		$get_response = $this->server->dispatch( $get_request );
 		$this->assertEquals( 200, $get_response->get_status() );
 		$this->assertTrue( $get_response->get_data()['input_was_empty'] );
@@ -763,7 +773,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/tool-empty/run' );
 		$post_request->set_header( 'Content-Type', 'application/json' );
 		$post_request->set_body( '{}' ); // Empty JSON object
-		
+
 		$post_response = $this->server->dispatch( $post_request );
 		$this->assertEquals( 200, $post_response->get_status() );
 		$this->assertTrue( $post_response->get_data()['input_was_empty'] );
@@ -799,7 +809,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( $json );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		// Malformed JSON should result in 400 Bad Request
 		$this->assertEquals( 400, $response->get_status() );
 	}
@@ -813,13 +823,13 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/echo',
 			array(
-				'label'            => 'Echo',
-				'description'      => 'Echoes input',
-				'execute_callback' => function( $input ) {
+				'label'               => 'Echo',
+				'description'         => 'Echoes input',
+				'execute_callback'    => function ( $input ) {
 					return array( 'echo' => $input );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array( 'type' => 'tool' ),
+				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -840,7 +850,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array( 'input' => $inputs ) ) );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( $inputs, $data['echo'] );
@@ -854,13 +864,13 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/echo-encoding',
 			array(
-				'label'            => 'Echo Encoding',
-				'description'      => 'Echoes input with encoding',
-				'execute_callback' => function( $input ) {
+				'label'               => 'Echo Encoding',
+				'description'         => 'Echoes input with encoding',
+				'execute_callback'    => function ( $input ) {
 					return array( 'echo' => $input );
 				},
 				'permission_callback' => '__return_true',
-				'meta'             => array( 'type' => 'tool' ),
+				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -879,10 +889,10 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 		$request->set_body( wp_json_encode( array( 'input' => $input ) ) );
 
 		$response = $this->server->dispatch( $request );
-		
+
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
-		
+
 		// Input should be preserved exactly
 		$this->assertEquals( $input['utf8'], $data['echo']['utf8'] );
 		$this->assertEquals( $input['emoji'], $data['echo']['emoji'] );
@@ -916,7 +926,7 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 			array(
 				'label'               => 'Method Test',
 				'description'         => 'Test ability for HTTP method validation',
-				'execute_callback'    => function() {
+				'execute_callback'    => function () {
 					return array( 'success' => true );
 				},
 				'permission_callback' => '__return_true', // No permission requirements
@@ -924,9 +934,9 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 			)
 		);
 
-		$request = new WP_REST_Request( $method, '/wp/v2/abilities/test/method-test/run' );
+		$request  = new WP_REST_Request( $method, '/wp/v2/abilities/test/method-test/run' );
 		$response = $this->server->dispatch( $request );
-		
+
 		// Tool abilities should only accept POST, so these should return 405
 		$this->assertEquals( 405, $response->get_status() );
 		$data = $response->get_data();
@@ -937,10 +947,9 @@ class WPRESTAbilitiesRunControllerTest extends WP_UnitTestCase {
 	 * Test OPTIONS method handling.
 	 */
 	public function test_options_method_handling(): void {
-		$request = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities/test/calculator/run' );
+		$request  = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities/test/calculator/run' );
 		$response = $this->server->dispatch( $request );
 		// OPTIONS requests return 200 with allowed methods
 		$this->assertEquals( 200, $response->get_status() );
 	}
-
 }

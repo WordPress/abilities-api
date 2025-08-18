@@ -15,12 +15,12 @@
 >
 	<testsuites>
 		<testsuite name="unit">
-			<directory suffix="Test.php">tests/unit</directory>
+			<directory suffix=".php">tests/unit</directory>
 		</testsuite>
 	</testsuites>
 	<coverage processUncoveredFiles="false">
 		<include>
-			<directory suffix=".php">src</directory>
+			<directory suffix=".php">includes</directory>
 			<file>abilities-api.php</file>
 		</include>
 		<report>
