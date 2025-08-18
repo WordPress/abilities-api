@@ -100,8 +100,9 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		$abilities = wp_get_abilities();
 
 		// Handle pagination with explicit defaults.
-		$page     = isset( $request['page'] ) ? $request['page'] : 1;
-		$per_page = isset( $request['per_page'] ) ? $request['per_page'] : self::DEFAULT_PER_PAGE;
+		$params   = $request->get_params();
+		$page     = $params['page'] ?? 1;
+		$per_page = $params['per_page'] ?? self::DEFAULT_PER_PAGE;
 		$offset   = ( $page - 1 ) * $per_page;
 
 		$total_abilities = count( $abilities );
@@ -120,8 +121,8 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		$response->header( 'X-WP-Total', (string) $total_abilities );
 		$response->header( 'X-WP-TotalPages', (string) $max_pages );
 
-		$request_params = $request->get_query_params();
-		$base           = add_query_arg( urlencode_deep( $request_params ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
+		$query_params = $request->get_query_params();
+		$base         = add_query_arg( urlencode_deep( $query_params ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
 
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
@@ -147,7 +148,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ) {
-		$ability = wp_get_ability( $request['name'] );
+		$ability = wp_get_ability( $request->get_param( 'name' ) );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
@@ -192,7 +193,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			'meta'          => $ability->get_meta(),
 		);
 
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$context = $request->get_param( 'context' ) ?? 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
 
