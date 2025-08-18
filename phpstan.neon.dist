@@ -15,7 +15,7 @@ parameters:
 		# Configuration
 		level: 8
 		phpVersion:
-			min: 70400
+			min: 70200
 			max: 80300
 		bootstrapFiles:
 				- abilities-api.php
