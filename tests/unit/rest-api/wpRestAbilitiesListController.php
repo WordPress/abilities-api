@@ -43,7 +43,9 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 
 		// Set up REST server
 		global $wp_rest_server;
-		$this->server = $wp_rest_server = new WP_REST_Server();
+		$wp_rest_server = new WP_REST_Server();
+		$this->server   = $wp_rest_server;
+
 		do_action( 'rest_api_init' );
 
 		// Initialize abilities API
@@ -107,7 +109,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 						case 'multiply':
 							return $input['a'] * $input['b'];
 						case 'divide':
-							return $input['b'] !== 0 ? $input['a'] / $input['b'] : null;
+							return 0 !== $input['b'] ? $input['a'] / $input['b'] : null;
 						default:
 							return null;
 					}
@@ -193,7 +195,6 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$data = $response->get_data();
 		$this->assertIsArray( $data );
 		$this->assertNotEmpty( $data );
-
 
 		$this->assertCount( 50, $data, 'First page should return exactly 50 items (default per_page)' );
 
@@ -292,7 +293,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 
 		// Test last page (should have 'prev' link but no 'next')
 		$total_abilities = count( wp_get_abilities() );
-		$last_page = ceil( $total_abilities / 10 );
+		$last_page       = ceil( $total_abilities / 10 );
 		$request->set_param( 'page', $last_page );
 		$response = $this->server->dispatch( $request );
 
@@ -378,7 +379,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 	 * Test schema retrieval.
 	 */
 	public function test_get_schema(): void {
-		$request = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities' );
+		$request  = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -406,9 +407,9 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		wp_register_ability(
 			'test-hyphen/ability',
 			array(
-				'label'            => 'Test Hyphen Ability',
-				'description'      => 'Test ability with hyphen',
-				'execute_callback' => function( $input ) {
+				'label'               => 'Test Hyphen Ability',
+				'description'         => 'Test ability with hyphen',
+				'execute_callback'    => function ( $input ) {
 					return array( 'success' => true );
 				},
 				'permission_callback' => '__return_true',
@@ -416,7 +417,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		);
 
 		// Test valid special characters (hyphen, forward slash)
-		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test-hyphen/ability' );
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test-hyphen/ability' );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 	}
@@ -446,7 +447,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 	 * @param string $name Invalid ability name to test.
 	 */
 	public function test_ability_name_with_invalid_special_characters( string $name ): void {
-		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/' . $name );
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/' . $name );
 		$response = $this->server->dispatch( $request );
 		// Should return 404 as the regex pattern won't match
 		$this->assertEquals( 404, $response->get_status() );
@@ -461,7 +462,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		// Create a very long but valid ability name
 		$long_name = 'test/' . str_repeat( 'a', 1000 );
 
-		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/' . $long_name );
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/' . $long_name );
 		$response = $this->server->dispatch( $request );
 
 		// Should return 404 as ability doesn't exist
