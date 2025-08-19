@@ -99,6 +99,16 @@ class WP_Ability {
 	 * @param array<string,mixed> $properties An associative array of properties for the ability. This should
 	 *                                        include `label`, `description`, `input_schema`, `output_schema`,
 	 *                                        `execute_callback`, `permission_callback`, and `meta`.
+	 *
+	 * @phpstan-param array{
+	 *   label: string,
+	 *   description: string,
+	 *   input_schema?: array<string,mixed>,
+	 *   output_schema?: array<string,mixed>,
+	 *   execute_callback: callable( array<string,mixed> $input): (mixed|\WP_Error),
+	 *   permission_callback?: ?callable( ?array<string,mixed> $input ): bool,
+	 *   meta?: array<string,mixed>,
+	 * } $properties
 	 */
 	public function __construct( string $name, array $properties ) {
 		$this->name = $name;
@@ -180,32 +190,17 @@ class WP_Ability {
 	 * @since 0.1.0
 	 *
 	 * @param array<string,mixed> $input Optional. The input data to validate.
-	 * @return bool Returns true if valid, false if validation fails.
+	 * @return true|\WP_Error Returns true if valid or the WP_Error object if validation fails.
 	 */
-	protected function validate_input( array $input = array() ): bool {
+	protected function validate_input( array $input = array() ) {
 		$input_schema = $this->get_input_schema();
 		if ( empty( $input_schema ) ) {
 			return true;
 		}
 
 		$valid_input = rest_validate_value_from_schema( $input, $input_schema );
-		if ( is_wp_error( $valid_input ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html(
-					sprintf(
-						/* translators: %1$s ability name, %2$s error message. */
-						__( 'Invalid input provided for ability "%1$s": %2$s.' ),
-						$this->name,
-						$valid_input->get_error_message()
-					)
-				),
-				'0.1.0'
-			);
-			return false;
-		}
 
-		return true;
+		return is_wp_error( $valid_input ) ? $valid_input : true;
 	}
 
 	/**
@@ -216,11 +211,12 @@ class WP_Ability {
 	 * @since 0.1.0
 	 *
 	 * @param array<string,mixed> $input Optional. The input data for permission checking.
-	 * @return bool Whether the ability has the necessary permission.
+	 * @return true|\WP_Error Whether the ability has the necessary permission.
 	 */
-	public function has_permission( array $input = array() ): bool {
-		if ( ! $this->validate_input( $input ) ) {
-			return false;
+	public function has_permission( array $input = array() ) {
+		$is_valid = $this->validate_input( $input );
+		if ( is_wp_error( $is_valid ) ) {
+			return $is_valid;
 		}
 
 		if ( ! is_callable( $this->permission_callback ) ) {
@@ -240,16 +236,13 @@ class WP_Ability {
 	 */
 	protected function do_execute( array $input ) {
 		if ( ! is_callable( $this->execute_callback ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html(
-					/* translators: %s ability name. */
-					sprintf( __( 'Ability "%s" does not have a valid execute callback.' ), $this->name )
-				),
-				'0.1.0'
+			return new \WP_Error(
+				'ability_invalid_execute_callback',
+				/* translators: %s ability name. */
+				sprintf( __( 'Ability "%s" does not have a valid execute callback.' ), $this->name )
 			);
-			return null;
 		}
+
 		return call_user_func( $this->execute_callback, $input );
 	}
 
@@ -259,32 +252,17 @@ class WP_Ability {
 	 * @since 0.1.0
 	 *
 	 * @param mixed $output The output data to validate.
-	 * @return bool Returns true if valid, false if validation fails.
+	 * @return true|\WP_Error Returns true if valid, or a WP_Error object if validation fails.
 	 */
-	protected function validate_output( $output ): bool {
+	protected function validate_output( $output ) {
 		$output_schema = $this->get_output_schema();
 		if ( empty( $output_schema ) ) {
 			return true;
 		}
 
 		$valid_output = rest_validate_value_from_schema( $output, $output_schema );
-		if ( is_wp_error( $valid_output ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html(
-					sprintf(
-						/* translators: %1$s ability name, %2$s error message. */
-						__( 'Invalid output provided for ability "%1$s": %2$s.' ),
-						$this->name,
-						$valid_output->get_error_message()
-					)
-				),
-				'0.1.0'
-			);
-			return false;
-		}
 
-		return true;
+		return is_wp_error( $valid_output ) ? $valid_output : true;
 	}
 
 	/**
@@ -297,16 +275,23 @@ class WP_Ability {
 	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
 	public function execute( array $input = array() ) {
-		if ( ! $this->has_permission( $input ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html(
-					/* translators: %s ability name. */
-					sprintf( __( 'Ability "%s" does not have necessary permission.' ), $this->name )
-				),
-				'0.1.0'
+		$has_permissions = $this->has_permission( $input );
+
+		if ( true !== $has_permissions ) {
+			if ( is_wp_error( $has_permissions ) ) {
+				// Don't leak the error to someone without the correct perms.
+				_doing_it_wrong(
+					__METHOD__,
+					esc_html( $has_permissions->get_error_message() ),
+					'0.1.0'
+				);
+			}
+
+			return new \WP_Error(
+				'ability_invalid_permissions',
+				/* translators: %s ability name. */
+				sprintf( __( 'Ability "%s" does not have necessary permission.' ), $this->name )
 			);
-			return null;
 		}
 
 		$result = $this->do_execute( $input );
@@ -314,11 +299,9 @@ class WP_Ability {
 			return $result;
 		}
 
-		if ( ! $this->validate_output( $result ) ) {
-			return null;
-		}
+		$is_valid = $this->validate_output( $result );
 
-		return $result;
+		return is_wp_error( $is_valid ) ? $is_valid : $result;
 	}
 
 	/**
