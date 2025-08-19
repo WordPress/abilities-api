@@ -47,7 +47,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			array(
 				'args'   => array(
 					'name' => array(
-						'description' => __( 'Unique identifier for the ability.', 'abilities-api' ),
+						'description' => __( 'Unique identifier for the ability.' ),
 						'type'        => 'string',
 						'pattern'     => '^[a-zA-Z0-9\-\/]+$',
 					),
@@ -79,12 +79,12 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function run_ability_with_method_check( $request ) {
-		$ability = wp_get_ability( $request['name'] );
+		$ability = wp_get_ability( $request->get_param( 'name' ) );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
-				__( 'Ability not found.', 'abilities-api' ),
+				__( 'Ability not found.' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -97,7 +97,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		if ( 'resource' === $type && 'GET' !== $method ) {
 			return new \WP_Error(
 				'rest_invalid_method',
-				__( 'Resource abilities require GET method.', 'abilities-api' ),
+				__( 'Resource abilities require GET method.' ),
 				array( 'status' => 405 )
 			);
 		}
@@ -105,7 +105,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		if ( 'tool' === $type && 'POST' !== $method ) {
 			return new \WP_Error(
 				'rest_invalid_method',
-				__( 'Tool abilities require POST method.', 'abilities-api' ),
+				__( 'Tool abilities require POST method.' ),
 				array( 'status' => 405 )
 			);
 		}
@@ -122,12 +122,12 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function run_ability( $request ) {
-		$ability = wp_get_ability( $request['name'] );
+		$ability = wp_get_ability( $request->get_param( 'name' ) );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
-				__( 'Ability not found.', 'abilities-api' ),
+				__( 'Ability not found.' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -145,7 +145,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 
 		$result = $ability->execute( $input );
 
-		if ( is_wp_error( $result ) ) {
+		if ( is_wp_error( $result ) ) {<<<<<<< dev/wp_ability-return-error
 			return $result;
 		}
 
@@ -166,12 +166,12 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @return true|\WP_Error True if the request has execution permission, WP_Error object otherwise.
 	 */
 	public function run_ability_permissions_check( $request ) {
-		$ability = wp_get_ability( $request['name'] );
+		$ability = wp_get_ability( $request->get_param( 'name' ) );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
-				__( 'Ability not found.', 'abilities-api' ),
+				__( 'Ability not found.' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -181,7 +181,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		if ( ! $ability->has_permission( $input ) ) {
 			return new \WP_Error(
 				'rest_cannot_execute',
-				__( 'Sorry, you are not allowed to execute this ability.', 'abilities-api' ),
+				__( 'Sorry, you are not allowed to execute this ability.' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}
@@ -211,7 +211,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 				'rest_invalid_param',
 				sprintf(
 					/* translators: %s: error message */
-					__( 'Invalid input parameters: %s', 'abilities-api' ),
+					__( 'Invalid input parameters: %s' ),
 					$validation_result->get_error_message()
 				),
 				array( 'status' => 400 )
@@ -243,7 +243,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 				'rest_invalid_response',
 				sprintf(
 					/* translators: %s: error message */
-					__( 'Invalid response from ability: %s', 'abilities-api' ),
+					__( 'Invalid response from ability: %s' ),
 					$validation_result->get_error_message()
 				),
 				array( 'status' => 500 )
@@ -287,7 +287,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	public function get_run_args(): array {
 		return array(
 			'input' => array(
-				'description' => __( 'Input parameters for the ability execution.', 'abilities-api' ),
+				'description' => __( 'Input parameters for the ability execution.' ),
 				'type'        => 'object',
 				'default'     => array(),
 			),
@@ -308,7 +308,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'result' => array(
-					'description' => __( 'The result of the ability execution.', 'abilities-api' ),
+					'description' => __( 'The result of the ability execution.' ),
 					'type'        => 'mixed',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

@@ -54,7 +54,9 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		parent::set_up();
 
 		global $wp_rest_server;
-		$this->server = $wp_rest_server = new WP_REST_Server();
+		$wp_rest_server = new WP_REST_Server();
+		$this->server   = $wp_rest_server;
+
 		do_action( 'rest_api_init' );
 
 		do_action( 'abilities_api_init' );
@@ -750,7 +752,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Tool Empty',
 				'description'         => 'Tool with empty input',
-				'execute_callback'    => static function ( $input ) {
+				'execute_callback'    => static function ( $	'execute_callback'    => function ( $input ) {
 					return array( 'input_was_empty' => empty( $input ) );
 				},
 				'permission_callback' => '__return_true',

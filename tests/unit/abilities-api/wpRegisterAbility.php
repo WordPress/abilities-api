@@ -326,19 +326,20 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		add_action( 'abilities_api_init', $callback );
 
-		// Temporarily set `$wp_abilities` to null to ensure `wp_get_ability()` triggers `abilities_api_init` action.
-		$old_wp_abilities = $wp_abilities;
-		$wp_abilities     = null;
+		// Reset the Registry, to ensure it's empty before the test.
+		$registry_reflection = new ReflectionClass( WP_Abilities_Registry::class );
+		$instance_prop       = $registry_reflection->getProperty( 'instance' );
+		$instance_prop->setAccessible( true );
+		$instance_prop->setValue( null );
 
 		$result = wp_get_ability( $name );
-
-		$wp_abilities = $old_wp_abilities;
 
 		remove_action( 'abilities_api_init', $callback );
 
 		$this->assertEquals(
 			new WP_Ability( $name, $properties ),
-			$result
+			$result,
+			'Ability does not share expected properties.'
 		);
 	}
 

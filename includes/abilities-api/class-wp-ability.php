@@ -99,6 +99,16 @@ class WP_Ability {
 	 * @param array<string,mixed> $properties An associative array of properties for the ability. This should
 	 *                                        include `label`, `description`, `input_schema`, `output_schema`,
 	 *                                        `execute_callback`, `permission_callback`, and `meta`.
+	 *
+	 * @phpstan-param array{
+	 *   label: string,
+	 *   description: string,
+	 *   input_schema?: array<string,mixed>,
+	 *   output_schema?: array<string,mixed>,
+	 *   execute_callback: callable( array<string,mixed> $input): (mixed|\WP_Error),
+	 *   permission_callback?: ?callable( ?array<string,mixed> $input ): bool,
+	 *   meta?: array<string,mixed>,
+	 * } $properties
 	 */
 	public function __construct( string $name, array $properties ) {
 		$this->name = $name;
