@@ -145,7 +145,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 
 		$result = $ability->execute( $input );
 
-		if ( is_wp_error( $result ) ) {<<<<<<< dev/wp_ability-return-error
+		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
 
