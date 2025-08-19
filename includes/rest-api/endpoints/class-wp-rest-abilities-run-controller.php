@@ -96,7 +96,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 
 		if ( 'resource' === $type && 'GET' !== $method ) {
 			return new \WP_Error(
-				'rest_invalid_method',
+				'rest_ability_invalid_method',
 				__( 'Resource abilities require GET method.' ),
 				array( 'status' => 405 )
 			);
@@ -104,7 +104,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 
 		if ( 'tool' === $type && 'POST' !== $method ) {
 			return new \WP_Error(
-				'rest_invalid_method',
+				'rest_ability_invalid_method',
 				__( 'Tool abilities require POST method.' ),
 				array( 'status' => 405 )
 			);
@@ -123,7 +123,6 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 */
 	public function run_ability( $request ) {
 		$ability = wp_get_ability( $request->get_param( 'name' ) );
-
 		if ( ! $ability ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
@@ -132,26 +131,13 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$input = $this->get_input_from_request( $request );
-
-		// REST API needs detailed error messages with HTTP status codes.
-		// While WP_Ability::execute() validates internally, it only returns false
-		// and logs with _doing_it_wrong, which doesn't provide capturable error messages.
-		// TODO: Consider updating WP_Ability to return WP_Error for better error handling.
-		$input_validation = $this->validate_input( $ability, $input );
-		if ( is_wp_error( $input_validation ) ) {
-			return $input_validation;
-		}
-
+		$input  = $this->get_input_from_request( $request );
 		$result = $ability->execute( $input );
-
 		if ( is_wp_error( $result ) ) {
+			if ( 'ability_invalid_input' === $result->get_error_code() ) {
+				$result->add_data( array( 'status' => 400 ) );
+			}
 			return $result;
-		}
-
-		$output_validation = $this->validate_output( $ability, $result );
-		if ( is_wp_error( $output_validation ) ) {
-			return $output_validation;
 		}
 
 		return rest_ensure_response( $result );
@@ -167,7 +153,6 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 */
 	public function run_ability_permissions_check( $request ) {
 		$ability = wp_get_ability( $request->get_param( 'name' ) );
-
 		if ( ! $ability ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
@@ -177,76 +162,11 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		}
 
 		$input = $this->get_input_from_request( $request );
-
 		if ( ! $ability->has_permission( $input ) ) {
 			return new \WP_Error(
-				'rest_cannot_execute',
+				'rest_ability_cannot_execute',
 				__( 'Sorry, you are not allowed to execute this ability.' ),
 				array( 'status' => rest_authorization_required_code() )
-			);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Validates input data against the ability's input schema.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param \WP_Ability          $ability The ability object.
-	 * @param array<string, mixed> $input   The input data to validate.
-	 * @return true|\WP_Error True if validation passes, WP_Error object on failure.
-	 */
-	private function validate_input( $ability, $input ) {
-		$input_schema = $ability->get_input_schema();
-
-		if ( empty( $input_schema ) ) {
-			return true;
-		}
-
-		$validation_result = rest_validate_value_from_schema( $input, $input_schema );
-		if ( is_wp_error( $validation_result ) ) {
-			return new \WP_Error(
-				'rest_invalid_param',
-				sprintf(
-					/* translators: %s: error message */
-					__( 'Invalid input parameters: %s' ),
-					$validation_result->get_error_message()
-				),
-				array( 'status' => 400 )
-			);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Validates output data against the ability's output schema.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param \WP_Ability $ability The ability object.
-	 * @param mixed       $output  The output data to validate.
-	 * @return true|\WP_Error True if validation passes, WP_Error object on failure.
-	 */
-	private function validate_output( $ability, $output ) {
-		$output_schema = $ability->get_output_schema();
-
-		if ( empty( $output_schema ) ) {
-			return true;
-		}
-
-		$validation_result = rest_validate_value_from_schema( $output, $output_schema );
-		if ( is_wp_error( $validation_result ) ) {
-			return new \WP_Error(
-				'rest_invalid_response',
-				sprintf(
-					/* translators: %s: error message */
-					__( 'Invalid response from ability: %s' ),
-					$validation_result->get_error_message()
-				),
-				array( 'status' => 500 )
 			);
 		}
 
