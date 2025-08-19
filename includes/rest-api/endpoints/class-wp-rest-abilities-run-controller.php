@@ -146,19 +146,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		$result = $ability->execute( $input );
 
 		if ( is_wp_error( $result ) ) {
-			return new \WP_Error(
-				'rest_ability_execution_failed',
-				$result->get_error_message(),
-				array( 'status' => 500 )
-			);
-		}
-
-		if ( is_null( $result ) ) {
-			return new \WP_Error(
-				'rest_ability_execution_failed',
-				__( 'Ability execution failed. Please check permissions and input parameters.' ),
-				array( 'status' => 500 )
-			);
+			return $result;
 		}
 
 		$output_validation = $this->validate_output( $ability, $result );
