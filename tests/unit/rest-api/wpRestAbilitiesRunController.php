@@ -752,7 +752,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Tool Empty',
 				'description'         => 'Tool with empty input',
-				'execute_callback'    => static function ( $	'execute_callback'    => function ( $input ) {
+				'execute_callback'    => static function ( $input ) {
 					return array( 'input_was_empty' => empty( $input ) );
 				},
 				'permission_callback' => '__return_true',
