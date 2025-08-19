@@ -16,11 +16,10 @@
 		"@wordpress/prettier-config": "^4.28.0"
 	},
 	"files": [
+		"docs",
 		"includes",
-		"LICENSE",
-		"CHANGELOG.md",
+		"LICENSE.md",
 		"README.md",
-		"readme.txt",
 		"abilities-api.php"
 	],
 	"scripts": {
