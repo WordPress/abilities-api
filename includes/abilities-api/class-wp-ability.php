@@ -202,8 +202,8 @@ class WP_Ability {
 		if ( is_wp_error( $valid_input ) ) {
 			return new \WP_Error(
 				'ability_invalid_input',
-				/* translators: %1$s ability name, %2$s error message. */
 				sprintf(
+					/* translators: %1$s ability name, %2$s error message. */
 					__( 'Ability "%1$s" has invalid input. Reason: %2$s.' ),
 					$this->name,
 					$valid_input->get_error_message()
@@ -275,8 +275,8 @@ class WP_Ability {
 		if ( is_wp_error( $valid_output ) ) {
 			return new \WP_Error(
 				'ability_invalid_output',
-				/* translators: %1$s ability name, %2$s error message. */
 				sprintf(
+					/* translators: %1$s ability name, %2$s error message. */
 					__( 'Ability "%1$s" has invalid output. Reason: %2$s.' ),
 					$this->name,
 					$valid_output->get_error_message()
