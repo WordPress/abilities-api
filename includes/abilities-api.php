@@ -27,6 +27,17 @@ declare( strict_types = 1 );
  *                                        include `label`, `description`, `input_schema`, `output_schema`,
  *                                        `execute_callback`, `permission_callback`, and `meta`.
  * @return ?\WP_Ability An instance of registered ability on success, null on failure.
+ *
+ * @phpstan-param array{
+ *   label?: string,
+ *   description?: string,
+ *   input_schema?: array<string,mixed>,
+ *   output_schema?: array<string,mixed>,
+ *   execute_callback?: callable( array<string,mixed> $input): (mixed|\WP_Error),
+ *   permission_callback?: callable( ?array<string,mixed> $input ): bool,
+ *   meta?: array<string,mixed>,
+ *   ...<string, mixed>
+ * } $properties
  */
 function wp_register_ability( $name, array $properties = array() ): ?WP_Ability {
 	if ( ! did_action( 'abilities_api_init' ) ) {

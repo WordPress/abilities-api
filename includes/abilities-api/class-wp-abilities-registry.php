@@ -50,6 +50,17 @@ final class WP_Abilities_Registry {
 	 *                                        include `label`, `description`, `input_schema`, `output_schema`,
 	 *                                        `execute_callback`, `permission_callback`, and `meta`.
 	 * @return ?\WP_Ability The registered ability instance on success, null on failure.
+	 *
+	 * @phpstan-param array{
+	 *   label?: string,
+	 *   description?: string,
+	 *   input_schema?: array<string,mixed>,
+	 *   output_schema?: array<string,mixed>,
+	 *   execute_callback?: callable( array<string,mixed> $input): (mixed|\WP_Error),
+	 *   permission_callback?: ?callable( ?array<string,mixed> $input ): bool,
+	 *   meta?: array<string,mixed>,
+	 *   ...<string, mixed>
+	 * } $properties
 	 */
 	public function register( $name, array $properties = array() ): ?WP_Ability {
 		$ability = null;
