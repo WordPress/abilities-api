@@ -48,4 +48,6 @@
 
 ## License
 
-[GPL-2.0-or-later](https://spdx.org/licenses/GPL-2.0-or-later.html)
+WordPress is free software, and is released under the terms of the GNU General Public License version 2 or (at your option) any later version. See [LICENSE.md](LICENSE.md) for complete license.
+
+<br/><br/><p align="center"><img src="https://s.w.org/style/images/codeispoetry.png?1" alt="Code is Poetry." /></p>
