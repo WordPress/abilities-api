@@ -147,17 +147,23 @@ final class WP_Abilities_Registry {
 			return null;
 		}
 
-		$ability = new WP_Ability(
+		/**
+		 * Filters the class used to instantiate the ability.
+		 *
+		 * This is helpful for creating complex ability types that are not well expressed by array values and callbacks.
+		 *
+		 * @param string $ability_class           The class name to instantiate the ability. Must extend \WP_Ability.
+		 * @param string $name                    The name of the ability being registered.
+		 * @param array<string,mixed> $properties The properties of the ability being registered. See
+		 *                                        `wp_register_ability()` for the expected structure.
+		 *
+		 * @phpstan-param class-string<\WP_Ability> $ability_class
+		 */
+		$ability_class = apply_filters( 'wp_ability_class', WP_Ability::class, $name, $properties );
+
+		$ability = new $ability_class(
 			$name,
-			array(
-				'label'               => $properties['label'],
-				'description'         => $properties['description'],
-				'input_schema'        => $properties['input_schema'] ?? array(),
-				'output_schema'       => $properties['output_schema'] ?? array(),
-				'execute_callback'    => $properties['execute_callback'],
-				'permission_callback' => $properties['permission_callback'] ?? null,
-				'meta'                => $properties['meta'] ?? array(),
-			)
+			$properties
 		);
 
 		$this->registered_abilities[ $name ] = $ability;
