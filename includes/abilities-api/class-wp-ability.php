@@ -15,7 +15,6 @@ declare( strict_types = 1 );
  * Encapsulates the properties and methods related to a specific ability in the registry.
  *
  * @since 0.1.0
- * @access private
  *
  * @see WP_Abilities_Registry
  */
@@ -90,6 +89,8 @@ class WP_Ability {
 	 * Constructor.
 	 *
 	 * Do not use this constructor directly. Instead, use the `wp_register_ability()` function.
+	 *
+	 * @access private
 	 *
 	 * @see wp_register_ability()
 	 *
