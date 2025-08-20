@@ -198,13 +198,13 @@ class WP_Ability {
 			return true;
 		}
 
-		$valid_input = rest_validate_value_from_schema( $input, $input_schema );
+		$valid_input = rest_validate_value_from_schema( $input, $input_schema, 'input' );
 		if ( is_wp_error( $valid_input ) ) {
 			return new \WP_Error(
 				'ability_invalid_input',
 				sprintf(
 					/* translators: %1$s ability name, %2$s error message. */
-					__( 'Ability "%1$s" has invalid input. Reason: %2$s.' ),
+					__( 'Ability "%1$s" has invalid input. Reason: %2$s' ),
 					$this->name,
 					$valid_input->get_error_message()
 				)
@@ -271,13 +271,13 @@ class WP_Ability {
 			return true;
 		}
 
-		$valid_output = rest_validate_value_from_schema( $output, $output_schema );
+		$valid_output = rest_validate_value_from_schema( $output, $output_schema, 'output' );
 		if ( is_wp_error( $valid_output ) ) {
 			return new \WP_Error(
 				'ability_invalid_output',
 				sprintf(
 					/* translators: %1$s ability name, %2$s error message. */
-					__( 'Ability "%1$s" has invalid output. Reason: %2$s.' ),
+					__( 'Ability "%1$s" has invalid output. Reason: %2$s' ),
 					$this->name,
 					$valid_output->get_error_message()
 				)
