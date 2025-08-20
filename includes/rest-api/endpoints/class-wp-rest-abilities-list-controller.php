@@ -69,7 +69,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			array(
 				'args'   => array(
 					'name' => array(
-						'description' => __( 'Unique identifier for the ability.', 'abilities-api' ),
+						'description' => __( 'Unique identifier for the ability.' ),
 						'type'        => 'string',
 						'pattern'     => '^[a-zA-Z0-9\-\/]+$',
 					),
@@ -100,8 +100,9 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		$abilities = wp_get_abilities();
 
 		// Handle pagination with explicit defaults.
-		$page     = isset( $request['page'] ) ? $request['page'] : 1;
-		$per_page = isset( $request['per_page'] ) ? $request['per_page'] : self::DEFAULT_PER_PAGE;
+		$params   = $request->get_params();
+		$page     = $params['page'] ?? 1;
+		$per_page = $params['per_page'] ?? self::DEFAULT_PER_PAGE;
 		$offset   = ( $page - 1 ) * $per_page;
 
 		$total_abilities = count( $abilities );
@@ -120,8 +121,8 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		$response->header( 'X-WP-Total', (string) $total_abilities );
 		$response->header( 'X-WP-TotalPages', (string) $max_pages );
 
-		$request_params = $request->get_query_params();
-		$base           = add_query_arg( urlencode_deep( $request_params ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
+		$query_params = $request->get_query_params();
+		$base         = add_query_arg( urlencode_deep( $query_params ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
 
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
@@ -147,12 +148,12 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ) {
-		$ability = wp_get_ability( $request['name'] );
+		$ability = wp_get_ability( $request->get_param( 'name' ) );
 
 		if ( ! $ability ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
-				__( 'Ability not found.', 'abilities-api' ),
+				__( 'Ability not found.' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -192,7 +193,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			'meta'          => $ability->get_meta(),
 		);
 
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$context = $request->get_param( 'context' ) ?? 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
 
@@ -233,37 +234,37 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'name'          => array(
-					'description' => __( 'Unique identifier for the ability.', 'abilities-api' ),
+					'description' => __( 'Unique identifier for the ability.' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
 				'label'         => array(
-					'description' => __( 'Display label for the ability.', 'abilities-api' ),
+					'description' => __( 'Display label for the ability.' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
 				'description'   => array(
-					'description' => __( 'Description of the ability.', 'abilities-api' ),
+					'description' => __( 'Description of the ability.' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'input_schema'  => array(
-					'description' => __( 'JSON Schema for the ability input.', 'abilities-api' ),
+					'description' => __( 'JSON Schema for the ability input.' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'output_schema' => array(
-					'description' => __( 'JSON Schema for the ability output.', 'abilities-api' ),
+					'description' => __( 'JSON Schema for the ability output.' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'meta'          => array(
-					'description' => __( 'Meta information about the ability.', 'abilities-api' ),
+					'description' => __( 'Meta information about the ability.' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -286,7 +287,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		return array(
 			'context'  => $this->get_context_param( array( 'default' => 'view' ) ),
 			'page'     => array(
-				'description'       => __( 'Current page of the collection.', 'abilities-api' ),
+				'description'       => __( 'Current page of the collection.' ),
 				'type'              => 'integer',
 				'default'           => 1,
 				'sanitize_callback' => 'absint',
@@ -294,7 +295,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 				'minimum'           => 1,
 			),
 			'per_page' => array(
-				'description'       => __( 'Maximum number of items to be returned in result set.', 'abilities-api' ),
+				'description'       => __( 'Maximum number of items to be returned in result set.' ),
 				'type'              => 'integer',
 				'default'           => self::DEFAULT_PER_PAGE,
 				'minimum'           => 1,

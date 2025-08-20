@@ -36,3 +36,6 @@ Thumbs.db
 
 # Tests & Coverage
 /coverage/
+
+# Build
+abilities-api.zip
