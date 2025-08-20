@@ -49,8 +49,8 @@ You can use Docker and the `wp-env` tool to set up a local development environme
 2. Change into the project folder and install the development dependencies:
 
    ```bash
-   ## If you're using NVM, make sure to use the correct Node.js version:
-   nvm use
+   ## Install Node.js 20.10.0 or higher if you don't have it
+   nvm install 20 && nvm use
 
    ## Then install the NPM dependencies:
    npm install
