@@ -107,7 +107,7 @@ class WP_Ability {
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
 	 *   execute_callback: callable( array<string,mixed> $input): (mixed|\WP_Error),
-	 *   permission_callback?: ?callable( ?array<string,mixed> $input ): true|\WP_Error,
+	 *   permission_callback?: ?callable( ?array<string,mixed> $input ): bool,
 	 *   meta?: array<string,mixed>,
 	 *   ...<string, mixed>,
 	 * } $properties
@@ -258,7 +258,7 @@ class WP_Ability {
 	 * @since 0.1.0
 	 *
 	 * @param array<string,mixed> $input Optional. The input data for permission checking.
-	 * @return true|\WP_Error Whether the ability has the necessary permission.
+	 * @return bool|\WP_Error Whether the ability has the necessary permission.
 	 */
 	public function has_permission( array $input = array() ) {
 		$is_valid = $this->validate_input( $input );
@@ -266,26 +266,26 @@ class WP_Ability {
 			return $is_valid;
 		}
 
-		$permission = true;
+		$permission_result = true;
 		if ( is_callable( $this->permission_callback ) ) {
-			$permission = call_user_func( $this->permission_callback, $input );
+			$permission_result = call_user_func( $this->permission_callback, $input );
 		}
 
 		/**
 		 * Filters the permission result for a specific ability.
 		 *
 		 * Allows plugins to override or short-circuit the permission check for an ability.
-		 * The filter receives the current permission result (true|\WP_Error), the
+		 * The filter receives the current permission result (bool), the
 		 * ability name, and the input provided for the permission check.
 		 *
 		 * @since 0.1.0
 		 *
-		 * @param true|\WP_Error      $permission   The current permission result.
-		 * @param string              $ability_name The ability name.
-		 * @param array<string,mixed> $input        The input for the ability.
-		 * @return true|\WP_Error The filtered permission result.
+		 * @param bool                $permission_result The current permission result.
+		 * @param string              $ability_name      The ability name.
+		 * @param array<string,mixed> $input             The input for the ability.
+		 * @return bool The filtered permission result.
 		 */
-		return apply_filters( 'ability_permission_result', $permission, $this->name, $input );
+		return (bool) apply_filters( 'ability_permission_result', $permission_result, $this->name, $input );
 	}
 
 	/**
