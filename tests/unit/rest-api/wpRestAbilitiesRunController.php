@@ -337,10 +337,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/open-tool/run' );
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 405, $response->get_status() );
+		$this->assertSame( 405, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'rest_invalid_method', $data['code'] );
-		$this->assertStringContainsString( 'Tool abilities require POST', $data['message'] );
+		$this->assertSame( 'rest_ability_invalid_method', $data['code'] );
+		$this->assertSame( 'Tool abilities require POST method.', $data['message'] );
 	}
 
 	/**
@@ -354,10 +354,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 405, $response->get_status() );
+		$this->assertSame( 405, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'rest_invalid_method', $data['code'] );
-		$this->assertStringContainsString( 'Resource abilities require GET', $data['message'] );
+		$this->assertSame( 'rest_ability_invalid_method', $data['code'] );
+		$this->assertSame( 'Resource abilities require GET method.', $data['message'] );
 	}
 
 
@@ -373,11 +373,13 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 500, $response->get_status() );
+		$this->assertSame( 500, $response->get_status() );
 		$data = $response->get_data();
-
-		$this->assertEquals( 'rest_invalid_type', $data['code'] );
-		$this->assertStringContainsString( 'is not of type number.', $data['message'] );
+		$this->assertSame( 'ability_invalid_output', $data['code'] );
+		$this->assertSame(
+			'Ability "test/invalid-output" has invalid output. Reason: output is not of type number.',
+			$data['message']
+		);
 	}
 
 	/**
@@ -401,9 +403,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 403, $response->get_status() );
+		$this->assertSame( 403, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'rest_cannot_execute', $data['code'] );
+		$this->assertSame( 'rest_ability_cannot_execute', $data['code'] );
+		$this->assertSame( 'Sorry, you are not allowed to execute this ability.', $data['message'] );
 	}
 
 	/**
@@ -618,10 +621,14 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		// Should return error when output validation fails
-		$this->assertEquals( 500, $response->get_status() );
+		// Should return error when output validation fails.
+		$this->assertSame( 500, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'rest_property_required', $data['code'] );
+		$this->assertSame( 'ability_invalid_output', $data['code'] );
+		$this->assertSame(
+			'Ability "test/strict-output" has invalid output. Reason: status is a required property of output.',
+			$data['message']
+		);
 	}
 
 	/**
@@ -659,9 +666,13 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 
 		// Should return error when input validation fails.
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertSame( 400, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+		$this->assertSame( 'ability_invalid_input', $data['code'] );
+		$this->assertSame(
+			'Ability "test/strict-input" has invalid input. Reason: required_field is a required property of input.',
+			$data['message']
+		);
 	}
 
 	/**
@@ -934,10 +945,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$request  = new WP_REST_Request( $method, '/wp/v2/abilities/test/method-test/run' );
 		$response = $this->server->dispatch( $request );
 
-		// Tool abilities should only accept POST, so these should return 405
-		$this->assertEquals( 405, $response->get_status() );
+		// Tool abilities should only accept POST, so these should return 405.
+		$this->assertSame( 405, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( 'rest_invalid_method', $data['code'] );
+		$this->assertSame( 'rest_ability_invalid_method', $data['code'] );
+		$this->assertSame( 'Tool abilities require POST method.', $data['message'] );
 	}
 
 	/**
