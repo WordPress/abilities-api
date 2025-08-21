@@ -283,9 +283,9 @@ class WP_Ability {
 		 * @param bool                $permission_result The current permission result.
 		 * @param string              $ability_name      The ability name.
 		 * @param array<string,mixed> $input             The input for the ability.
-		 * @return bool The filtered permission result.
+		 * @return bool|\WP_Error The filtered permission result.
 		 */
-		return (bool) apply_filters( 'ability_permission_result', $permission_result, $this->name, $input );
+		return apply_filters( 'ability_permission_result', $permission_result, $this->name, $input );
 	}
 
 	/**
