@@ -305,7 +305,23 @@ class WP_Ability {
 			);
 		}
 
-		return call_user_func( $this->execute_callback, $input );
+		$result = call_user_func( $this->execute_callback, $input );
+
+		/**
+		 * Filters the raw result returned by the ability execute callback.
+		 *
+		 * Allows plugins to modify or short-circuit the execute callback result
+		 * before output validation occurs. The filter receives the raw result,
+		 * the ability name and the input provided to the ability.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param mixed               $result       The raw result from the execute callback (can be any type or \WP_Error).
+		 * @param string              $ability_name The ability name.
+		 * @param array<string,mixed> $input        The input passed to the ability.
+		 * @return mixed The filtered result.
+		 */
+		return apply_filters( 'ability_execute_result', $result, $this->name, $input );
 	}
 
 	/**
@@ -370,21 +386,6 @@ class WP_Ability {
 		}
 
 		$result = $this->do_execute( $input );
-		/**
-		 * Filters the raw result returned by the ability execute callback.
-		 *
-		 * Allows plugins to modify or short-circuit the execute callback result
-		 * before output validation occurs. The filter receives the raw result,
-		 * the ability name and the input provided to the ability.
-		 *
-		 * @since 0.1.0
-		 *
-		 * @param mixed               $result       The raw result from the execute callback (can be any type or \WP_Error).
-		 * @param string              $ability_name The ability name.
-		 * @param array<string,mixed> $input        The input passed to the ability.
-		 * @return mixed The filtered result.
-		 */
-		$result = apply_filters( 'ability_execute_result', $result, $this->name, $input );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
