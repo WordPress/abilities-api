@@ -107,7 +107,7 @@ class WP_Ability {
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
 	 *   execute_callback: callable( array<string,mixed> $input): (mixed|\WP_Error),
-	 *   permission_callback?: ?callable( ?array<string,mixed> $input ): bool,
+	 *   permission_callback?: ?callable( ?array<string,mixed> $input ): true|\WP_Error,
 	 *   meta?: array<string,mixed>,
 	 *   ...<string, mixed>,
 	 * } $properties
@@ -177,7 +177,16 @@ class WP_Ability {
 	 * @return array<string,mixed> The input schema for the ability.
 	 */
 	public function get_input_schema(): array {
-		return $this->input_schema;
+		/**
+		 * Filters the input schema for a specific ability.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param array<string,mixed> $input_schema The input schema.
+		 * @param string              $ability_name The ability name.
+		 * @return array<string,mixed> The filtered input schema.
+		 */
+		return (array) apply_filters( 'ability_input_schema', $this->input_schema, $this->name );
 	}
 
 	/**
@@ -188,7 +197,16 @@ class WP_Ability {
 	 * @return array<string,mixed> The output schema for the ability.
 	 */
 	public function get_output_schema(): array {
-		return $this->output_schema;
+		/**
+		 * Filters the output schema for a specific ability.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param array<string,mixed> $output_schema The output schema.
+		 * @param string              $ability_name  The ability name.
+		 * @return array<string,mixed> The filtered output schema.
+		 */
+		return (array) apply_filters( 'ability_output_schema', $this->output_schema, $this->name );
 	}
 
 	/**
@@ -248,11 +266,26 @@ class WP_Ability {
 			return $is_valid;
 		}
 
-		if ( ! is_callable( $this->permission_callback ) ) {
-			return true;
+		$permission = true;
+		if ( is_callable( $this->permission_callback ) ) {
+			$permission = call_user_func( $this->permission_callback, $input );
 		}
 
-		return call_user_func( $this->permission_callback, $input );
+		/**
+		 * Filters the permission result for a specific ability.
+		 *
+		 * Allows plugins to override or short-circuit the permission check for an ability.
+		 * The filter receives the current permission result (true|\WP_Error), the
+		 * ability name, and the input provided for the permission check.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param true|\WP_Error      $permission   The current permission result.
+		 * @param string              $ability_name The ability name.
+		 * @param array<string,mixed> $input        The input for the ability.
+		 * @return true|\WP_Error The filtered permission result.
+		 */
+		return apply_filters( 'ability_permission_result', $permission, $this->name, $input );
 	}
 
 	/**
@@ -337,6 +370,21 @@ class WP_Ability {
 		}
 
 		$result = $this->do_execute( $input );
+		/**
+		 * Filters the raw result returned by the ability execute callback.
+		 *
+		 * Allows plugins to modify or short-circuit the execute callback result
+		 * before output validation occurs. The filter receives the raw result,
+		 * the ability name and the input provided to the ability.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param mixed               $result       The raw result from the execute callback (can be any type or \WP_Error).
+		 * @param string              $ability_name The ability name.
+		 * @param array<string,mixed> $input        The input passed to the ability.
+		 * @return mixed The filtered result.
+		 */
+		$result = apply_filters( 'ability_execute_result', $result, $this->name, $input );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}

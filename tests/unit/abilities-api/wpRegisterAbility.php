@@ -10,6 +10,8 @@ class Mock_Custom_Ability extends WP_Ability {
 }
 
 /**
+ * Tests for registering, unregistering and retrieving abilities.
+ *
  * @covers wp_register_ability
  * @covers wp_unregister_ability
  * @covers wp_get_ability
