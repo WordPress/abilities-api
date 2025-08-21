@@ -31,5 +31,3 @@ class WP_REST_Abilities_Init {
 		$list_controller->register_routes();
 	}
 }
-
-add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
