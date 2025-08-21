@@ -27,26 +27,17 @@
 define( 'WP_ABILITIES_API_DIR', plugin_dir_path( __FILE__ ) );
 
 /**
- * Version of the plugin.
+ * Prefer Composer autoloader when available. If present, it will load
+ * `includes/bootstrap.php` (registered in composer.json) which makes the
+ * procedural functions and classes available. Otherwise fall back to the
+ * local includes bootstrap to keep compatibility with non-Composer installs.
  */
-define( 'WP_ABILITIES_API_VERSION', '0.1.0' );
+if ( file_exists( WP_ABILITIES_API_DIR . 'vendor/autoload.php' ) ) {
+	require_once WP_ABILITIES_API_DIR . 'vendor/autoload.php';
+} else {
+	require_once WP_ABILITIES_API_DIR . 'includes/bootstrap.php';
+}
 
-/**
- * First the WP_Ability class that users can extend.
- */
-require_once WP_ABILITIES_API_DIR . 'includes/abilities-api/class-wp-ability.php';
-
-/**
- * Then the WP_Abilities_Registry class that manages the abilities.
- */
-require_once WP_ABILITIES_API_DIR . 'includes/abilities-api/class-wp-abilities-registry.php';
-
-/**
- * Then the public access functions that users can use to interact with the abilities.
- */
-require_once WP_ABILITIES_API_DIR . 'includes/abilities-api.php';
-
-/**
- * Initialize REST API controllers.
- */
-require_once WP_ABILITIES_API_DIR . 'includes/rest-api/class-wp-rest-abilities-init.php';
+if ( function_exists( 'add_action' ) ) {
+	add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
+}

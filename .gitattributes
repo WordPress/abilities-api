@@ -1,0 +1,45 @@
+# Automatically normalize line endings.
+* text=auto
+
+# Files and directories to exclude from the generated archive (export-ignore).
+# These will be omitted from GitHub/Packagist ZIP archives to keep packages small.
+
+# Tests and test fixtures
+/tests/ export-ignore
+/tests/** export-ignore
+
+# PHP unit / static analysis configs.
+/phpcs.xml.dist export-ignore
+/phpstan.neon.dist export-ignore
+/phpunit.xml.dist export-ignore
+
+# Continuous Integration configs.
+/.github/ export-ignore
+/.github/** export-ignore
+
+# Node and build artifacts.
+node_modules/ export-ignore
+node_modules/** export-ignore
+package.json export-ignore
+package-lock.json export-ignore
+
+# Composer/vendor and dev tooling.
+/vendor/ export-ignore
+/vendor/** export-ignore
+/composer.lock export-ignore
+
+# Don't include the dotfiles for distribution.
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+.gitignore export-ignore
+.gitkeep export-ignore
+/.nvmrc export-ignore
+/.prettierignore export-ignore
+/.prettierrc.js export-ignore
+/.wp-env.json export-ignore
+
+# Mark docs as documentation for GitHub Linguist.
+/docs/** linguist-documentation
+/CONTRIBUTING.md linguist-documentation
+/LICENSE.md linguist-documentation
+/README.md linguist-documentation
