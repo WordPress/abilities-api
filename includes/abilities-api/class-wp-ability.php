@@ -198,9 +198,20 @@ class WP_Ability {
 			return true;
 		}
 
-		$valid_input = rest_validate_value_from_schema( $input, $input_schema );
+		$valid_input = rest_validate_value_from_schema( $input, $input_schema, 'input' );
+		if ( is_wp_error( $valid_input ) ) {
+			return new \WP_Error(
+				'ability_invalid_input',
+				sprintf(
+					/* translators: %1$s ability name, %2$s error message. */
+					__( 'Ability "%1$s" has invalid input. Reason: %2$s' ),
+					$this->name,
+					$valid_input->get_error_message()
+				)
+			);
+		}
 
-		return is_wp_error( $valid_input ) ? $valid_input : true;
+		return true;
 	}
 
 	/**
@@ -260,9 +271,20 @@ class WP_Ability {
 			return true;
 		}
 
-		$valid_output = rest_validate_value_from_schema( $output, $output_schema );
+		$valid_output = rest_validate_value_from_schema( $output, $output_schema, 'output' );
+		if ( is_wp_error( $valid_output ) ) {
+			return new \WP_Error(
+				'ability_invalid_output',
+				sprintf(
+					/* translators: %1$s ability name, %2$s error message. */
+					__( 'Ability "%1$s" has invalid output. Reason: %2$s' ),
+					$this->name,
+					$valid_output->get_error_message()
+				)
+			);
+		}
 
-		return is_wp_error( $valid_output ) ? $valid_output : true;
+		return true;
 	}
 
 	/**
@@ -276,10 +298,12 @@ class WP_Ability {
 	 */
 	public function execute( array $input = array() ) {
 		$has_permissions = $this->has_permission( $input );
-
 		if ( true !== $has_permissions ) {
 			if ( is_wp_error( $has_permissions ) ) {
-				// Don't leak the error to someone without the correct perms.
+				if ( 'ability_invalid_input' === $has_permissions->get_error_code() ) {
+					return $has_permissions;
+				}
+				// Don't leak the permission check error to someone without the correct perms.
 				_doing_it_wrong(
 					__METHOD__,
 					esc_html( $has_permissions->get_error_message() ),

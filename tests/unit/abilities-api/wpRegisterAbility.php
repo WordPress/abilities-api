@@ -182,8 +182,6 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_properties );
 
-		$this->setExpectedIncorrectUsage( 'WP_Ability::execute' );
-
 		$actual = $result->execute(
 			array(
 				'a'       => 2,
@@ -194,9 +192,13 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$this->assertWPError(
 			$actual,
-			'Execution should fail due to input not matching schema'
+			'Execution should fail due to input not matching schema.'
 		);
-		$this->assertEquals( 'ability_invalid_permissions', $actual->get_error_code() );
+		$this->assertSame( 'ability_invalid_input', $actual->get_error_code() );
+		$this->assertSame(
+			'Ability "test/add-numbers" has invalid input. Reason: unknown is not a valid property of Object.',
+			$actual->get_error_message()
+		);
 	}
 
 	/**
@@ -218,9 +220,13 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		);
 		$this->assertWPError(
 			$actual,
-			'Execution should fail due to output not matching schema',
+			'Execution should fail due to output not matching schema.',
 		);
-		$this->assertEquals( 'rest_invalid_type', $actual->get_error_code() );
+		$this->assertSame( 'ability_invalid_output', $actual->get_error_code() );
+		$this->assertSame(
+			'Ability "test/add-numbers" has invalid output. Reason: output is not of type number.',
+			$actual->get_error_message()
+		);
 	}
 
 	/**
@@ -241,9 +247,13 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$this->assertWPError(
 			$actual,
-			'Permission check should fail due to input not matching schema'
+			'Permission check should fail due to input not matching schema.'
 		);
-		$this->assertEquals( 'rest_additional_properties_forbidden', $actual->get_error_code() );
+		$this->assertSame( 'ability_invalid_input', $actual->get_error_code() );
+		$this->assertSame(
+			'Ability "test/add-numbers" has invalid input. Reason: unknown is not a valid property of Object.',
+			$actual->get_error_message()
+		);
 	}
 
 	/**
