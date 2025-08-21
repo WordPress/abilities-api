@@ -4,7 +4,6 @@
  *
  * @package abilities-api
  *
- * phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
  * phpcs:disable WordPressVIPMinimum.Files.IncludingFile.UsingVariable
  */
 

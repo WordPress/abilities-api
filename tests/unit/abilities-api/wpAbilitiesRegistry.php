@@ -1,6 +1,8 @@
 <?php declare( strict_types=1 );
 
 /**
+ * Tests for the abilities registry functionality.
+ *
  * @covers WP_Abilities_Registry
  *
  * @group abilities-api
