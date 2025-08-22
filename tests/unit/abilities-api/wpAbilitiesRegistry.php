@@ -13,7 +13,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	/**
 	 * Mock abilities registry.
 	 *
-	 * @var WP_Abilities_Registry
+	 * @var \WP_Abilities_Registry
 	 */
 	private $registry = null;
 
@@ -49,10 +49,10 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 				'description' => 'The result of adding the two numbers.',
 				'required'    => true,
 			),
-			'execute_callback'    => function ( array $input ): int {
+			'execute_callback'    => static function ( array $input ): int {
 				return $input['a'] + $input['b'];
 			},
-			'permission_callback' => function (): bool {
+			'permission_callback' => static function (): bool {
 				return true;
 			},
 			'meta'                => array(
