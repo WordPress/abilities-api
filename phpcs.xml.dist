@@ -198,7 +198,6 @@
 				<element value="abilities_api_" /><!-- Hook prefix -->
 				<element value="ability_" /><!-- Hook prefix -->
 				<element value="WP_Ability" />
-				<element value="WP_Ability" />
 				<element value="WP_Abilities" />
 				<element value="WP_REST_Abilities" />
 				<element value="WP_ABILITIES_API" /><!-- Constant -->
