@@ -75,7 +75,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request<array<string,mixed>> $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function run_ability_with_method_check( $request ) {
@@ -118,7 +118,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request<array<string,mixed>> $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function run_ability( $request ) {
@@ -148,7 +148,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request<array<string,mixed>> $request Full details about the request.
 	 * @return true|\WP_Error True if the request has execution permission, WP_Error object otherwise.
 	 */
 	public function run_ability_permissions_check( $request ) {
@@ -178,7 +178,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param \WP_REST_Request $request The request object.
+	 * @param \WP_REST_Request<array<string,mixed>> $request The request object.
 	 * @return array<string, mixed> The input parameters.
 	 */
 	private function get_input_from_request( $request ) {
