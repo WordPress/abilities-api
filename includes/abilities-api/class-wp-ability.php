@@ -316,10 +316,10 @@ class WP_Ability {
 		 *
 		 * @since 0.1.0
 		 *
-		 * @param mixed               $result       The raw result from the execute callback (can be any type or \WP_Error).
+		 * @param mixed|\WP_Error     $result       The raw result from the execute callback (can be any type or \WP_Error).
 		 * @param string              $ability_name The ability name.
 		 * @param array<string,mixed> $input        The input passed to the ability.
-		 * @return mixed The filtered result.
+		 * @return mixed|\WP_Error The filtered result.
 		 */
 		return apply_filters( 'ability_execute_result', $result, $this->name, $input );
 	}
