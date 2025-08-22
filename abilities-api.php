@@ -26,7 +26,6 @@
  */
 define( 'WP_ABILITIES_API_DIR', plugin_dir_path( __FILE__ ) );
 
-
 require_once WP_ABILITIES_API_DIR . 'includes/bootstrap.php';
 
 if ( function_exists( 'add_action' ) ) {

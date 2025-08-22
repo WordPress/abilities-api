@@ -1,16 +1,27 @@
 <?php
 /**
- * Abilities API - Composer bootstrap
+ * Bootstraps the Abilities API classes and global functions.
  *
- * This file is autoloaded by Composer when the package is installed via the
- * "files" autoload mechanism. It ensures the procedural functions defined in
- * `includes/abilities-api.php` are available without requiring namespaces.
+ * Can also be used by libraries to include the Abilities API classes without loading the plugin itself.
  *
- * Keep this file simple and side-effect free except for requiring the functions
- * file.
+ * This file will not be needed when the Abilities API is merged in Core.
+ *
+ * @package abilities-api
+ * @since 0.1.0
  */
 
-// Load core classes if they are not already defined (for non-Composer installs or direct includes).
+declare( strict_types = 1 );
+
+/**
+ * Plugin version.
+ *
+ * Useful to confirm you're using the latest version of the Abilities API.
+ */
+if ( ! defined( 'WP_ABILITIES_API_VERSION' ) ) {
+	define( 'WP_ABILITIES_API_VERSION', '0.1.0' );
+}
+
+// Load core classes if they are not already defined.
 if ( ! class_exists( 'WP_Ability' ) ) {
 	require_once __DIR__ . '/abilities-api/class-wp-ability.php';
 }
