@@ -15,31 +15,17 @@
 
 # Continuous Integration configs.
 /.github/ export-ignore
-/.github/** export-ignore
 
 # Node and build artifacts.
-node_modules/ export-ignore
-node_modules/** export-ignore
 package.json export-ignore
 package-lock.json export-ignore
-
-# Composer/vendor and dev tooling.
-/vendor/ export-ignore
-/vendor/** export-ignore
 /composer.lock export-ignore
 
 # Don't include the dotfiles for distribution.
-/.editorconfig export-ignore
-/.gitattributes export-ignore
-.gitignore export-ignore
-.gitkeep export-ignore
-/.nvmrc export-ignore
-/.prettierignore export-ignore
-/.prettierrc.js export-ignore
-/.wp-env.json export-ignore
+/.* export-ignore
 
 # Mark docs as documentation for GitHub Linguist.
-/docs/** linguist-documentation
-/CONTRIBUTING.md linguist-documentation
+/docs/ linguist-documentation export-ignore
+/CONTRIBUTING.md linguist-documentation export-ignore
 /LICENSE.md linguist-documentation
 /README.md linguist-documentation
