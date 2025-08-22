@@ -161,7 +161,7 @@ class Tests_Abilities_API_WpAbility_Filters extends WP_UnitTestCase {
 
 		$output = $ability->execute( array( 'value' => 'ok' ) );
 
-		remove_filter( 'ability_execute_result', $filter_cb, 10 );
+		remove_filter( 'ability_execute_result', $filter_cb );
 
 		$this->assertSame( 'modified-ok', $output );
 	}
