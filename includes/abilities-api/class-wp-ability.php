@@ -65,7 +65,7 @@ class WP_Ability {
 	 * The ability execute callback.
 	 *
 	 * @since 0.1.0
-	 * @var callable
+	 * @var callable( array<string,mixed> $input): (mixed|\WP_Error)
 	 */
 	protected $execute_callback;
 
@@ -73,7 +73,7 @@ class WP_Ability {
 	 * The optional ability permission callback.
 	 *
 	 * @since 0.1.0
-	 * @var ?callable
+	 * @var ?callable( array<string,mixed> $input ): (bool|\WP_Error)
 	 */
 	protected $permission_callback = null;
 
@@ -107,7 +107,7 @@ class WP_Ability {
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
 	 *   execute_callback: callable( array<string,mixed> $input): (mixed|\WP_Error),
-	 *   permission_callback?: ?callable( ?array<string,mixed> $input ): bool,
+	 *   permission_callback?: ?callable( array<string,mixed> $input ): (bool|\WP_Error),
 	 *   meta?: array<string,mixed>,
 	 *   ...<string, mixed>,
 	 * } $properties
@@ -280,7 +280,7 @@ class WP_Ability {
 		 *
 		 * @since 0.1.0
 		 *
-		 * @param bool                $permission_result The current permission result.
+		 * @param bool|\WP_Error      $permission_result The current permission result.
 		 * @param string              $ability_name      The ability name.
 		 * @param array<string,mixed> $input             The input for the ability.
 		 * @return bool|\WP_Error The filtered permission result.

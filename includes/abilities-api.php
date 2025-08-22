@@ -36,7 +36,7 @@ declare( strict_types = 1 );
  *   input_schema?: array<string,mixed>,
  *   output_schema?: array<string,mixed>,
  *   execute_callback?: callable( array<string,mixed> $input): (mixed|\WP_Error),
- *   permission_callback?: callable( ?array<string,mixed> $input ): bool,
+ *   permission_callback?: callable( array<string,mixed> $input ): (bool|\WP_Error),
  *   meta?: array<string,mixed>,
  *   ability_class?: class-string<\WP_Ability>,
  *   ...<string, mixed>
