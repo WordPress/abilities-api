@@ -1,6 +1,15 @@
 <?php declare( strict_types=1 );
 
 /**
+ * Mock used to test a custom ability class.
+ */
+class Mock_Custom_Ability extends WP_Ability {
+	protected function do_execute( array $input ) {
+		return 9999;
+	}
+}
+
+/**
  * @covers wp_register_ability
  * @covers wp_unregister_ability
  * @covers wp_get_ability
@@ -173,6 +182,47 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		);
 		$this->assertEquals( 'ability_invalid_permissions', $actual->get_error_code() );
 	}
+
+	/**
+	 * Tests registering an ability with a custom ability class.
+	 */
+	public function test_register_ability_custom_ability_class(): void {
+		do_action( 'abilities_api_init' );
+
+		$result = wp_register_ability(
+			self::$test_ability_name,
+			array_merge(
+				self::$test_ability_properties,
+				array(
+					'ability_class' => Mock_Custom_Ability::class,
+				)
+			)
+		);
+
+		$this->assertInstanceOf( Mock_Custom_Ability::class, $result );
+		$this->assertSame(
+			9999,
+			$result->execute(
+				array(
+					'a' => 2,
+					'b' => 3,
+				)
+			)
+		);
+
+		// Try again with an invalid class throws a doing it wrong.
+		$this->setExpectedIncorrectUsage( WP_Abilities_Registry::class . '::register' );
+		wp_register_ability(
+			self::$test_ability_name,
+			array_merge(
+				self::$test_ability_properties,
+				array(
+					'ability_class' => 'Non_Existent_Class',
+				)
+			)
+		);
+	}
+
 
 	/**
 	 * Tests executing an ability with input not matching schema.

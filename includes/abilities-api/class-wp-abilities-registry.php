@@ -48,7 +48,7 @@ final class WP_Abilities_Registry {
 	 *                                        alphanumeric characters, dashes and the forward slash.
 	 * @param array<string,mixed> $properties An associative array of properties for the ability. This should include
 	 *                                        `label`, `description`, `input_schema`, `output_schema`,
-	 *                                        `execute_callback`, `permission_callback`, and `meta`.
+	 *                                        `execute_callback`, `permission_callback`, `meta`, and ability_class.
 	 * @return ?\WP_Ability The registered ability instance on success, null on failure.
 	 *
 	 * @phpstan-param array{
@@ -59,6 +59,7 @@ final class WP_Abilities_Registry {
 	 *   execute_callback?: callable( array<string,mixed> $input): (mixed|\WP_Error),
 	 *   permission_callback?: ?callable( ?array<string,mixed> $input ): bool,
 	 *   meta?: array<string,mixed>,
+	 *   ability_class?: class-string<\WP_Ability>,
 	 *   ...<string, mixed>
 	 * } $properties
 	 */
@@ -147,19 +148,18 @@ final class WP_Abilities_Registry {
 			return null;
 		}
 
-		/**
-		 * Filters the class used to instantiate the ability.
-		 *
-		 * This is helpful for creating complex ability types that are not well expressed by array values and callbacks.
-		 *
-		 * @param string $ability_class           The class name to instantiate the ability. Must extend \WP_Ability.
-		 * @param string $name                    The name of the ability being registered.
-		 * @param array<string,mixed> $properties The properties of the ability being registered. See
-		 *                                        `wp_register_ability()` for the expected structure.
-		 *
-		 * @phpstan-param class-string<\WP_Ability> $ability_class
-		 */
-		$ability_class = apply_filters( 'wp_ability_class', WP_Ability::class, $name, $properties );
+		if ( isset( $properties['ability_class'] ) && ! is_a( $properties['ability_class'], WP_Ability::class, true ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				esc_html__( 'The ability properties should provide a valid `ability_class` that extends WP_Ability.' ),
+				'0.1.0'
+			);
+			return null;
+		}
+
+		// The class is only used to instantiate the ability, and is not a property of the ability itself.
+		$ability_class = $properties['ability_class'] ?? WP_Ability::class;
+		unset( $properties['ability_class'] );
 
 		$ability = new $ability_class(
 			$name,

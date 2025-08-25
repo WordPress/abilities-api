@@ -25,7 +25,7 @@ declare( strict_types = 1 );
  *                                        alphanumeric characters, dashes and the forward slash.
  * @param array<string,mixed> $properties An associative array of properties for the ability. This should include
  *                                        `label`, `description`, `input_schema`, `output_schema`, `execute_callback`,
- *                                        `permission_callback`, and `meta`.
+ *                                        `permission_callback`, `meta`, and `ability_class`.
  * @return ?\WP_Ability An instance of registered ability on success, null on failure.
  *
  * @phpstan-param array{
@@ -36,6 +36,7 @@ declare( strict_types = 1 );
  *   execute_callback?: callable( array<string,mixed> $input): (mixed|\WP_Error),
  *   permission_callback?: callable( ?array<string,mixed> $input ): bool,
  *   meta?: array<string,mixed>,
+ *   ability_class?: class-string<\WP_Ability>,
  *   ...<string, mixed>
  * } $properties
  */
