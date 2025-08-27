@@ -10,6 +10,8 @@ class Mock_Custom_Ability extends WP_Ability {
 }
 
 /**
+ * Tests for registering, unregistering and retrieving abilities.
+ *
  * @covers wp_register_ability
  * @covers wp_unregister_ability
  * @covers wp_get_ability
@@ -270,7 +272,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		);
 		$this->assertWPError(
 			$actual,
-			'Execution should fail due to output not matching schema.',
+			'Execution should fail due to output not matching schema.'
 		);
 		$this->assertSame( 'ability_invalid_output', $actual->get_error_code() );
 		$this->assertSame(
@@ -376,8 +378,6 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	 * Tests retrieving existing ability.
 	 */
 	public function test_get_existing_ability() {
-		global $wp_abilities;
-
 		$name       = self::$test_ability_name;
 		$properties = self::$test_ability_properties;
 		$callback   = static function ( $instance ) use ( $name, $properties ) {
