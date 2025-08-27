@@ -15,7 +15,6 @@ declare( strict_types = 1 );
  * Encapsulates the properties and methods related to a specific ability in the registry.
  *
  * @since 0.1.0
- * @access private
  *
  * @see WP_Abilities_Registry
  */
@@ -91,6 +90,8 @@ class WP_Ability {
 	 *
 	 * Do not use this constructor directly. Instead, use the `wp_register_ability()` function.
 	 *
+	 * @access private
+	 *
 	 * @see wp_register_ability()
 	 *
 	 * @since 0.1.0
@@ -108,11 +109,28 @@ class WP_Ability {
 	 *   execute_callback: callable( array<string,mixed> $input): (mixed|\WP_Error),
 	 *   permission_callback?: ?callable( ?array<string,mixed> $input ): bool,
 	 *   meta?: array<string,mixed>,
+	 *   ...<string, mixed>,
 	 * } $properties
 	 */
 	public function __construct( string $name, array $properties ) {
 		$this->name = $name;
+
 		foreach ( $properties as $property_name => $property_value ) {
+			if ( ! property_exists( $this, $property_name ) ) {
+				_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: Property name. */
+						esc_html__( 'Property "%1$s" is not a valid property for ability "%2$s". Please check the %3$s class for allowed properties.' ),
+						'<code>' . esc_html( $property_name ) . '</code>',
+						'<code>' . esc_html( $this->name ) . '</code>',
+						'<code>' . esc_html( self::class ) . '</code>'
+					),
+					'0.1.0'
+				);
+				continue;
+			}
+
 			$this->$property_name = $property_value;
 		}
 	}
