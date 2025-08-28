@@ -5,7 +5,7 @@
  * Defines functions for managing abilities in WordPress.
  *
  * @package WordPress
- * @subpackage Abilities API
+ * @subpackage Abilities_API
  * @since 0.1.0
  *
  * phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
