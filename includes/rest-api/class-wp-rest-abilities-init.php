@@ -2,8 +2,9 @@
 /**
  * REST API initialization for Abilities API.
  *
- * @package abilities-api
- * @since   0.1.0
+ * @package WordPress
+ * @subpackage Abilities_API
+ * @since 0.1.0
  */
 
 declare( strict_types = 1 );
@@ -31,5 +32,3 @@ class WP_REST_Abilities_Init {
 		$list_controller->register_routes();
 	}
 }
-
-add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );

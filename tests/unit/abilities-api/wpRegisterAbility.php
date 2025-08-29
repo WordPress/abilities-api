@@ -1,6 +1,17 @@
 <?php declare( strict_types=1 );
 
 /**
+ * Mock used to test a custom ability class.
+ */
+class Mock_Custom_Ability extends WP_Ability {
+	protected function do_execute( array $input ) {
+		return 9999;
+	}
+}
+
+/**
+ * Tests for registering, unregistering and retrieving abilities.
+ *
  * @covers wp_register_ability
  * @covers wp_unregister_ability
  * @covers wp_get_ability
@@ -175,14 +186,53 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests registering an ability with a custom ability class.
+	 */
+	public function test_register_ability_custom_ability_class(): void {
+		do_action( 'abilities_api_init' );
+
+		$result = wp_register_ability(
+			self::$test_ability_name,
+			array_merge(
+				self::$test_ability_properties,
+				array(
+					'ability_class' => Mock_Custom_Ability::class,
+				)
+			)
+		);
+
+		$this->assertInstanceOf( Mock_Custom_Ability::class, $result );
+		$this->assertSame(
+			9999,
+			$result->execute(
+				array(
+					'a' => 2,
+					'b' => 3,
+				)
+			)
+		);
+
+		// Try again with an invalid class throws a doing it wrong.
+		$this->setExpectedIncorrectUsage( WP_Abilities_Registry::class . '::register' );
+		wp_register_ability(
+			self::$test_ability_name,
+			array_merge(
+				self::$test_ability_properties,
+				array(
+					'ability_class' => 'Non_Existent_Class',
+				)
+			)
+		);
+	}
+
+
+	/**
 	 * Tests executing an ability with input not matching schema.
 	 */
 	public function test_execute_ability_no_input_schema_match(): void {
 		do_action( 'abilities_api_init' );
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_properties );
-
-		$this->setExpectedIncorrectUsage( 'WP_Ability::execute' );
 
 		$actual = $result->execute(
 			array(
@@ -194,9 +244,13 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$this->assertWPError(
 			$actual,
-			'Execution should fail due to input not matching schema'
+			'Execution should fail due to input not matching schema.'
 		);
-		$this->assertEquals( 'ability_invalid_permissions', $actual->get_error_code() );
+		$this->assertSame( 'ability_invalid_input', $actual->get_error_code() );
+		$this->assertSame(
+			'Ability "test/add-numbers" has invalid input. Reason: unknown is not a valid property of Object.',
+			$actual->get_error_message()
+		);
 	}
 
 	/**
@@ -218,9 +272,13 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		);
 		$this->assertWPError(
 			$actual,
-			'Execution should fail due to output not matching schema',
+			'Execution should fail due to output not matching schema.'
 		);
-		$this->assertEquals( 'rest_invalid_type', $actual->get_error_code() );
+		$this->assertSame( 'ability_invalid_output', $actual->get_error_code() );
+		$this->assertSame(
+			'Ability "test/add-numbers" has invalid output. Reason: output is not of type number.',
+			$actual->get_error_message()
+		);
 	}
 
 	/**
@@ -241,9 +299,13 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$this->assertWPError(
 			$actual,
-			'Permission check should fail due to input not matching schema'
+			'Permission check should fail due to input not matching schema.'
 		);
-		$this->assertEquals( 'rest_additional_properties_forbidden', $actual->get_error_code() );
+		$this->assertSame( 'ability_invalid_input', $actual->get_error_code() );
+		$this->assertSame(
+			'Ability "test/add-numbers" has invalid input. Reason: unknown is not a valid property of Object.',
+			$actual->get_error_message()
+		);
 	}
 
 	/**
@@ -316,8 +378,6 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	 * Tests retrieving existing ability.
 	 */
 	public function test_get_existing_ability() {
-		global $wp_abilities;
-
 		$name       = self::$test_ability_name;
 		$properties = self::$test_ability_properties;
 		$callback   = static function ( $instance ) use ( $name, $properties ) {

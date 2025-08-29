@@ -12,7 +12,7 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 	/**
 	 * REST Server instance.
 	 *
-	 * @var WP_REST_Server
+	 * @var \WP_REST_Server
 	 */
 	protected $server;
 
@@ -139,9 +139,11 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 		// Verify abilities endpoints are under wp/v2 namespace
 		$routes = $this->server->get_routes();
 		foreach ( array_keys( $routes ) as $route ) {
-			if ( strpos( $route, 'abilities' ) !== false && $route !== '/' ) {
-				$this->assertStringStartsWith( '/wp/v2/abilities', $route );
+			if ( strpos( $route, 'abilities' ) === false || $route === '/' ) {
+				continue;
 			}
+
+			$this->assertStringStartsWith( '/wp/v2/abilities', $route );
 		}
 	}
 
@@ -152,14 +154,14 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 		// First init
 		do_action( 'rest_api_init' );
 
-		$routes_first = $this->server->get_routes();
+		$routes_first                = $this->server->get_routes();
 		$abilities_route_count_first = count( $routes_first['/wp/v2/abilities'] ?? array() );
 
 		// Second init (simulating multiple calls)
 		// Note: WordPress doesn't prevent duplicate registration, so we expect 2x routes
 		WP_REST_Abilities_Init::register_routes();
 
-		$routes_second = $this->server->get_routes();
+		$routes_second                = $this->server->get_routes();
 		$abilities_route_count_second = count( $routes_second['/wp/v2/abilities'] ?? array() );
 
 		// WordPress allows duplicate route registration
