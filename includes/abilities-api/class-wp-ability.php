@@ -92,9 +92,9 @@ class WP_Ability {
 	 *
 	 * @access private
 	 *
-	 * @see wp_register_ability()
-	 *
 	 * @since 0.1.0
+	 *
+	 * @see wp_register_ability()
 	 *
 	 * @param string              $name       The name of the ability, with its namespace.
 	 * @param array<string,mixed> $properties An associative array of properties for the ability. This should

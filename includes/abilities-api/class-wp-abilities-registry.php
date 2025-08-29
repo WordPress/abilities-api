@@ -39,9 +39,9 @@ final class WP_Abilities_Registry {
 	 *
 	 * Do not use this method directly. Instead, use the `wp_register_ability()` function.
 	 *
-	 * @see wp_register_ability()
-	 *
 	 * @since 0.1.0
+	 *
+	 * @see wp_register_ability()
 	 *
 	 * @param string              $name       The name of the ability. The name must be a string containing a namespace
 	 *                                        prefix, i.e. `my-plugin/my-ability`. It can only contain lowercase
@@ -175,9 +175,9 @@ final class WP_Abilities_Registry {
 	 *
 	 * Do not use this method directly. Instead, use the `wp_unregister_ability()` function.
 	 *
-	 * @see wp_unregister_ability()
-	 *
 	 * @since 0.1.0
+	 *
+	 * @see wp_unregister_ability()
 	 *
 	 * @param string $name The name of the registered ability, with its namespace.
 	 * @return ?\WP_Ability The unregistered ability instance on success, null on failure.
@@ -204,9 +204,9 @@ final class WP_Abilities_Registry {
 	 *
 	 * Do not use this method directly. Instead, use the `wp_get_abilities()` function.
 	 *
-	 * @see wp_get_abilities()
-	 *
 	 * @since 0.1.0
+	 *
+	 * @see wp_get_abilities()
 	 *
 	 * @return \WP_Ability[] The array of registered abilities.
 	 */
@@ -231,9 +231,9 @@ final class WP_Abilities_Registry {
 	 *
 	 * Do not use this method directly. Instead, use the `wp_get_ability()` function.
 	 *
-	 * @see wp_get_ability()
-	 *
 	 * @since 0.1.0
+	 *
+	 * @see wp_get_ability()
 	 *
 	 * @param string $name The name of the registered ability, with its namespace.
 	 * @return ?\WP_Ability The registered ability instance, or null if it is not registered.
