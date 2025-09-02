@@ -100,20 +100,11 @@ class WP_Ability {
 	 * @param array<string,mixed> $properties An associative array of properties for the ability. This should
 	 *                                        include `label`, `description`, `input_schema`, `output_schema`,
 	 *                                        `execute_callback`, `permission_callback`, and `meta`.
-	 *
-	 * @phpstan-param array{
-	 *   label: string,
-	 *   description: string,
-	 *   input_schema?: array<string,mixed>,
-	 *   output_schema?: array<string,mixed>,
-	 *   execute_callback: callable( array<string,mixed> $input): (mixed|\WP_Error),
-	 *   permission_callback?: ?callable( array<string,mixed> $input ): (bool|\WP_Error),
-	 *   meta?: array<string,mixed>,
-	 *   ...<string, mixed>,
-	 * } $properties
 	 */
 	public function __construct( string $name, array $properties ) {
 		$this->name = $name;
+
+		$this->validate_properties( $properties );
 
 		foreach ( $properties as $property_name => $property_value ) {
 			if ( ! property_exists( $this, $property_name ) ) {
@@ -200,6 +191,76 @@ class WP_Ability {
 	 */
 	public function get_meta(): array {
 		return $this->meta;
+	}
+
+	/**
+	 * Validates the properties used to instantiate the ability.
+	 *
+	 * Errors are thrown as exceptions instead of \WP_Errors to allow for simpler handling and overloading. They are then
+	 * caught and converted to a WP_Error when by WP_Abilities_Registry::register().
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @see WP_Abilities_Registry::register()
+	 *
+	 * @param array<string,mixed> $properties An associative array of properties to validate.
+	 *
+	 * @return void
+	 * @throws \InvalidArgumentException if the properties are invalid.
+	 *
+	 * @phpstan-assert array{
+	 *   label: string,
+	 *   description: string,
+	 *   input_schema?: array<string,mixed>,
+	 *   output_schema?: array<string,mixed>,
+	 *   execute_callback: callable( array<string,mixed> $input): (mixed|\WP_Error),
+	 *   permission_callback?: ?callable( array<string,mixed> $input ): (bool|\WP_Error),
+	 *   meta?: array<string,mixed>,
+	 *   ...<string, mixed>,
+	 * } $properties
+	 */
+	protected function validate_properties( array $properties ) {
+		if ( empty( $properties['label'] ) || ! is_string( $properties['label'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties must contain a `label` string.' )
+			);
+		}
+
+		if ( empty( $properties['description'] ) || ! is_string( $properties['description'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties must contain a `description` string.' )
+			);
+		}
+
+		if ( isset( $properties['input_schema'] ) && ! is_array( $properties['input_schema'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties should provide a valid `input_schema` definition.' )
+			);
+		}
+
+		if ( isset( $properties['output_schema'] ) && ! is_array( $properties['output_schema'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties should provide a valid `output_schema` definition.' )
+			);
+		}
+
+		if ( empty( $properties['execute_callback'] ) || ! is_callable( $properties['execute_callback'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties must contain a valid `execute_callback` function.' )
+			);
+		}
+
+		if ( isset( $properties['permission_callback'] ) && ! is_callable( $properties['permission_callback'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties should provide a valid `permission_callback` function.' )
+			);
+		}
+
+		if ( isset( $properties['meta'] ) && ! is_array( $properties['meta'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties should provide a valid `meta` array.' )
+			);
+		}
 	}
 
 	/**

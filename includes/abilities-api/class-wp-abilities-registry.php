@@ -85,69 +85,7 @@ final class WP_Abilities_Registry {
 			return null;
 		}
 
-		if ( empty( $properties['label'] ) || ! is_string( $properties['label'] ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html__( 'The ability properties must contain a `label` string.' ),
-				'0.1.0'
-			);
-			return null;
-		}
-
-		if ( empty( $properties['description'] ) || ! is_string( $properties['description'] ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html__( 'The ability properties must contain a `description` string.' ),
-				'0.1.0'
-			);
-			return null;
-		}
-
-		if ( isset( $properties['input_schema'] ) && ! is_array( $properties['input_schema'] ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html__( 'The ability properties should provide a valid `input_schema` definition.' ),
-				'0.1.0'
-			);
-			return null;
-		}
-
-		if ( isset( $properties['output_schema'] ) && ! is_array( $properties['output_schema'] ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html__( 'The ability properties should provide a valid `output_schema` definition.' ),
-				'0.1.0'
-			);
-			return null;
-		}
-
-		if ( empty( $properties['execute_callback'] ) || ! is_callable( $properties['execute_callback'] ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html__( 'The ability properties must contain a valid `execute_callback` function.' ),
-				'0.1.0'
-			);
-			return null;
-		}
-
-		if ( isset( $properties['permission_callback'] ) && ! is_callable( $properties['permission_callback'] ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html__( 'The ability properties should provide a valid `permission_callback` function.' ),
-				'0.1.0'
-			);
-			return null;
-		}
-
-		if ( isset( $properties['meta'] ) && ! is_array( $properties['meta'] ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html__( 'The ability properties should provide a valid `meta` array.' ),
-				'0.1.0'
-			);
-			return null;
-		}
-
+		// The class is only used to instantiate the ability, and is not a property of the ability itself.
 		if ( isset( $properties['ability_class'] ) && ! is_a( $properties['ability_class'], WP_Ability::class, true ) ) {
 			_doing_it_wrong(
 				__METHOD__,
@@ -156,15 +94,23 @@ final class WP_Abilities_Registry {
 			);
 			return null;
 		}
-
-		// The class is only used to instantiate the ability, and is not a property of the ability itself.
 		$ability_class = $properties['ability_class'] ?? WP_Ability::class;
 		unset( $properties['ability_class'] );
 
-		$ability = new $ability_class(
-			$name,
-			$properties
-		);
+		try {
+			// WP_Ability::validate_properties() will throw an exception if the properties are invalid.
+			$ability = new $ability_class(
+				$name,
+				$properties
+			);
+		} catch ( \InvalidArgumentException $e ) {
+			_doing_it_wrong(
+				__METHOD__,
+				esc_html( $e->getMessage() ),
+				'0.1.0'
+			);
+			return null;
+		}
 
 		$this->registered_abilities[ $name ] = $ability;
 		return $ability;
