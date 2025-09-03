@@ -416,14 +416,38 @@ class WP_Ability {
 			);
 		}
 
+		/**
+		 * Fires before an ability gets executed.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param string              $ability_name The name of the ability.
+		 * @param array<string,mixed> $input        The input data for the ability.
+		 */
+		do_action( 'before_execute_ability', $this->name, $input );
+
 		$result = $this->do_execute( $input );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
 
 		$is_valid = $this->validate_output( $result );
+		if ( is_wp_error( $is_valid ) ) {
+			return $is_valid;
+		}
 
-		return is_wp_error( $is_valid ) ? $is_valid : $result;
+		/**
+		 * Fires immediately after an ability finished executing.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param string              $ability_name The name of the ability.
+		 * @param array<string,mixed> $input        The input data for the ability.
+		 * @param mixed               $result       The result of the ability execution.
+		 */
+		do_action( 'executed_ability', $this->name, $input, $result );
+
+		return $result;
 	}
 
 	/**
