@@ -13,6 +13,10 @@
 
 declare( strict_types = 1 );
 
+if ( ! defined( 'ABSPATH' ) ) {
+	return; // Not in WordPress context
+}
+
 // Version of the plugin.
 if ( ! defined( 'WP_ABILITIES_API_VERSION' ) ) {
 	define( 'WP_ABILITIES_API_VERSION', '0.1.0' );
