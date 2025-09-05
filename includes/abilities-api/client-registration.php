@@ -40,7 +40,7 @@ function wp_abilities_register_client_assets(): bool {
 		if ( strpos( $base_path, $plugin_dir ) === 0 ) {
 			// Inside a plugin directory
 			$relative_path = str_replace( $plugin_dir, '', $base_path );
-			$base_url = plugins_url( $relative_path );
+			$base_url      = plugins_url( $relative_path );
 		} else {
 			// Assume standard Composer vendor structure
 			$base_url = plugins_url( 'vendor/wordpress/abilities-api', dirname( $base_path, 2 ) );

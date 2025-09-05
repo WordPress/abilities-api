@@ -44,7 +44,9 @@ add_action( 'admin_enqueue_scripts', 'wp_abilities_admin_enqueue_scripts' );
  * @return void
  */
 function wp_abilities_admin_enqueue_scripts() {
-	if ( wp_script_is( 'wp-abilities', 'registered' ) ) {
-		wp_enqueue_script( 'wp-abilities' );
+	if ( ! wp_script_is( 'wp-abilities', 'registered' ) ) {
+		return;
 	}
+
+	wp_enqueue_script( 'wp-abilities' );
 }
