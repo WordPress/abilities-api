@@ -22,12 +22,12 @@ declare( strict_types = 1 );
  *
  * @see WP_Abilities_Registry::register()
  *
- * @param string              $name       The name of the ability. The name must be a string containing a namespace
- *                                        prefix, i.e. `my-plugin/my-ability`. It can only contain lowercase
- *                                        alphanumeric characters, dashes and the forward slash.
- * @param array<string,mixed> $properties An associative array of properties for the ability. This should include
- *                                        `label`, `description`, `input_schema`, `output_schema`, `execute_callback`,
- *                                        `permission_callback`, `meta`, and `ability_class`.
+ * @param string              $name The name of the ability. The name must be a string containing a namespace
+ *                                  prefix, i.e. `my-plugin/my-ability`. It can only contain lowercase
+ *                                  alphanumeric characters, dashes and the forward slash.
+ * @param array<string,mixed> $args An associative array of arguments for the ability. This should include
+ *                                  `label`, `description`, `input_schema`, `output_schema`, `execute_callback`,
+ *                                  `permission_callback`, `meta`, and `ability_class`.
  * @return ?\WP_Ability An instance of registered ability on success, null on failure.
  *
  * @phpstan-param array{
@@ -40,9 +40,9 @@ declare( strict_types = 1 );
  *   meta?: array<string,mixed>,
  *   ability_class?: class-string<\WP_Ability>,
  *   ...<string, mixed>
- * } $properties
+ * } $args
  */
-function wp_register_ability( string $name, array $properties = array() ): ?WP_Ability {
+function wp_register_ability( string $name, array $args ): ?WP_Ability {
 	if ( ! did_action( 'abilities_api_init' ) ) {
 		_doing_it_wrong(
 			__FUNCTION__,
@@ -57,7 +57,7 @@ function wp_register_ability( string $name, array $properties = array() ): ?WP_A
 		return null;
 	}
 
-	return WP_Abilities_Registry::get_instance()->register( $name, $properties );
+	return WP_Abilities_Registry::get_instance()->register( $name, $args );
 }
 
 /**

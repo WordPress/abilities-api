@@ -43,12 +43,12 @@ final class WP_Abilities_Registry {
 	 *
 	 * @see wp_register_ability()
 	 *
-	 * @param string              $name       The name of the ability. The name must be a string containing a namespace
-	 *                                        prefix, i.e. `my-plugin/my-ability`. It can only contain lowercase
-	 *                                        alphanumeric characters, dashes and the forward slash.
-	 * @param array<string,mixed> $properties An associative array of properties for the ability. This should include
-	 *                                        `label`, `description`, `input_schema`, `output_schema`,
-	 *                                        `execute_callback`, `permission_callback`, `meta`, and ability_class.
+	 * @param string              $name The name of the ability. The name must be a string containing a namespace
+	 *                                  prefix, i.e. `my-plugin/my-ability`. It can only contain lowercase
+	 *                                  alphanumeric characters, dashes and the forward slash.
+	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should include
+	 *                                  `label`, `description`, `input_schema`, `output_schema`,
+	 *                                  `execute_callback`, `permission_callback`, `meta`, and ability_class.
 	 * @return ?\WP_Ability The registered ability instance on success, null on failure.
 	 *
 	 * @phpstan-param array{
@@ -61,9 +61,9 @@ final class WP_Abilities_Registry {
 	 *   meta?: array<string,mixed>,
 	 *   ability_class?: class-string<\WP_Ability>,
 	 *   ...<string, mixed>
-	 * } $properties
+	 * } $args
 	 */
-	public function register( string $name, array $properties = array() ): ?WP_Ability {
+	public function register( string $name, array $args ): ?WP_Ability {
 		if ( ! preg_match( '/^[a-z0-9-]+\/[a-z0-9-]+$/', $name ) ) {
 			_doing_it_wrong(
 				__METHOD__,
@@ -86,22 +86,19 @@ final class WP_Abilities_Registry {
 		}
 
 		// The class is only used to instantiate the ability, and is not a property of the ability itself.
-		if ( isset( $properties['ability_class'] ) && ! is_a( $properties['ability_class'], WP_Ability::class, true ) ) {
+		if ( isset( $args['ability_class'] ) && ! is_a( $args['ability_class'], WP_Ability::class, true ) ) {
 			_doing_it_wrong(
 				__METHOD__,
-				esc_html__( 'The ability properties should provide a valid `ability_class` that extends WP_Ability.' ),
+				esc_html__( 'The ability args should provide a valid `ability_class` that extends WP_Ability.' ),
 				'0.1.0'
 			);
 			return null;
 		}
-		$ability_class = $properties['ability_class'] ?? WP_Ability::class;
-		unset( $properties['ability_class'] );
+		$ability_class = $args['ability_class'] ?? WP_Ability::class;
+		unset( $args['ability_class'] );
 
 		try {
-			$ability = new $ability_class(
-				$name,
-				$properties
-			);
+			$ability = new $ability_class( $name, $args );
 		} catch ( \InvalidArgumentException $e ) {
 			_doing_it_wrong(
 				__METHOD__,
