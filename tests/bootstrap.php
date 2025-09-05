@@ -34,7 +34,8 @@ require_once $_test_root . '/includes/functions.php';
 tests_add_filter(
 	'muplugins_loaded',
 	static function (): void {
-		require_once dirname( __DIR__ ) . '/abilities-api.php';
+		// Require ( to bypass require_once ).
+		require dirname( __DIR__ ) . '/includes/bootstrap.php';
 	}
 );
 
