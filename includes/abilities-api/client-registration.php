@@ -20,12 +20,15 @@ declare( strict_types = 1 );
  *
  * @since 0.1.0
  *
- * @return bool True if the script was registered, false if the build doesn't exist.
+ * @return void
  */
-function wp_abilities_register_client_assets(): bool {
+function wp_abilities_register_client_assets(): void {
 	if ( wp_script_is( 'wp-abilities', 'registered' ) ) {
-		return true;
+		return;
 	}
+
+	$base_path = '';
+	$base_url  = '';
 
 	if ( defined( 'WP_ABILITIES_API_DIR' ) ) {
 		// Running as a plugin
@@ -47,12 +50,14 @@ function wp_abilities_register_client_assets(): bool {
 		}
 	}
 
+	/** @var string $base_path PHPStan type assertion - base_path is always set above */
 	$client_path = trailingslashit( $base_path ) . 'packages/client/build/';
 
 	if ( ! file_exists( $client_path . 'index.js' ) ) {
-		return false;
+		return;
 	}
 
+	// phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable -- asset file path can be variable based on plugin or Composer install
 	$asset = require_once $client_path . 'index.asset.php';
 
 	$client_url = trailingslashit( $base_url ) . 'packages/client/build/index.js';
@@ -64,6 +69,4 @@ function wp_abilities_register_client_assets(): bool {
 		$asset['version'],
 		true
 	);
-
-	return true;
 }
