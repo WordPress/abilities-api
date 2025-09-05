@@ -1,0 +1,56 @@
+/**
+ * WordPress Abilities API Client
+ *
+ * This package provides a client for interacting with the
+ * WordPress Abilities API, allowing you to list, retrieve, and execute
+ * abilities from client-side code.
+ *
+ * @package
+ */
+
+import * as api from './api';
+import { store } from './store';
+
+/**
+ * TypeScript declaration for the global wp object
+ */
+declare global {
+	interface Window {
+		wp: {
+			abilities?: typeof api & {
+				store: typeof store;
+			};
+			[ key: string ]: any;
+		};
+	}
+}
+
+/**
+ * Public API functions
+ */
+export { listAbilities, getAbility, executeAbility } from './api';
+
+/**
+ * The store can be used directly with @wordpress/data via selectors
+ * in React components with useSelect.
+ *
+ * @example
+ * ```js
+ * import { useSelect } from '@wordpress/data';
+ * import { store as abilitiesStore } from '@wordpress/abilities';
+ *
+ * function MyComponent() {
+ *   const abilities = useSelect(
+ *     (select) => select(abilitiesStore).getAbilities(),
+ *     []
+ *   );
+ *   // Use abilities...
+ * }
+ * ```
+ */
+export { store } from './store';
+
+/**
+ * Type definitions
+ */
+export type { Ability, AbilitiesState } from './types';
