@@ -44,3 +44,8 @@ if ( ! class_exists( 'WP_REST_Abilities_Init' ) ) {
 		add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
 	}
 }
+
+// Load client registration helper for Composer users.
+if ( ! function_exists( 'wp_abilities_register_client_assets' ) ) {
+	require_once __DIR__ . '/abilities-api/client-registration.php';
+}

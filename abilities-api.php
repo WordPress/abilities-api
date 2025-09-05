@@ -28,3 +28,23 @@ define( 'WP_ABILITIES_API_DIR', plugin_dir_path( __FILE__ ) );
 
 
 require_once WP_ABILITIES_API_DIR . 'includes/bootstrap.php';
+
+// Register the Abilities API client script
+add_action( 'init', 'wp_abilities_register_client_assets' );
+
+// Auto-enqueue on admin pages for development and testing
+add_action( 'admin_enqueue_scripts', 'wp_abilities_admin_enqueue_scripts' );
+
+/**
+ * Auto-enqueue Abilities API client on admin pages.
+ *
+ * This is primarily for development and testing purposes.
+ *
+ * @since 0.1.0
+ * @return void
+ */
+function wp_abilities_admin_enqueue_scripts() {
+	if ( wp_script_is( 'wp-abilities', 'registered' ) ) {
+		wp_enqueue_script( 'wp-abilities' );
+	}
+}
