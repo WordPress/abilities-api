@@ -65,7 +65,7 @@ class WP_Ability {
 	 * The ability execute callback.
 	 *
 	 * @since 0.1.0
-	 * @var callable( array<string,mixed> $input): (mixed|\WP_Error)
+	 * @var callable( mixed $input ): (mixed|\WP_Error)
 	 */
 	protected $execute_callback;
 
@@ -73,7 +73,7 @@ class WP_Ability {
 	 * The optional ability permission callback.
 	 *
 	 * @since 0.1.0
-	 * @var ?callable( array<string,mixed> $input ): (bool|\WP_Error)
+	 * @var ?callable( mixed $input ): (bool|\WP_Error)
 	 */
 	protected $permission_callback = null;
 
@@ -269,10 +269,10 @@ class WP_Ability {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array<string,mixed> $input Optional. The input data to validate.
+	 * @param mixed $input The input data to validate.
 	 * @return true|\WP_Error Returns true if valid or the WP_Error object if validation fails.
 	 */
-	protected function validate_input( array $input = array() ) {
+	protected function validate_input( $input ) {
 		$input_schema = $this->get_input_schema();
 		if ( empty( $input_schema ) ) {
 			return true;
@@ -301,10 +301,10 @@ class WP_Ability {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array<string,mixed> $input Optional. The input data for permission checking.
+	 * @param mixed $input Optional. The input data for permission checking. Default `null`.
 	 * @return bool|\WP_Error Whether the ability has the necessary permission.
 	 */
-	public function has_permission( array $input = array() ) {
+	public function has_permission( $input = null ) {
 		$is_valid = $this->validate_input( $input );
 		if ( is_wp_error( $is_valid ) ) {
 			return $is_valid;
@@ -322,10 +322,10 @@ class WP_Ability {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array<string,mixed> $input The input data for the ability.
+	 * @param mixed $input The input data for the ability.
 	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
-	protected function do_execute( array $input ) {
+	protected function do_execute( $input ) {
 		if ( ! is_callable( $this->execute_callback ) ) {
 			return new \WP_Error(
 				'ability_invalid_execute_callback',
@@ -373,10 +373,10 @@ class WP_Ability {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array<string,mixed> $input Optional. The input data for the ability.
+	 * @param mixed $input Optional. The input data for the ability. Default `null`.
 	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
-	public function execute( array $input = array() ) {
+	public function execute( $input = null ) {
 		$has_permissions = $this->has_permission( $input );
 		if ( true !== $has_permissions ) {
 			if ( is_wp_error( $has_permissions ) ) {

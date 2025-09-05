@@ -4,7 +4,7 @@
  * Mock used to test a custom ability class.
  */
 class Mock_Custom_Ability extends WP_Ability {
-	protected function do_execute( array $input ) {
+	protected function do_execute( $input ) {
 		return 9999;
 	}
 }

@@ -118,7 +118,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'execute_callback'    => static function ( array $input ) {
 					return $input['a'] + $input['b'];
 				},
-				'permission_callback' => static function ( array $input ) {
+				'permission_callback' => static function () {
 					return current_user_can( 'edit_posts' );
 				},
 				'meta'                => array(
@@ -160,7 +160,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 						'login' => $user->user_login,
 					);
 				},
-				'permission_callback' => static function ( array $input ) {
+				'permission_callback' => static function () {
 					return is_user_logged_in();
 				},
 				'meta'                => array(
@@ -263,7 +263,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 						'param2' => array( 'type' => 'integer' ),
 					),
 				),
-				'execute_callback'    => static function ( array $input ) {
+				'execute_callback'    => static function ( $input ) {
 					return $input;
 				},
 				'permission_callback' => '__return_true',
@@ -608,7 +608,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					),
 					'required'   => array( 'status' ),
 				),
-				'execute_callback'    => static function ( $input ) {
+				'execute_callback'    => static function () {
 					// Return invalid output that doesn't match schema
 					return array( 'wrong_field' => 'value' );
 				},
@@ -652,7 +652,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					),
 					'required'   => array( 'required_field' ),
 				),
-				'execute_callback'    => static function ( $input ) {
+				'execute_callback'    => static function () {
 					return array( 'status' => 'success' );
 				},
 				'permission_callback' => '__return_true',
@@ -687,7 +687,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'No Type',
 				'description'         => 'Ability without type',
-				'execute_callback'    => static function ( $input ) {
+				'execute_callback'    => static function () {
 					return array( 'executed' => true );
 				},
 				'permission_callback' => '__return_true',
@@ -719,7 +719,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'            => 'No Permission Callback',
 				'description'      => 'Ability without permission callback',
-				'execute_callback' => static function ( $input ) {
+				'execute_callback' => static function () {
 					return array( 'executed' => true );
 				},
 				'meta'             => array( 'type' => 'tool' ),
