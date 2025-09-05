@@ -21,7 +21,7 @@ class Mock_Custom_Ability extends WP_Ability {
  */
 class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
-	public static $test_ability_name       = 'test/add-numbers';
+	public static $test_ability_name = 'test/add-numbers';
 	public static $test_ability_args = array();
 
 	/**
@@ -314,7 +314,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	public function test_permission_callback_receives_input(): void {
 		do_action( 'abilities_api_init' );
 
-		$received_input                                       = null;
+		$received_input                                 = null;
 		self::$test_ability_args['permission_callback'] = static function ( array $input ) use ( &$received_input ): bool {
 			$received_input = $input;
 			// Allow only if 'a' is greater than 'b'
@@ -378,9 +378,9 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	 * Tests retrieving existing ability.
 	 */
 	public function test_get_existing_ability() {
-		$name       = self::$test_ability_name;
-		$args = self::$test_ability_args;
-		$callback   = static function ( $instance ) use ( $name, $args ) {
+		$name     = self::$test_ability_name;
+		$args     = self::$test_ability_args;
+		$callback = static function ( $instance ) use ( $name, $args ) {
 			wp_register_ability( $name, $args );
 		};
 
@@ -409,15 +409,15 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	public function test_get_all_registered_abilities() {
 		do_action( 'abilities_api_init' );
 
-		$ability_one_name       = 'test/ability-one';
+		$ability_one_name = 'test/ability-one';
 		$ability_one_args = self::$test_ability_args;
 		wp_register_ability( $ability_one_name, $ability_one_args );
 
-		$ability_two_name       = 'test/ability-two';
+		$ability_two_name = 'test/ability-two';
 		$ability_two_args = self::$test_ability_args;
 		wp_register_ability( $ability_two_name, $ability_two_args );
 
-		$ability_three_name       = 'test/ability-three';
+		$ability_three_name = 'test/ability-three';
 		$ability_three_args = self::$test_ability_args;
 		wp_register_ability( $ability_three_name, $ability_three_args );
 

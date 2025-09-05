@@ -98,6 +98,7 @@ final class WP_Abilities_Registry {
 		unset( $args['ability_class'] );
 
 		try {
+			// WP_Ability::prepare_properties() will throw an exception if the properties are invalid.
 			$ability = new $ability_class( $name, $args );
 		} catch ( \InvalidArgumentException $e ) {
 			_doing_it_wrong(
