@@ -98,7 +98,6 @@ final class WP_Abilities_Registry {
 		unset( $properties['ability_class'] );
 
 		try {
-			// WP_Ability::validate_properties() will throw an exception if the properties are invalid.
 			$ability = new $ability_class(
 				$name,
 				$properties
