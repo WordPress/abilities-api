@@ -132,7 +132,7 @@ class WP_Ability {
 	 * Errors are thrown as exceptions instead of \WP_Errors to allow for simpler handling and overloading. They are then
 	 * caught and converted to a WP_Error when by WP_Abilities_Registry::register().
 	 *
-	 * @since n.e.x.t
+	 * @since 0.2.0
 	 *
 	 * @see WP_Abilities_Registry::register()
 	 *
