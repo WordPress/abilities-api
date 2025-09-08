@@ -391,7 +391,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		$registry_reflection = new ReflectionClass( WP_Abilities_Registry::class );
 		$instance_prop       = $registry_reflection->getProperty( 'instance' );
 		$instance_prop->setAccessible( true );
-		$instance_prop->setValue( null );
+		$instance_prop->setValue( null, null );
 
 		$result = wp_get_ability( $name );
 
