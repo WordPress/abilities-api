@@ -180,22 +180,18 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 * @since 0.1.0
 	 *
 	 * @param \WP_REST_Request<array<string,mixed>> $request The request object.
-	 * @return array<string, mixed> The input parameters.
+	 * @return mixed|null The input parameters.
 	 */
 	private function get_input_from_request( $request ) {
 		if ( 'GET' === $request->get_method() ) {
 			// For GET requests, look for 'input' query parameter.
 			$query_params = $request->get_query_params();
-			return isset( $query_params['input'] ) && is_array( $query_params['input'] )
-				? $query_params['input']
-				: array();
+			return $query_params['input'] ?? null;
 		}
 
 		// For POST requests, look for 'input' in JSON body.
 		$json_params = $request->get_json_params();
-		return isset( $json_params['input'] ) && is_array( $json_params['input'] )
-			? $json_params['input']
-			: array();
+		return $json_params['input'] ?? null;
 	}
 
 	/**
@@ -209,8 +205,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		return array(
 			'input' => array(
 				'description' => __( 'Input parameters for the ability execution.' ),
-				'type'        => 'object',
-				'default'     => array(),
+				'default'     => null,
 			),
 		);
 	}
@@ -230,7 +225,6 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			'properties' => array(
 				'result' => array(
 					'description' => __( 'The result of the ability execution.' ),
-					'type'        => 'mixed',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
