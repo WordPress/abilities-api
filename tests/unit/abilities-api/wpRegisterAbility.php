@@ -262,6 +262,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		self::$test_ability_args['execute_callback'] = static function (): bool {
 			return true;
 		};
+
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
 		$actual = $result->execute(
