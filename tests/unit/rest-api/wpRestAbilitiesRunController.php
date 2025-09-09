@@ -746,7 +746,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	 * Test edge case with empty input for both GET and POST.
 	 */
 	public function test_empty_input_handling(): void {
-		// Register abilities for empty input testing
+		// Registers abilities for empty input testing.
 		wp_register_ability(
 			'test/resource-empty',
 			array(
@@ -773,13 +773,13 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		// Test GET with no input parameter
+		// Tests GET with no input parameter.
 		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/resource-empty/run' );
 		$get_response = $this->server->dispatch( $get_request );
 		$this->assertEquals( 200, $get_response->get_status() );
 		$this->assertTrue( $get_response->get_data()['input_was_empty'] );
 
-		// Test POST with no body
+		// Tests POST with no body.
 		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/tool-empty/run' );
 		$post_request->set_header( 'Content-Type', 'application/json' );
 		$post_request->set_body( '{}' ); // Empty JSON object
@@ -794,7 +794,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array{0: string}>
 	 */
-	public function malformed_json_provider(): array {
+	public function data_malformed_json_provider(): array {
 		return array(
 			'Missing value'              => array( '{"input": }' ),
 			'Trailing comma in array'    => array( '{"input": [1, 2, }' ),
@@ -810,7 +810,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	/**
 	 * Test malformed JSON in POST body.
 	 *
-	 * @dataProvider malformed_json_provider
+	 * @dataProvider data_malformed_json_provider
 	 * @param string $json Malformed JSON to test.
 	 */
 	public function test_malformed_json_post_body( string $json ): void {
@@ -914,7 +914,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array{0: string}>
 	 */
-	public function invalid_http_methods_provider(): array {
+	public function data_invalid_http_methods_provider(): array {
 		return array(
 			'PATCH'  => array( 'PATCH' ),
 			'PUT'    => array( 'PUT' ),
@@ -926,7 +926,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	/**
 	 * Test request with invalid HTTP methods.
 	 *
-	 * @dataProvider invalid_http_methods_provider
+	 * @dataProvider data_invalid_http_methods_provider
 	 * @param string $method HTTP method to test.
 	 */
 	public function test_invalid_http_methods( string $method ): void {
