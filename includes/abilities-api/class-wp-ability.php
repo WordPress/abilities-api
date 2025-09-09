@@ -272,7 +272,7 @@ class WP_Ability {
 	 * @param mixed $input The input data to validate.
 	 * @return true|\WP_Error Returns true if valid or the WP_Error object if validation fails.
 	 */
-	protected function validate_input( $input ) {
+	protected function validate_input( $input = null ) {
 		$input_schema = $this->get_input_schema();
 		if ( empty( $input_schema ) ) {
 			return true;
