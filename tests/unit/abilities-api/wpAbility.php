@@ -103,14 +103,15 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			'object input'   => array(
 				array(
 					'type'                 => 'object',
+					'description'          => 'An object containing two numbers to add.',
 					'properties'           => array(
 						'a' => array(
-							'type'        => 'number',
+							'type'        => 'integer',
 							'description' => 'First number.',
 							'required'    => true,
 						),
 						'b' => array(
-							'type'        => 'number',
+							'type'        => 'integer',
 							'description' => 'Second number.',
 							'required'    => true,
 						),
@@ -125,11 +126,13 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			),
 			'array input'    => array(
 				array(
-					'type'     => 'array',
-					'minItems' => 2,
-    				'maxItems' => 2,
-					'items'    => array(
-						'type' => 'number',
+					'type'        => 'array',
+					'description' => 'An array containing two numbers to add.',
+					'required'    => true,
+					'minItems'    => 2,
+    				'maxItems'    => 2,
+					'items'       => array(
+						'type' => 'integer',
 					),
 			    ),
 				static function ( array $input ): int {
