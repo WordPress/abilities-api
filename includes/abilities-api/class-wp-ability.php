@@ -65,7 +65,7 @@ class WP_Ability {
 	 * The ability execute callback.
 	 *
 	 * @since 0.1.0
-	 * @var callable( mixed $input ): (mixed|\WP_Error)
+	 * @var callable( mixed $input= ): (mixed|\WP_Error)
 	 */
 	protected $execute_callback;
 
@@ -73,7 +73,7 @@ class WP_Ability {
 	 * The optional ability permission callback.
 	 *
 	 * @since 0.1.0
-	 * @var ?callable( mixed $input ): (bool|\WP_Error)
+	 * @var ?callable( mixed $input= ): (bool|\WP_Error)
 	 */
 	protected $permission_callback = null;
 
@@ -145,8 +145,8 @@ class WP_Ability {
 	 *   description: string,
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
-	 *   execute_callback: callable( array<string,mixed> $input): (mixed|\WP_Error),
-	 *   permission_callback?: ?callable( array<string,mixed> $input ): (bool|\WP_Error),
+	 *   execute_callback: callable( mixed $input= ): (mixed|\WP_Error),
+	 *   permission_callback?: ?callable( mixed $input= ): (bool|\WP_Error),
 	 *   meta?: array<string,mixed>,
 	 *   ...<string, mixed>,
 	 * } $args
@@ -314,6 +314,10 @@ class WP_Ability {
 			return true;
 		}
 
+		if ( empty( $this->get_input_schema() ) && null === $input ) {
+			return call_user_func( $this->permission_callback );
+		}
+
 		return call_user_func( $this->permission_callback, $input );
 	}
 
@@ -332,6 +336,10 @@ class WP_Ability {
 				/* translators: %s ability name. */
 				sprintf( __( 'Ability "%s" does not have a valid execute callback.' ), $this->name )
 			);
+		}
+
+		if ( empty( $this->get_input_schema() ) && null === $input ) {
+			return call_user_func( $this->execute_callback );
 		}
 
 		return call_user_func( $this->execute_callback, $input );

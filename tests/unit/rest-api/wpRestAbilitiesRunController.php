@@ -752,8 +752,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Resource Empty',
 				'description'         => 'Resource with empty input',
-				'execute_callback'    => static function ( $input ) {
-					return array( 'input_was_empty' => empty( $input ) );
+				'execute_callback'    => static function () {
+					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
 				'permission_callback' => '__return_true',
 				'meta'                => array( 'type' => 'resource' ),
@@ -765,8 +765,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Tool Empty',
 				'description'         => 'Tool with empty input',
-				'execute_callback'    => static function ( $input ) {
-					return array( 'input_was_empty' => empty( $input ) );
+				'execute_callback'    => static function () {
+					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
 				'permission_callback' => '__return_true',
 				'meta'                => array( 'type' => 'tool' ),
