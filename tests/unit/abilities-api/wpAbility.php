@@ -100,7 +100,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				'Hello world!',
 				12,
 			),
-			'array input'    => array(
+			'object input'   => array(
 				array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -121,6 +121,21 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 					return $input['a'] + $input['b'];
 				},
 				array( 'a' => 2, 'b' => 3 ),
+				5,
+			),
+			'array input'    => array(
+				array(
+					'type'     => 'array',
+					'minItems' => 2,
+    				'maxItems' => 2,
+					'items'    => array(
+						'type' => 'number',
+					),
+			    ),
+				static function ( array $input ): int {
+					return $input[0] + $input[1];
+				},
+				array( 2, 3 ),
 				5,
 			),
 		);
