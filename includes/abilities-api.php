@@ -89,14 +89,25 @@ function wp_get_ability( string $name ): ?WP_Ability {
 }
 
 /**
- * Retrieves all registered abilities using Abilities API.
+ * Retrieves registered abilities using Abilities API.
  *
  * @since 0.1.0
  *
  * @see WP_Abilities_Registry::get_all_registered()
+ * @see WP_Abilities_Query
  *
+ * @param array<string,mixed> $args Optional. Query arguments to filter abilities.
+ *                                  Accepts 'namespace', 'search', 'meta_query',
+ *                                  'has_input_schema', 'has_output_schema'.
  * @return \WP_Ability[] The array of registered abilities.
  */
-function wp_get_abilities(): array {
-	return WP_Abilities_Registry::get_instance()->get_all_registered();
+function wp_get_abilities( array $args = array() ): array {
+	// If no arguments provided, return all abilities (backward compatibility).
+	if ( empty( $args ) ) {
+		return WP_Abilities_Registry::get_instance()->get_all_registered();
+	}
+
+	// Use WP_Abilities_Query for filtered results.
+	$query = new WP_Abilities_Query( $args );
+	return $query->get_abilities();
 }

@@ -98,10 +98,28 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		// Should return early with empty body but include X-WP-Total and X-WP-TotalPages headers.
 		// See: https://github.com/WordPress/wordpress-develop/blob/trunk/src/wp-includes/rest-api/endpoints/class-wp-rest-comments-controller.php#L316-L318
 
-		$abilities = wp_get_abilities();
+		// Build query arguments from request parameters.
+		$query_args = array();
+		$params     = $request->get_params();
+
+		// Add filtering parameters.
+		if ( ! empty( $params['namespace'] ) ) {
+			$query_args['namespace'] = $params['namespace'];
+		}
+		if ( ! empty( $params['search'] ) ) {
+			$query_args['search'] = $params['search'];
+		}
+		if ( isset( $params['has_input_schema'] ) && '' !== $params['has_input_schema'] ) {
+			$query_args['has_input_schema'] = (bool) $params['has_input_schema'];
+		}
+		if ( isset( $params['has_output_schema'] ) && '' !== $params['has_output_schema'] ) {
+			$query_args['has_output_schema'] = (bool) $params['has_output_schema'];
+		}
+
+		// Get filtered abilities.
+		$abilities = wp_get_abilities( $query_args );
 
 		// Handle pagination with explicit defaults.
-		$params   = $request->get_params();
 		$page     = $params['page'] ?? 1;
 		$per_page = $params['per_page'] ?? self::DEFAULT_PER_PAGE;
 		$offset   = ( $page - 1 ) * $per_page;
@@ -286,8 +304,8 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 */
 	public function get_collection_params(): array {
 		return array(
-			'context'  => $this->get_context_param( array( 'default' => 'view' ) ),
-			'page'     => array(
+			'context'           => $this->get_context_param( array( 'default' => 'view' ) ),
+			'page'              => array(
 				'description'       => __( 'Current page of the collection.' ),
 				'type'              => 'integer',
 				'default'           => 1,
@@ -295,13 +313,35 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 				'validate_callback' => 'rest_validate_request_arg',
 				'minimum'           => 1,
 			),
-			'per_page' => array(
+			'per_page'          => array(
 				'description'       => __( 'Maximum number of items to be returned in result set.' ),
 				'type'              => 'integer',
 				'default'           => self::DEFAULT_PER_PAGE,
 				'minimum'           => 1,
 				'maximum'           => 100,
 				'sanitize_callback' => 'absint',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'namespace'         => array(
+				'description'       => __( 'Filter abilities by namespace prefix.' ),
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'search'            => array(
+				'description'       => __( 'Search abilities by label or description.' ),
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'has_input_schema'  => array(
+				'description'       => __( 'Filter abilities that have input schema defined.' ),
+				'type'              => 'boolean',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'has_output_schema' => array(
+				'description'       => __( 'Filter abilities that have output schema defined.' ),
+				'type'              => 'boolean',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 		);

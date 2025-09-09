@@ -29,6 +29,9 @@ if ( ! class_exists( 'WP_Ability' ) ) {
 if ( ! class_exists( 'WP_Abilities_Registry' ) ) {
 	require_once __DIR__ . '/abilities-api/class-wp-abilities-registry.php';
 }
+if ( ! class_exists( 'WP_Abilities_Query' ) ) {
+	require_once __DIR__ . '/abilities-api/class-wp-abilities-query.php';
+}
 
 // Ensure procedural functions are available, too.
 if ( ! function_exists( 'wp_register_ability' ) ) {
