@@ -314,7 +314,7 @@ class WP_Ability {
 			return true;
 		}
 
-		if ( empty( $this->get_input_schema() ) && null === $input ) {
+		if ( empty( $this->get_input_schema() ) ) {
 			return call_user_func( $this->permission_callback );
 		}
 
