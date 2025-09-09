@@ -329,7 +329,7 @@ class WP_Ability {
 	 * @param mixed $input The input data for the ability.
 	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
-	protected function do_execute( $input ) {
+	protected function do_execute( $input = null ) {
 		if ( ! is_callable( $this->execute_callback ) ) {
 			return new \WP_Error(
 				'ability_invalid_execute_callback',
