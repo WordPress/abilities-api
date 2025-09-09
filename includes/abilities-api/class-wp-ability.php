@@ -269,13 +269,23 @@ class WP_Ability {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param mixed $input The input data to validate.
+	 * @param mixed $input Optional. The input data to validate. Default `null`.
 	 * @return true|\WP_Error Returns true if valid or the WP_Error object if validation fails.
 	 */
 	protected function validate_input( $input = null ) {
 		$input_schema = $this->get_input_schema();
 		if ( empty( $input_schema ) ) {
-			return true;
+			if ( null === $input ) {
+				return true;
+			}
+			return new \WP_Error(
+				'ability_missing_input_schema',
+				sprintf(
+					/* translators: %s ability name. */
+					__( 'Ability "%s" does not define an input schema required to validate the provided input.' ),
+					$this->name
+				)
+			);
 		}
 
 		$valid_input = rest_validate_value_from_schema( $input, $input_schema, 'input' );
@@ -326,7 +336,7 @@ class WP_Ability {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param mixed $input The input data for the ability.
+	 * @param mixed $input Optional. The input data for the ability. Default `null`.
 	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
 	protected function do_execute( $input = null ) {
