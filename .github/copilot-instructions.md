@@ -22,10 +22,16 @@ composer install      # Install PHP dependencies (~1s)
 
 **Code Quality and Linting (FAST - under 10 seconds each):**
 ```bash
+# These work WITHOUT wp-env (use when Docker not available):
 composer run-script lint      # Run PHPCS linting (~1s)
 composer run-script format    # Auto-fix PHPCS issues (~1s) 
 composer run-script phpstan   # Run PHPStan static analysis (~5s)
 npm run format               # Format non-PHP files with Prettier (~1s)
+
+# These require wp-env (use when WordPress environment is running):
+npm run lint:php             # Same as composer lint, but via wp-env
+npm run lint:php:fix         # Same as composer format, but via wp-env
+npm run lint:php:stan        # Same as composer phpstan, but via wp-env
 ```
 
 **Build plugin for distribution (FAST - under 1 second):**
@@ -112,7 +118,35 @@ Coverage reports are generated in:
    ls -la abilities-api.zip    # Verify zip file created
    ```
 
-## Project Structure
+## Working Without Docker/wp-env
+
+If Docker is not available or network access is restricted, you can still work on the codebase effectively:
+
+**Available commands (no Docker required):**
+```bash
+# Install dependencies
+npm ci && composer install
+
+# Code quality (all work without wp-env)
+composer run-script lint      # PHPCS linting
+composer run-script format    # PHPCS auto-fix
+composer run-script phpstan   # Static analysis
+npm run format               # Prettier formatting
+
+# Build plugin
+npm run plugin-zip           # Create distribution zip
+
+# Syntax checking
+php -l abilities-api.php     # Check PHP syntax
+php -l includes/bootstrap.php
+```
+
+**NOT available without wp-env:**
+- PHPUnit tests (require WordPress environment)
+- WordPress functionality testing 
+- REST API testing
+- npm run lint:php* commands (these wrap the composer commands via wp-env)
+- npm run test:php command
 
 ### Key Directories
 - `abilities-api.php` - Main plugin file with WordPress plugin headers
