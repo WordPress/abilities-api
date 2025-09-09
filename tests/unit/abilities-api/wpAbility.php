@@ -40,10 +40,22 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 */
 	public function data_execute_input() {
 		return array(
-			'boolean input' => array(
+			'null input'     => array(
+				array(
+					'type'        => array( 'null', 'integer' ),
+					'description' => 'The null or integer to convert to integer.',
+					'required'    => true,
+				),
+				static function ( $input ): int {
+					return null === $input ? 0 : (int) $input;
+				},
+				null,
+				0,
+			),
+			'boolean input'  => array(
 				array(
 					'type'        => 'boolean',
-					'description' => 'The boolean to convert to number.',
+					'description' => 'The boolean to convert to integer.',
 					'required'    => true,
 				),
 				static function ( bool $input ): int {
@@ -52,10 +64,10 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				true,
 				1,
 			),
-			'number input'  => array(
+			'integer input'  => array(
 				array(
-					'type'        => 'number',
-					'description' => 'The number to add 5 to.',
+					'type'        => 'integer',
+					'description' => 'The integer to add 5 to.',
 					'required'    => true,
 				),
 				static function ( int $input ): int {
@@ -64,7 +76,19 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				2,
 				7,
 			),
-			'string input'  => array(
+			'number input'   => array(
+				array(
+					'type'        => 'number',
+					'description' => 'The floating number to round.',
+					'required'    => true,
+				),
+				static function ( float $input ): int {
+					return (int) round( $input );
+				},
+				2.7,
+				3,
+			),
+			'string input'   => array(
 				array(
 					'type'        => 'string',
 					'description' => 'The string to measure the length of.',
@@ -76,7 +100,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				'Hello world!',
 				12,
 			),
-			'array input'   => array(
+			'array input'    => array(
 				array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -119,5 +143,23 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$ability = new WP_Ability( self::$test_ability_name, $args );
 
 		$this->assertSame( $result, $ability->execute( $input ) );
+	}
+
+	/**
+	 * Tests the execution of the ability with no input.
+	 */
+	public function test_execute_no_input() {
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'execute_callback' => static function (): int {
+					return 42;
+				},
+			)
+		);
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+
+		$this->assertSame( 42, $ability->execute() );
 	}
 }
