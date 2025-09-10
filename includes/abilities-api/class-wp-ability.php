@@ -348,7 +348,7 @@ class WP_Ability {
 			);
 		}
 
-		if ( empty( $this->get_input_schema() ) && null === $input ) {
+		if ( empty( $this->get_input_schema() ) ) {
 			return call_user_func( $this->execute_callback );
 		}
 
