@@ -205,6 +205,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		return array(
 			'input' => array(
 				'description' => __( 'Input parameters for the ability execution.' ),
+				'type'        => array( 'integer', 'number', 'boolean', 'string', 'array', 'object', 'null' ),
 				'default'     => null,
 			),
 		);
