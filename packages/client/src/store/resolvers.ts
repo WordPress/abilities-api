@@ -28,13 +28,19 @@ export function getAbilities() {
 
 /**
  * Resolver for getAbility selector.
- * Fetches a specific ability from the server.
+ * Fetches a specific ability from the server if not already in store.
  *
  * @param name Ability name.
  */
 export function getAbility( name: string ) {
 	// @ts-expect-error - registry types are not yet available
-	return async ( { dispatch, registry } ) => {
+	return async ( { dispatch, registry, select } ) => {
+		// Check if ability already exists in store (i.e. client ability or already fetched)
+		const existingAbility = select.getAbility( name );
+		if ( existingAbility ) {
+			return;
+		}
+
 		const ability = await registry
 			.resolveSelect( coreStore )
 			.getEntityRecord( ENTITY_KIND, ENTITY_NAME, name );

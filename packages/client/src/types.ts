@@ -3,6 +3,13 @@
  */
 
 /**
+ * Callback function for client-side abilities.
+ */
+export type AbilityCallback = (
+	input: AbilityInput
+) => AbilityOutput | Promise< AbilityOutput >;
+
+/**
  * Represents an ability in the WordPress Abilities API.
  *
  * @see WP_Ability
@@ -40,6 +47,20 @@ export interface Ability {
 	output_schema?: Record< string, any >;
 
 	/**
+	 * Where the ability is executed.
+	 * 'server' means it's executed via REST API on the server.
+	 * 'client' means it's executed locally in the browser.
+	 * Defaults to 'server'.
+	 */
+	location?: 'server' | 'client';
+
+	/**
+	 * Callback function for client-side abilities.
+	 * Only used when location is 'client'.
+	 */
+	callback?: AbilityCallback;
+
+	/**
 	 * Metadata about the ability.
 	 * @see WP_Ability::get_meta()
 	 */
@@ -73,3 +94,9 @@ export type AbilityInput = any;
  * The actual shape depends on the ability's output schema.
  */
 export type AbilityOutput = any;
+
+/**
+ * Validation error - just a message string.
+ * The Abilities API wraps this with the appropriate error code.
+ */
+export type ValidationError = string;
