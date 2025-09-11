@@ -14,7 +14,7 @@ import {
  * @param abilities Array of abilities to store.
  * @return Action object.
  */
-export function receiveAbilities( abilities: Ability[] ) {
+export function receiveAbilities(abilities: Ability[]) {
 	return {
 		type: RECEIVE_ABILITIES,
 		abilities,
@@ -27,7 +27,7 @@ export function receiveAbilities( abilities: Ability[] ) {
  * @param ability The ability to register.
  * @return Action object.
  */
-export function registerAbility( ability: Ability ) {
+export function registerAbility(ability: Ability) {
 	return {
 		type: REGISTER_ABILITY,
 		ability,
@@ -40,7 +40,7 @@ export function registerAbility( ability: Ability ) {
  * @param name The name of the ability to unregister.
  * @return Action object.
  */
-export function unregisterAbility( name: string ) {
+export function unregisterAbility(name: string) {
 	return {
 		type: UNREGISTER_ABILITY,
 		name,

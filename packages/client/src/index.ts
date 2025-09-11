@@ -20,7 +20,7 @@ declare global {
 			abilities?: typeof api & {
 				store: typeof store;
 			};
-			[ key: string ]: any;
+			[key: string]: any;
 		};
 	}
 }
@@ -61,6 +61,8 @@ export { store } from './store';
  */
 export type {
 	Ability,
+	ClientAbility,
+	ServerAbility,
 	AbilitiesState,
 	AbilityCallback,
 	AbilityInput,

@@ -17,16 +17,16 @@ import { STORE_NAME, ENTITY_KIND, ENTITY_NAME } from './constants';
 /**
  * The abilities store definition.
  */
-export const store = createReduxStore( STORE_NAME, {
+export const store = createReduxStore(STORE_NAME, {
 	reducer,
 	actions,
 	selectors,
 	resolvers,
-} );
+});
 
-register( store );
+register(store);
 
-dispatch( coreStore ).addEntities( [
+dispatch(coreStore).addEntities([
 	{
 		name: ENTITY_NAME,
 		kind: ENTITY_KIND,
@@ -37,4 +37,4 @@ dispatch( coreStore ).addEntities( [
 		label: __( 'Abilities' ),
 		supportsPagination: true,
 	},
-] );
+]);

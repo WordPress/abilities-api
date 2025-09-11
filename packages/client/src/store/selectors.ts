@@ -15,10 +15,10 @@ import type { Ability, AbilitiesState } from '../types';
  * @return Array of abilities.
  */
 export const getAbilities = createSelector(
-	( state: AbilitiesState ): Ability[] => {
-		return Object.values( state.abilitiesByName );
+	(state: AbilitiesState): Ability[] => {
+		return Object.values(state.abilitiesByName);
 	},
-	( state: AbilitiesState ) => [ state.abilitiesByName ]
+	(state: AbilitiesState) => [state.abilitiesByName]
 );
 
 /**
@@ -32,5 +32,5 @@ export function getAbility(
 	state: AbilitiesState,
 	name: string
 ): Ability | null {
-	return state.abilitiesByName[ name ] || null;
+	return state.abilitiesByName[name] || null;
 }

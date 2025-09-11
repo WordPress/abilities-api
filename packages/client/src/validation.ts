@@ -17,17 +17,10 @@ const ajv = new Ajv({
 	removeAdditional: false, // Keep additional properties
 	allErrors: true,
 	verbose: true,
-	allowUnionTypes: true, 	// Allow anyOf without explicit type
+	allowUnionTypes: true, // Allow anyOf without explicit type
 });
 
-addFormats( ajv, [
-	'date-time',
-	'email',
-	'hostname',
-	'ipv4',
-	'ipv6',
-	'uuid',
-] );
+addFormats(ajv, ['date-time', 'email', 'hostname', 'ipv4', 'ipv6', 'uuid']);
 
 /**
  * Formats AJV errors into a simple error message.
@@ -37,97 +30,97 @@ addFormats( ajv, [
  * @param param    The base parameter name.
  * @return Simple error message string.
  */
-function formatAjvError( ajvError: any, param: string ): string {
+function formatAjvError(ajvError: any, param: string): string {
 	// Convert AJV's instancePath format (/0/prop) to an array like format to better match WordPress ([0][prop])
 	const instancePath = ajvError.instancePath
-		? ajvError.instancePath.replace( /\//g, '][' ).replace( /^\]\[/, '[' ) + ']'
+		? ajvError.instancePath.replace(/\//g, '][').replace(/^\]\[/, '[') + ']'
 		: '';
 	const fullParam = param + instancePath;
 
-	switch ( ajvError.keyword ) {
+	switch (ajvError.keyword) {
 		case 'type':
-			return `${ fullParam } is not of type ${ ajvError.params.type }.`;
+			return `${fullParam} is not of type ${ajvError.params.type}.`;
 
 		case 'required':
-			return `${ ajvError.params.missingProperty } is a required property of ${ fullParam }.`;
+			return `${ajvError.params.missingProperty} is a required property of ${fullParam}.`;
 
 		case 'additionalProperties':
-			return `${ ajvError.params.additionalProperty } is not a valid property of Object.`;
+			return `${ajvError.params.additionalProperty} is not a valid property of Object.`;
 
 		case 'enum':
 			const enumValues = ajvError.params.allowedValues
-				.map( ( v: any ) =>
-					typeof v === 'string' ? v : JSON.stringify( v )
+				.map((v: any) =>
+					typeof v === 'string' ? v : JSON.stringify(v)
 				)
-				.join( ', ' );
+				.join(', ');
 			return ajvError.params.allowedValues.length === 1
-				? `${ fullParam } is not ${ enumValues }.`
-				: `${ fullParam } is not one of ${ enumValues }.`;
+				? `${fullParam} is not ${enumValues}.`
+				: `${fullParam} is not one of ${enumValues}.`;
 
 		case 'pattern':
-			return `${ fullParam } does not match pattern ${ ajvError.params.pattern }.`;
+			return `${fullParam} does not match pattern ${ajvError.params.pattern}.`;
 
 		case 'format':
 			const format = ajvError.params.format;
-			const formatMessages: Record< string, string > = {
+			const formatMessages: Record<string, string> = {
 				email: 'Invalid email address.',
 				'date-time': 'Invalid date.',
-				uuid: `${ fullParam } is not a valid UUID.`,
-				ipv4: `${ fullParam } is not a valid IP address.`,
-				ipv6: `${ fullParam } is not a valid IP address.`,
-				hostname: `${ fullParam } is not a valid hostname.`,
+				uuid: `${fullParam} is not a valid UUID.`,
+				ipv4: `${fullParam} is not a valid IP address.`,
+				ipv6: `${fullParam} is not a valid IP address.`,
+				hostname: `${fullParam} is not a valid hostname.`,
 			};
-			return formatMessages[ format ] || `Invalid ${ format }.`;
+			return formatMessages[format] || `Invalid ${format}.`;
 
 		case 'minimum':
 		case 'exclusiveMinimum':
 			return ajvError.keyword === 'exclusiveMinimum'
-				? `${ fullParam } must be greater than ${ ajvError.params.limit }`
-				: `${ fullParam } must be greater than or equal to ${ ajvError.params.limit }`;
+				? `${fullParam} must be greater than ${ajvError.params.limit}`
+				: `${fullParam} must be greater than or equal to ${ajvError.params.limit}`;
 
 		case 'maximum':
 		case 'exclusiveMaximum':
 			return ajvError.keyword === 'exclusiveMaximum'
-				? `${ fullParam } must be less than ${ ajvError.params.limit }`
-				: `${ fullParam } must be less than or equal to ${ ajvError.params.limit }`;
+				? `${fullParam} must be less than ${ajvError.params.limit}`
+				: `${fullParam} must be less than or equal to ${ajvError.params.limit}`;
 
 		case 'multipleOf':
-			return `${ fullParam } must be a multiple of ${ ajvError.params.multipleOf }.`;
+			return `${fullParam} must be a multiple of ${ajvError.params.multipleOf}.`;
 
 		case 'anyOf':
 		case 'oneOf':
-			return `${ fullParam } is invalid (failed ${ ajvError.keyword } validation).`;
+			return `${fullParam} is invalid (failed ${ajvError.keyword} validation).`;
 
 		case 'minLength':
-			return `${ fullParam } must be at least ${ ajvError.params.limit } character${
+			return `${fullParam} must be at least ${ajvError.params.limit} character${
 				ajvError.params.limit === 1 ? '' : 's'
 			} long.`;
 
 		case 'maxLength':
-			return `${ fullParam } must be at most ${ ajvError.params.limit } character${
+			return `${fullParam} must be at most ${ajvError.params.limit} character${
 				ajvError.params.limit === 1 ? '' : 's'
 			} long.`;
 
 		case 'minItems':
-			return `${ fullParam } must contain at least ${ ajvError.params.limit } item${
+			return `${fullParam} must contain at least ${ajvError.params.limit} item${
 				ajvError.params.limit === 1 ? '' : 's'
 			}.`;
 
 		case 'maxItems':
-			return `${ fullParam } must contain at most ${ ajvError.params.limit } item${
+			return `${fullParam} must contain at most ${ajvError.params.limit} item${
 				ajvError.params.limit === 1 ? '' : 's'
 			}.`;
 
 		case 'uniqueItems':
-			return `${ fullParam } has duplicate items.`;
+			return `${fullParam} has duplicate items.`;
 
 		case 'minProperties':
-			return `${ fullParam } must contain at least ${ ajvError.params.limit } propert${
+			return `${fullParam} must contain at least ${ajvError.params.limit} propert${
 				ajvError.params.limit === 1 ? 'y' : 'ies'
 			}.`;
 
 		case 'maxProperties':
-			return `${ fullParam } must contain at most ${ ajvError.params.limit } propert${
+			return `${fullParam} must contain at most ${ajvError.params.limit} propert${
 				ajvError.params.limit === 1 ? 'y' : 'ies'
 			}.`;
 
@@ -135,7 +128,7 @@ function formatAjvError( ajvError: any, param: string ): string {
 			// Fallback for any unhandled validation keywords
 			return (
 				ajvError.message ||
-				`${ fullParam } is invalid (failed ${ ajvError.keyword } validation).`
+				`${fullParam} is invalid (failed ${ajvError.keyword} validation).`
 			);
 	}
 }
@@ -150,45 +143,47 @@ function formatAjvError( ajvError: any, param: string ): string {
  */
 export function validateValueFromSchema(
 	value: any,
-	args: Record< string, any > = {},
+	args: Record<string, any> = {},
 	param = ''
 ): true | ValidationError {
 	// If no schema provided, consider it valid
-	if ( ! args || Object.keys( args ).length === 0 ) {
+	if (!args || Object.keys(args).length === 0) {
 		return true;
 	}
 
 	// Type validation - WordPress REST API requires type to be set
-	if ( ! args.type && ! args.anyOf && ! args.oneOf ) {
+	if (!args.type && !args.anyOf && !args.oneOf) {
 		// WordPress issues a _doing_it_wrong but continues
 		// For client-side, we'll treat as valid for now, but could consider a warning
 		return true;
 	}
 
 	try {
-		const validate = ajv.compile( args );
-		const valid = validate( value );
+		const validate = ajv.compile(args);
+		const valid = validate(value);
 
-		if ( valid ) {
+		if (valid) {
 			return true;
 		}
 
 		// Return the first error as a simple message string
 		// The API will wrap this with ability_invalid_input/output
-		if ( validate.errors && validate.errors.length > 0 ) {
+		if (validate.errors && validate.errors.length > 0) {
 			// For anyOf/oneOf, look for the more specific error
-			const anyOfError = validate.errors.find( e => e.keyword === 'anyOf' || e.keyword === 'oneOf' );
-			if ( anyOfError ) {
-				return formatAjvError( anyOfError, param );
+			const anyOfError = validate.errors.find(
+				(e) => e.keyword === 'anyOf' || e.keyword === 'oneOf'
+			);
+			if (anyOfError) {
+				return formatAjvError(anyOfError, param);
 			}
-			return formatAjvError( validate.errors[ 0 ], param );
+			return formatAjvError(validate.errors[0], param);
 		}
 
-		return `${ param } is invalid.`;
-	} catch ( error ) {
+		return `${param} is invalid.`;
+	} catch (error) {
 		// Handle schema compilation errors
 		// eslint-disable-next-line no-console
-		console.error( 'Schema compilation error:', error );
+		console.error('Schema compilation error:', error);
 		return 'Invalid schema provided for validation.';
 	}
 }

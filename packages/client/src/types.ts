@@ -7,7 +7,7 @@
  */
 export type AbilityCallback = (
 	input: AbilityInput
-) => AbilityOutput | Promise< AbilityOutput >;
+) => AbilityOutput | Promise<AbilityOutput>;
 
 /**
  * Represents an ability in the WordPress Abilities API.
@@ -38,13 +38,13 @@ export interface Ability {
 	 * JSON Schema for the ability's input parameters.
 	 * @see WP_Ability::get_input_schema()
 	 */
-	input_schema?: Record< string, any >;
+	input_schema?: Record<string, any>;
 
 	/**
 	 * JSON Schema for the ability's output format.
 	 * @see WP_Ability::get_output_schema()
 	 */
-	output_schema?: Record< string, any >;
+	output_schema?: Record<string, any>;
 
 	/**
 	 * Where the ability is executed.
@@ -69,8 +69,24 @@ export interface Ability {
 		 * The type of ability - 'resource' uses GET, 'tool' uses POST.
 		 */
 		type?: 'resource' | 'tool';
-		[ key: string ]: any;
+		[key: string]: any;
 	};
+}
+
+/**
+ * Server-side ability that is executed via REST API.
+ */
+export interface ServerAbility extends Ability {
+	location: 'server';
+}
+
+/**
+ * Client-side ability that is executed locally in the browser.
+ * Must include a callback function.
+ */
+export interface ClientAbility extends Ability {
+	location: 'client';
+	callback: AbilityCallback;
 }
 
 /**
@@ -80,7 +96,7 @@ export interface AbilitiesState {
 	/**
 	 * Map of ability names to ability objects.
 	 */
-	abilitiesByName: Record< string, Ability >;
+	abilitiesByName: Record<string, Ability>;
 }
 
 /**

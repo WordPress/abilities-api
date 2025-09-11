@@ -15,14 +15,14 @@ import { receiveAbilities } from './actions';
  */
 export function getAbilities() {
 	// @ts-expect-error - registry types are not yet available
-	return async ( { dispatch, registry } ) => {
+	return async ({ dispatch, registry }) => {
 		const abilities = await registry
-			.resolveSelect( coreStore )
-			.getEntityRecords( ENTITY_KIND, ENTITY_NAME, {
+			.resolveSelect(coreStore)
+			.getEntityRecords(ENTITY_KIND, ENTITY_NAME, {
 				per_page: -1,
-			} );
+			});
 
-		dispatch( receiveAbilities( abilities || [] ) );
+		dispatch(receiveAbilities(abilities || []));
 	};
 }
 
@@ -32,21 +32,21 @@ export function getAbilities() {
  *
  * @param name Ability name.
  */
-export function getAbility( name: string ) {
+export function getAbility(name: string) {
 	// @ts-expect-error - registry types are not yet available
-	return async ( { dispatch, registry, select } ) => {
+	return async ({ dispatch, registry, select }) => {
 		// Check if ability already exists in store (i.e. client ability or already fetched)
-		const existingAbility = select.getAbility( name );
-		if ( existingAbility ) {
+		const existingAbility = select.getAbility(name);
+		if (existingAbility) {
 			return;
 		}
 
 		const ability = await registry
-			.resolveSelect( coreStore )
-			.getEntityRecord( ENTITY_KIND, ENTITY_NAME, name );
+			.resolveSelect(coreStore)
+			.getEntityRecord(ENTITY_KIND, ENTITY_NAME, name);
 
-		if ( ability ) {
-			dispatch( receiveAbilities( [ ability ] ) );
+		if (ability) {
+			dispatch(receiveAbilities([ability]));
 		}
 	};
 }
