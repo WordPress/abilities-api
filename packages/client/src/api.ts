@@ -72,6 +72,13 @@ export function registerAbility( ability: Ability ): void {
 	if ( ! ability.description ) {
 		throw new Error( 'Ability description is required' );
 	}
+
+	// Check if it's a server ability and reject it
+	if ( ability.location === 'server' ) {
+		throw new Error( 'Server abilities cannot be registered via registerAbility' );
+	}
+
+	// Now we know it's supposed to be a client ability
 	if ( ! ability.callback || typeof ability.callback !== 'function' ) {
 		throw new Error(
 			'Client abilities must include a callback function'
