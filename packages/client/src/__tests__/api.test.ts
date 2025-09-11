@@ -147,7 +147,9 @@ describe('API functions', () => {
 			};
 
 			// Use type assertion to bypass TypeScript check for testing runtime validation
-			expect(() => registerAbility(ability as unknown as ClientAbility)).toThrow(
+			expect(() =>
+				registerAbility(ability as unknown as ClientAbility)
+			).toThrow(
 				'Server abilities cannot be registered via registerAbility'
 			);
 		});
@@ -170,9 +172,9 @@ describe('API functions', () => {
 			};
 
 			// Use type assertion to bypass TypeScript check
-			expect(() => registerAbility(ability as unknown as ClientAbility)).toThrow(
-				'Client abilities must include a callback function'
-			);
+			expect(() =>
+				registerAbility(ability as unknown as ClientAbility)
+			).toThrow('Client abilities must include a callback function');
 		});
 
 		it('should throw error for ability without name', () => {

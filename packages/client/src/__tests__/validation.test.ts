@@ -382,8 +382,18 @@ describe('validateValueFromSchema', () => {
 		it('should handle empty schema as valid', () => {
 			expect(validateValueFromSchema('anything', undefined)).toBe(true);
 			// Testing edge cases where schema is null or falsy
-			expect(validateValueFromSchema(123, null as unknown as Record<string, any>)).toBe(true);
-			expect(validateValueFromSchema(true, false as unknown as Record<string, any>)).toBe(true);
+			expect(
+				validateValueFromSchema(
+					123,
+					null as unknown as Record<string, any>
+				)
+			).toBe(true);
+			expect(
+				validateValueFromSchema(
+					true,
+					false as unknown as Record<string, any>
+				)
+			).toBe(true);
 		});
 
 		it('should handle schema compilation errors', () => {

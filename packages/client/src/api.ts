@@ -71,6 +71,16 @@ export function registerAbility(ability: Ability): void {
 	if (!ability.description) {
 		throw new Error(__('Ability description is required'));
 	}
+
+	// Runtime check for JavaScript consumers who might pass server abilities
+	// TypeScript users are protected by the ClientAbility type
+	const anyAbility = ability as any;
+	if (anyAbility.location === 'server') {
+		throw new Error(
+			'Server abilities cannot be registered via registerAbility'
+		);
+	}
+
 	if (!ability.callback || typeof ability.callback !== 'function') {
 		throw new Error(__('Abilities registered on the client require a callback function'));
 	}
