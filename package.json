@@ -6,23 +6,17 @@
 		"type": "git",
 		"url": "git+https://github.com/WordPress/abilities.git"
 	},
-	"workspaces": [
-		"packages/*"
-	],
 	"engines": {
 		"node": ">=20.10.0",
 		"npm": ">=10.2.3"
 	},
+	"workspaces": [
+		"packages/*"
+	],
 	"devDependencies": {
-		"@types/wordpress__api-fetch": "^3.23.1",
-		"@wordpress/env": "^10.30.0",
-		"@wordpress/eslint-plugin": "^22.16.0",
-		"@wordpress/prettier-config": "^4.30.0",
-		"@wordpress/scripts": "^30.23.0",
-		"eslint": "^8.57.0",
-		"eslint-plugin-import": "^2.32.0",
-		"prettier": "npm:wp-prettier@3.0.3",
-		"typescript": "^5.9.2"
+		"@wordpress/env": "^10.28.0",
+		"@wordpress/scripts": "^30.21.0",
+		"@wordpress/prettier-config": "^4.28.0"
 	},
 	"files": [
 		"docs",
@@ -33,16 +27,20 @@
 	],
 	"scripts": {
 		"plugin-zip": "wp-scripts plugin-zip",
-		"build:client": "npm run build -w packages/client",
-		"dev:client": "npm run dev -w packages/client",
 		"format": "wp-scripts format",
-		"lint:js": "wp-scripts lint-js",
-		"lint:js:fix": "wp-scripts lint-js --fix",
+		"format:js": "npm run format --workspace=@wordpress/abilities",
+		"lint:js": "npm run lint:js --workspace=@wordpress/abilities",
+		"lint:js:fix": "npm run lint:js:fix --workspace=@wordpress/abilities",
 		"lint:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/$(basename \"$(pwd)\")/ composer run-script lint",
 		"lint:php:fix": "wp-env run tests-cli --env-cwd=wp-content/plugins/$(basename \"$(pwd)\")/ composer run-script format",
 		"lint:php:stan": "wp-env run tests-cli --env-cwd=wp-content/plugins/$(basename \"$(pwd)\")/ composer run-script phpstan",
+		"lint:all": "npm run lint:php && npm run lint:js && npm run typecheck",
+		"typecheck": "npm run typecheck --workspace=@wordpress/abilities",
 		"test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/$(basename \"$(pwd)\")/ vendor/bin/phpunit -c phpunit.xml.dist",
-		"typecheck": "tsc --noEmit -p packages/client",
+		"test:client": "npm run test:unit --workspace=@wordpress/abilities",
+		"test:client:watch": "npm run test:unit:watch --workspace=@wordpress/abilities",
+		"test:client:coverage": "npm run test:unit:coverage --workspace=@wordpress/abilities",
+		"test:all": "npm run test:php && npm run test:client",
 		"wp-env": "wp-env"
 	}
 }

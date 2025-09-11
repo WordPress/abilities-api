@@ -1,0 +1,171 @@
+name: JavaScript Linting and Formatting
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - trunk
+    paths:
+      - '**.js'
+      - '**.jsx'
+      - '**.ts'
+      - '**.tsx'
+      - 'packages/client/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.eslintrc*'
+      - '.prettierrc*'
+      - 'tsconfig*.json'
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+    paths:
+      - '**.js'
+      - '**.jsx'
+      - '**.ts'
+      - '**.tsx'
+      - 'packages/client/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.eslintrc*'
+      - '.prettierrc*'
+      - 'tsconfig*.json'
+
+# Cancel previous runs for pull requests when new commits are pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  # Runs ESLint on JavaScript/TypeScript files
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    if: github.event.pull_request.draft != true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint:js
+
+      - name: Check for ESLint warnings
+        if: always()
+        run: |
+          cd packages/client
+          npm run lint:js 2>&1 | tee eslint-output.txt
+          if grep -q "warning" eslint-output.txt; then
+            echo "::warning::ESLint warnings detected. Please review and fix."
+          fi
+
+  # Checks code formatting with Prettier
+  prettier:
+    name: Prettier Formatting
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    if: github.event.pull_request.draft != true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Check Prettier formatting
+        run: |
+          cd packages/client
+          npx prettier --check "**/*.{js,jsx,ts,tsx,json,md}" \
+            --ignore-path .gitignore \
+            --ignore-path .prettierignore || \
+            (echo "::error::Code formatting issues detected. Run 'npm run format' locally to fix." && exit 1)
+
+  # TypeScript type checking
+  typecheck:
+    name: TypeScript Type Check
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    if: github.event.pull_request.draft != true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Run TypeScript type checking
+        run: npm run typecheck
+
+      - name: Check for TypeScript errors in test files
+        run: |
+          cd packages/client
+          npx tsc --noEmit --project tsconfig.json 2>&1 | tee tsc-output.txt || true
+          if grep -q "error TS" tsc-output.txt; then
+            echo "::error::TypeScript errors detected in test files."
+            exit 1
+          fi
+
+  # Combined status check for branch protection
+  js-quality-checks:
+    name: JavaScript Quality Checks
+    runs-on: ubuntu-24.04
+    needs: [eslint, prettier, typecheck]
+    if: always()
+    steps:
+      - name: All JavaScript checks passed
+        if: ${{ !(contains(needs.*.result, 'failure')) }}
+        run: |
+          echo "✅ All JavaScript quality checks passed successfully!"
+          echo "- ESLint: ${{ needs.eslint.result }}"
+          echo "- Prettier: ${{ needs.prettier.result }}"
+          echo "- TypeScript: ${{ needs.typecheck.result }}"
+
+      - name: Some JavaScript checks failed
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: |
+          echo "❌ Some JavaScript quality checks failed!"
+          echo "- ESLint: ${{ needs.eslint.result }}"
+          echo "- Prettier: ${{ needs.prettier.result }}"
+          echo "- TypeScript: ${{ needs.typecheck.result }}"
+          exit 1

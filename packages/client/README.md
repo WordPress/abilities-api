@@ -2,6 +2,14 @@
 
 Client library for the WordPress Abilities API, providing a standardized way to discover and execute WordPress capabilities.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Reference](#api-reference)
+- [Development](#development)
+- [Testing](#testing)
+
 ## Installation
 
 The client is currently available as a part of the Composer package.
@@ -130,3 +138,32 @@ npm run lint:js
 # Type checking
 npm run typecheck
 ```
+
+## Testing
+
+The client package includes unit tests using Jest and follows WordPress testing standards.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm run test:unit
+
+# Run tests in watch mode (recommended for development)
+npm run test:unit:watch
+
+# Generate coverage report
+npm run test:unit:coverage
+
+# Debug tests
+npm run test:unit:debug
+```
+
+### Test Structure
+
+Tests are organized following WordPress conventions:
+
+- Unit tests are located in `src/__tests__/`
+- Store tests are located in `src/store/__tests__/`
+- Test files use `.test.ts` or `.test.js` extension
+- Tests use Jest with `@wordpress/jest-preset-default` configuration

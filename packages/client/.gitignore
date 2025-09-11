@@ -20,3 +20,10 @@ coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Test coverage
+coverage/
+*.lcov
+clover.xml
+coverage-final.json
+.nyc_output/
