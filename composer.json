@@ -2,7 +2,7 @@
 	"name": "wordpress/abilities-api",
 	"description": "AI Abilities for WordPress.",
 	"license": "GPL-2.0-or-later",
-	"type": "library",
+	"type": "wordpress-plugin",
 	"keywords": [
 		"ai",
 		"api",
