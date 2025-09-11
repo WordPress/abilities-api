@@ -19,7 +19,7 @@ import {
 	executeAbility,
 } from '../api';
 import { store } from '../store';
-import type { Ability } from '../types';
+import type { Ability, ClientAbility, ServerAbility } from '../types';
 
 // Mock WordPress dependencies
 jest.mock('@wordpress/data', () => ({
@@ -131,23 +131,24 @@ describe('API functions', () => {
 			expect(mockRegisterAbility).toHaveBeenCalledWith(ability);
 		});
 
-		it('should throw error for non-client abilities', () => {
+		it('should throw error for server abilities', () => {
 			const mockRegisterAbility = jest.fn();
 			(dispatch as jest.Mock).mockReturnValue({
 				registerAbility: mockRegisterAbility,
 			});
 
-			const ability = {
+			const ability: ServerAbility = {
 				name: 'test/server-ability',
 				label: 'Server Ability',
 				description: 'Test server ability',
-				location: 'server' as const,
+				location: 'server',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
 
-			expect(() => registerAbility(ability as any)).toThrow(
-				'Client abilities must include a callback function'
+			// Use type assertion to bypass TypeScript check for testing runtime validation
+			expect(() => registerAbility(ability as unknown as ClientAbility)).toThrow(
+				'Server abilities cannot be registered via registerAbility'
 			);
 		});
 
@@ -157,6 +158,7 @@ describe('API functions', () => {
 				registerAbility: mockRegisterAbility,
 			});
 
+			// Create an incomplete client ability for testing runtime validation
 			const ability = {
 				name: 'test/client-ability',
 				label: 'Client Ability',
@@ -164,45 +166,50 @@ describe('API functions', () => {
 				location: 'client' as const,
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
+				// Missing callback property
 			};
 
-			expect(() => registerAbility(ability as any)).toThrow(
+			// Use type assertion to bypass TypeScript check
+			expect(() => registerAbility(ability as unknown as ClientAbility)).toThrow(
 				'Client abilities must include a callback function'
 			);
 		});
 
 		it('should throw error for ability without name', () => {
-			const ability = {
+			const ability: Partial<ClientAbility> = {
 				label: 'Test Ability',
 				description: 'Test ability',
 				callback: jest.fn(),
+				// Missing name property
 			};
 
-			expect(() => registerAbility(ability as any)).toThrow(
+			expect(() => registerAbility(ability as ClientAbility)).toThrow(
 				'Ability name is required'
 			);
 		});
 
 		it('should throw error for ability without label', () => {
-			const ability = {
+			const ability: Partial<ClientAbility> = {
 				name: 'test/ability',
 				description: 'Test ability',
 				callback: jest.fn(),
+				// Missing label property
 			};
 
-			expect(() => registerAbility(ability as any)).toThrow(
+			expect(() => registerAbility(ability as ClientAbility)).toThrow(
 				'Ability label is required'
 			);
 		});
 
 		it('should throw error for ability without description', () => {
-			const ability = {
+			const ability: Partial<ClientAbility> = {
 				name: 'test/ability',
 				label: 'Test Ability',
 				callback: jest.fn(),
+				// Missing description property
 			};
 
-			expect(() => registerAbility(ability as any)).toThrow(
+			expect(() => registerAbility(ability as ClientAbility)).toThrow(
 				'Ability description is required'
 			);
 		});
