@@ -145,27 +145,3 @@ jobs:
             echo "::error::TypeScript errors detected in test files."
             exit 1
           fi
-
-  # Combined status check for branch protection
-  js-quality-checks:
-    name: JavaScript Quality Checks
-    runs-on: ubuntu-24.04
-    needs: [eslint, prettier, typecheck]
-    if: always()
-    steps:
-      - name: All JavaScript checks passed
-        if: ${{ !(contains(needs.*.result, 'failure')) }}
-        run: |
-          echo "✅ All JavaScript quality checks passed successfully!"
-          echo "- ESLint: ${{ needs.eslint.result }}"
-          echo "- Prettier: ${{ needs.prettier.result }}"
-          echo "- TypeScript: ${{ needs.typecheck.result }}"
-
-      - name: Some JavaScript checks failed
-        if: ${{ contains(needs.*.result, 'failure') }}
-        run: |
-          echo "❌ Some JavaScript quality checks failed!"
-          echo "- ESLint: ${{ needs.eslint.result }}"
-          echo "- Prettier: ${{ needs.prettier.result }}"
-          echo "- TypeScript: ${{ needs.typecheck.result }}"
-          exit 1
