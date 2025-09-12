@@ -274,6 +274,23 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test HEAD method returns empty body with proper headers.
+	 */
+	public function test_head_request(): void {
+		$request  = new WP_REST_Request( 'HEAD', '/wp/v2/abilities' );
+		$response = $this->server->dispatch( $request );
+
+		// Verify empty response body
+		$data = $response->get_data();
+		$this->assertEmpty( $data );
+
+		// Verify pagination headers are present
+		$headers = $response->get_headers();
+		$this->assertArrayHasKey( 'X-WP-Total', $headers );
+		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers );
+	}
+
+	/**
 	 * Test pagination links.
 	 */
 	public function test_pagination_links(): void {
