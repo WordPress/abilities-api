@@ -94,8 +94,6 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @return \WP_REST_Response Response object on success.
 	 */
 	public function get_items( $request ) {
-		$is_head_request = $request->is_method( 'HEAD' );
-
 		$abilities = wp_get_abilities();
 
 		// Handle pagination with explicit defaults.
@@ -107,7 +105,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		$total_abilities = count( $abilities );
 		$max_pages       = ceil( $total_abilities / $per_page );
 
-		if ( $is_head_request ) {
+		if ( $request->is_method( 'HEAD' ) ) {
 			$response = new \WP_REST_Response( array() );
 		} else {
 			$abilities = array_slice( $abilities, $offset, $per_page );
@@ -124,21 +122,19 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		$response->header( 'X-WP-Total', (string) $total_abilities );
 		$response->header( 'X-WP-TotalPages', (string) $max_pages );
 
-		if ( ! $is_head_request ) {
-			$query_params = $request->get_query_params();
-			$base         = add_query_arg( urlencode_deep( $query_params ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
+		$query_params = $request->get_query_params();
+		$base         = add_query_arg( urlencode_deep( $query_params ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
 
-			if ( $page > 1 ) {
-				$prev_page = $page - 1;
-				$prev_link = add_query_arg( 'page', $prev_page, $base );
-				$response->add_link( 'prev', $prev_link );
-			}
+		if ( $page > 1 ) {
+			$prev_page = $page - 1;
+			$prev_link = add_query_arg( 'page', $prev_page, $base );
+			$response->add_link( 'prev', $prev_link );
+		}
 
-			if ( $page < $max_pages ) {
-				$next_page = $page + 1;
-				$next_link = add_query_arg( 'page', $next_page, $base );
-				$response->add_link( 'next', $next_link );
-			}
+		if ( $page < $max_pages ) {
+			$next_page = $page + 1;
+			$next_link = add_query_arg( 'page', $next_page, $base );
+			$response->add_link( 'next', $next_link );
 		}
 
 		return $response;
