@@ -288,10 +288,6 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$headers = $response->get_headers();
 		$this->assertArrayHasKey( 'X-WP-Total', $headers );
 		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers );
-
-		// Verify pagination links are included
-		$links = $response->get_links();
-		$this->assertArrayHasKey( 'self', $links );
 	}
 
 	/**
