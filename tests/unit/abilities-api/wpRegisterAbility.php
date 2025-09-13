@@ -225,7 +225,6 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		);
 	}
 
-
 	/**
 	 * Tests executing an ability with input not matching schema.
 	 */

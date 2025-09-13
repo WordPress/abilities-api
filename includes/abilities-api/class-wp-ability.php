@@ -73,9 +73,9 @@ class WP_Ability {
 	 * The optional ability permission callback.
 	 *
 	 * @since 0.1.0
-	 * @var ?callable( mixed $input= ): (bool|\WP_Error)
+	 * @var callable( mixed $input= ): (bool|\WP_Error)
 	 */
-	protected $permission_callback = null;
+	protected $permission_callback;
 
 	/**
 	 * The optional ability metadata.
@@ -143,15 +143,16 @@ class WP_Ability {
 	 * @phpstan-return array{
 	 *   label: string,
 	 *   description: string,
+	 *   execute_callback: callable( mixed $input= ): (mixed|\WP_Error),
+	 *   permission_callback: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
-	 *   execute_callback: callable( mixed $input= ): (mixed|\WP_Error),
-	 *   permission_callback?: ?callable( mixed $input= ): (bool|\WP_Error),
 	 *   meta?: array<string,mixed>,
 	 *   ...<string, mixed>,
 	 * } $args
 	 */
 	protected function prepare_properties( array $args ): array {
+		// Required args must be present and of the correct type.
 		if ( empty( $args['label'] ) || ! is_string( $args['label'] ) ) {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties must contain a `label` string.' )
@@ -164,6 +165,19 @@ class WP_Ability {
 			);
 		}
 
+		if ( empty( $args['execute_callback'] ) || ! is_callable( $args['execute_callback'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties must contain a valid `execute_callback` function.' )
+			);
+		}
+
+		if ( empty( $args['permission_callback'] ) || ! is_callable( $args['permission_callback'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties must provide a valid `permission_callback` function.' )
+			);
+		}
+
+		// Optional args only need to be of the correct type if they are present.
 		if ( isset( $args['input_schema'] ) && ! is_array( $args['input_schema'] ) ) {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties should provide a valid `input_schema` definition.' )
@@ -173,18 +187,6 @@ class WP_Ability {
 		if ( isset( $args['output_schema'] ) && ! is_array( $args['output_schema'] ) ) {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties should provide a valid `output_schema` definition.' )
-			);
-		}
-
-		if ( empty( $args['execute_callback'] ) || ! is_callable( $args['execute_callback'] ) ) {
-			throw new \InvalidArgumentException(
-				esc_html__( 'The ability properties must contain a valid `execute_callback` function.' )
-			);
-		}
-
-		if ( isset( $args['permission_callback'] ) && ! is_callable( $args['permission_callback'] ) ) {
-			throw new \InvalidArgumentException(
-				esc_html__( 'The ability properties should provide a valid `permission_callback` function.' )
 			);
 		}
 
@@ -278,6 +280,7 @@ class WP_Ability {
 			if ( null === $input ) {
 				return true;
 			}
+
 			return new \WP_Error(
 				'ability_missing_input_schema',
 				sprintf(
@@ -306,8 +309,8 @@ class WP_Ability {
 
 	/**
 	 * Checks whether the ability has the necessary permissions.
-	 * If the permission callback is not set, the default behavior is to allow access
-	 * when the input provided passes validation.
+	 *
+	 * The input is validated against the input schema before it is passed to to permission callback.
 	 *
 	 * @since 0.1.0
 	 *
@@ -318,14 +321,6 @@ class WP_Ability {
 		$is_valid = $this->validate_input( $input );
 		if ( is_wp_error( $is_valid ) ) {
 			return $is_valid;
-		}
-
-		if ( ! is_callable( $this->permission_callback ) ) {
-			return true;
-		}
-
-		if ( empty( $this->get_input_schema() ) ) {
-			return call_user_func( $this->permission_callback );
 		}
 
 		return call_user_func( $this->permission_callback, $input );
