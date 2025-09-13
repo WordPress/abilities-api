@@ -203,7 +203,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
 	public function test_register_invalid_missing_permission_callback() {
-		// Remove the execute_callback from the args.
+		// Remove the permission_callback from the args.
 		unset( self::$test_ability_args['permission_callback'] );
 
 		$result = $this->registry->register( self::$test_ability_name, self::$test_ability_args );
