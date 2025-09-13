@@ -112,6 +112,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration without a label.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
@@ -127,6 +128,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration with invalid label type.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
@@ -141,6 +143,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration without a description.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
@@ -156,6 +159,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration with invalid description type.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
@@ -170,6 +174,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration without an execute callback.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
@@ -185,6 +190,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration if the execute callback is not a callable.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
@@ -199,6 +205,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration without an execute callback.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
@@ -214,6 +221,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration if the permission callback is not a callable.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
@@ -228,6 +236,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration if the input schema is not an array.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
@@ -242,6 +251,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration if the output schema is not an array.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
@@ -256,6 +266,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * Should reject ability registration with invalid meta type.
 	 *
 	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
