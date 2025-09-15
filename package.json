@@ -11,9 +11,9 @@
 		"npm": ">=10.2.3"
 	},
 	"devDependencies": {
-		"@wordpress/env": "^10.28.0",
-		"@wordpress/scripts": "^30.21.0",
-		"@wordpress/prettier-config": "^4.28.0"
+		"@wordpress/env": "^10.30.0",
+		"@wordpress/scripts": "^30.23.0",
+		"@wordpress/prettier-config": "^4.30.0"
 	},
 	"files": [
 		"docs",
