@@ -11,11 +11,11 @@ import { store } from './store';
 import type { Ability, AbilityInput, AbilityOutput } from './types';
 
 /**
- * List all available abilities.
+ * Get all available abilities.
  *
  * @return Promise resolving to array of abilities.
  */
-export async function listAbilities(): Promise< Ability[] > {
+export async function getAbilities(): Promise< Ability[] > {
 	return await resolveSelect( store ).getAbilities();
 }
 

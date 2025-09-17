@@ -17,13 +17,13 @@ interface AbilitiesAction {
 const DEFAULT_STATE: Record< string, Ability > = {};
 
 /**
- * Reducer managing the abilities by ID.
+ * Reducer managing the abilities by name.
  *
  * @param state  Current state.
  * @param action Dispatched action.
  * @return New state.
  */
-function abilitiesById(
+function abilitiesByName(
 	state: Record< string, Ability > = DEFAULT_STATE,
 	action: AbilitiesAction
 ): Record< string, Ability > {
@@ -44,5 +44,5 @@ function abilitiesById(
 }
 
 export default combineReducers( {
-	abilitiesById,
+	abilitiesByName,
 } );

@@ -59,7 +59,7 @@ export interface AbilitiesState {
 	/**
 	 * Map of ability names to ability objects.
 	 */
-	abilitiesById: Record< string, Ability >;
+	abilitiesByName: Record< string, Ability >;
 }
 
 /**

@@ -14,11 +14,11 @@ When the Abilities API is installed, the client is automatically registered and 
 
 ```javascript
 // In your WordPress plugin or theme JavaScript
-const { listAbilities, getAbility, executeAbility } = wp.abilities;
-// or import { listAbilities, getAbility, executeAbility } from '@wordpress/abilities'; depending on your setup
+const { getAbilities, getAbility, executeAbility } = wp.abilities;
+// or import { getAbilities, getAbility, executeAbility } from '@wordpress/abilities'; depending on your setup
 
-// List all abilities
-const abilities = await listAbilities();
+// Get all abilities
+const abilities = await getAbilities();
 
 // Get a specific ability
 const ability = await getAbility( 'my-plugin/my-ability' );
@@ -68,12 +68,12 @@ function MyComponent() {
 
 ### Functions
 
-#### `listAbilities(): Promise<Ability[]>`
+#### `getAbilities(): Promise<Ability[]>`
 
 Returns all registered abilities. Automatically handles pagination to fetch all abilities across multiple pages if needed.
 
 ```javascript
-const abilities = await listAbilities();
+const abilities = await getAbilities();
 console.log( `Found ${abilities.length} abilities` );
 ```
 
