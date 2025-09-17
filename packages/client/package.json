@@ -61,7 +61,6 @@
 		"@testing-library/jest-dom": "^6.1.5",
 		"@testing-library/react": "^14.1.2",
 		"@types/jest": "^30.0.0",
-		"@types/wordpress__api-fetch": "^3.23.1",
 		"@typescript-eslint/eslint-plugin": "^8.42.0",
 		"@typescript-eslint/parser": "^8.42.0",
 		"@wordpress/eslint-plugin": "^22.16.0",
