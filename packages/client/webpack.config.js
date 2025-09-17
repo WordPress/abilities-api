@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
+const defaultConfig = require('@wordpress/scripts/config/webpack.config');
 
 module.exports = {
 	...defaultConfig,
@@ -11,7 +11,7 @@ module.exports = {
 	output: {
 		...defaultConfig.output,
 		library: {
-			name: [ 'wp', 'abilities' ],
+			name: ['wp', 'abilities'],
 			type: 'window',
 		},
 	},
