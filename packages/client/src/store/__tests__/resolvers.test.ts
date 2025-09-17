@@ -41,7 +41,6 @@ describe('Store Resolvers', () => {
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
-					location: 'server',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -65,7 +64,7 @@ describe('Store Resolvers', () => {
 			expect(mockResolveSelect.getEntityRecords).toHaveBeenCalledWith(
 				ENTITY_KIND,
 				ENTITY_NAME,
-				{ per_page: 1, page: 1 }
+				{ per_page: -1 }
 			);
 			expect(mockDispatch).toHaveBeenCalledWith(
 				receiveAbilities(mockAbilities)
@@ -98,86 +97,52 @@ describe('Store Resolvers', () => {
 			expect(mockDispatch).toHaveBeenCalledWith(receiveAbilities([]));
 		});
 
-		it('should handle pagination when multiple pages exist', async () => {
-			const page1Abilities: Ability[] = [
+		it('should fetch all abilities in a single request', async () => {
+			const allAbilities: Ability[] = [
 				{
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
-					location: 'server',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
-			];
-
-			const page2Abilities: Ability[] = [
 				{
 					name: 'test/ability2',
 					label: 'Test Ability 2',
 					description: 'Second test ability',
-					location: 'server',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
-			];
-
-			const page3Abilities: Ability[] = [
 				{
 					name: 'test/ability3',
 					label: 'Test Ability 3',
 					description: 'Third test ability',
-					location: 'server',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
 			];
 
 			const mockResolveSelect = {
-				getEntityRecords: jest
-					.fn()
-					.mockResolvedValueOnce(page1Abilities)
-					.mockResolvedValueOnce(page2Abilities)
-					.mockResolvedValueOnce(page3Abilities),
-			};
-
-			const mockSelectInstance = {
-				getEntityRecordsTotalPages: jest.fn().mockReturnValue(3),
+				getEntityRecords: jest.fn().mockResolvedValue(allAbilities),
 			};
 
 			mockRegistry.resolveSelect.mockReturnValue(mockResolveSelect);
-			mockRegistry.select.mockReturnValue(mockSelectInstance);
 
 			const resolver = getAbilities();
 			await resolver({ dispatch: mockDispatch, registry: mockRegistry });
 
-			// Should fetch all 3 pages
-			expect(mockResolveSelect.getEntityRecords).toHaveBeenCalledTimes(3);
+			// Should fetch all abilities in one request with per_page: -1
+			expect(mockResolveSelect.getEntityRecords).toHaveBeenCalledTimes(1);
 			expect(mockResolveSelect.getEntityRecords).toHaveBeenNthCalledWith(
 				1,
 				ENTITY_KIND,
 				ENTITY_NAME,
-				{ per_page: 1, page: 1 }
-			);
-			expect(mockResolveSelect.getEntityRecords).toHaveBeenNthCalledWith(
-				2,
-				ENTITY_KIND,
-				ENTITY_NAME,
-				{ per_page: 1, page: 2 }
-			);
-			expect(mockResolveSelect.getEntityRecords).toHaveBeenNthCalledWith(
-				3,
-				ENTITY_KIND,
-				ENTITY_NAME,
-				{ per_page: 1, page: 3 }
+				{ per_page: -1 }
 			);
 
-			// Should dispatch all abilities combined
+			// Should dispatch all abilities
 			expect(mockDispatch).toHaveBeenCalledWith(
-				receiveAbilities([
-					...page1Abilities,
-					...page2Abilities,
-					...page3Abilities,
-				])
+				receiveAbilities(allAbilities)
 			);
 		});
 	});
@@ -188,7 +153,6 @@ describe('Store Resolvers', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Test ability description',
-				location: 'server',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -224,7 +188,6 @@ describe('Store Resolvers', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Already in store',
-				location: 'client',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: jest.fn(),
@@ -272,7 +235,6 @@ describe('Store Resolvers', () => {
 				name: 'my-plugin/feature/action',
 				label: 'Namespaced Action',
 				description: 'Complex namespaced ability',
-				location: 'server',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};

@@ -25,7 +25,6 @@ describe('Store Actions', () => {
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
-					location: 'server',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -33,7 +32,6 @@ describe('Store Actions', () => {
 					name: 'test/ability2',
 					label: 'Test Ability 2',
 					description: 'Second test ability',
-					location: 'client',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -64,7 +62,6 @@ describe('Store Actions', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Test ability description',
-				location: 'client',
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -93,7 +90,6 @@ describe('Store Actions', () => {
 				name: 'test/server-ability',
 				label: 'Server Ability',
 				description: 'Server-side ability',
-				location: 'server',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};

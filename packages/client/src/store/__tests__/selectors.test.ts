@@ -12,12 +12,11 @@ describe('Store Selectors', () => {
 	describe('getAbilities', () => {
 		it('should return all abilities as an array', () => {
 			const state: AbilitiesState = {
-				abilitiesById: {
+				abilitiesByName: {
 					'test/ability1': {
 						name: 'test/ability1',
 						label: 'Test Ability 1',
 						description: 'First test ability',
-						location: 'server',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},
@@ -25,7 +24,6 @@ describe('Store Selectors', () => {
 						name: 'test/ability2',
 						label: 'Test Ability 2',
 						description: 'Second test ability',
-						location: 'client',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 						callback: jest.fn(),
@@ -37,16 +35,16 @@ describe('Store Selectors', () => {
 
 			expect(abilities).toHaveLength(2);
 			expect(abilities).toContainEqual(
-				state.abilitiesById['test/ability1']
+				state.abilitiesByName['test/ability1']
 			);
 			expect(abilities).toContainEqual(
-				state.abilitiesById['test/ability2']
+				state.abilitiesByName['test/ability2']
 			);
 		});
 
 		it('should return empty array when no abilities exist', () => {
 			const state: AbilitiesState = {
-				abilitiesById: {},
+				abilitiesByName: {},
 			};
 
 			const abilities = getAbilities(state);
@@ -56,12 +54,11 @@ describe('Store Selectors', () => {
 
 		it('should memoize results when state unchanged', () => {
 			const state: AbilitiesState = {
-				abilitiesById: {
+				abilitiesByName: {
 					'test/ability': {
 						name: 'test/ability',
 						label: 'Test Ability',
 						description: 'Test ability',
-						location: 'server',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},
@@ -77,12 +74,11 @@ describe('Store Selectors', () => {
 
 		it('should return new array reference when state changes', () => {
 			const state1: AbilitiesState = {
-				abilitiesById: {
+				abilitiesByName: {
 					'test/ability1': {
 						name: 'test/ability1',
 						label: 'Test Ability 1',
 						description: 'Test ability',
-						location: 'server',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},
@@ -90,13 +86,12 @@ describe('Store Selectors', () => {
 			};
 
 			const state2: AbilitiesState = {
-				abilitiesById: {
-					...state1.abilitiesById,
+				abilitiesByName: {
+					...state1.abilitiesByName,
 					'test/ability2': {
 						name: 'test/ability2',
 						label: 'Test Ability 2',
 						description: 'Another test ability',
-						location: 'client',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},
@@ -115,12 +110,11 @@ describe('Store Selectors', () => {
 
 	describe('getAbility', () => {
 		const state: AbilitiesState = {
-			abilitiesById: {
+			abilitiesByName: {
 				'test/ability1': {
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
-					location: 'server',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -128,7 +122,6 @@ describe('Store Selectors', () => {
 					name: 'test/ability2',
 					label: 'Test Ability 2',
 					description: 'Second test ability',
-					location: 'client',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 					callback: jest.fn(),
@@ -139,7 +132,7 @@ describe('Store Selectors', () => {
 		it('should return a specific ability by name', () => {
 			const ability = getAbility(state, 'test/ability1');
 
-			expect(ability).toEqual(state.abilitiesById['test/ability1']);
+			expect(ability).toEqual(state.abilitiesByName['test/ability1']);
 		});
 
 		it('should return null if ability not found', () => {
@@ -150,7 +143,7 @@ describe('Store Selectors', () => {
 
 		it('should handle empty state', () => {
 			const emptyState: AbilitiesState = {
-				abilitiesById: {},
+				abilitiesByName: {},
 			};
 
 			const ability = getAbility(emptyState, 'test/ability');
@@ -161,18 +154,17 @@ describe('Store Selectors', () => {
 		it('should return client abilities with callbacks', () => {
 			const ability = getAbility(state, 'test/ability2');
 
-			expect(ability).toEqual(state.abilitiesById['test/ability2']);
+			expect(ability).toEqual(state.abilitiesByName['test/ability2']);
 			expect(ability?.callback).toBeDefined();
 		});
 
 		it('should handle namespaced ability names correctly', () => {
 			const stateWithNamespaced: AbilitiesState = {
-				abilitiesById: {
+				abilitiesByName: {
 					'my-plugin/feature/action': {
 						name: 'my-plugin/feature/action',
 						label: 'Namespaced Action',
 						description: 'Complex namespaced ability',
-						location: 'server',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},
@@ -185,7 +177,7 @@ describe('Store Selectors', () => {
 			);
 
 			expect(ability).toEqual(
-				stateWithNamespaced.abilitiesById['my-plugin/feature/action']
+				stateWithNamespaced.abilitiesByName['my-plugin/feature/action']
 			);
 		});
 	});

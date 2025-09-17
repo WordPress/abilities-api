@@ -5,25 +5,26 @@
 /**
  * WordPress dependencies
  */
-import { dispatch, resolveSelect } from '@wordpress/data';
+import { dispatch, select, resolveSelect } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
 import {
-	listAbilities,
+	getAbilities,
 	getAbility,
 	registerAbility,
 	unregisterAbility,
 	executeAbility,
 } from '../api';
 import { store } from '../store';
-import type { Ability, ClientAbility, ServerAbility } from '../types';
+import type { Ability } from '../types';
 
 // Mock WordPress dependencies
 jest.mock('@wordpress/data', () => ({
 	dispatch: jest.fn(),
+	select: jest.fn(),
 	resolveSelect: jest.fn(),
 }));
 
@@ -38,14 +39,13 @@ describe('API functions', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('listAbilities', () => {
+	describe('getAbilities', () => {
 		it('should resolve and return all abilities from the store', async () => {
 			const mockAbilities: Ability[] = [
 				{
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
-					location: 'server',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -53,7 +53,6 @@ describe('API functions', () => {
 					name: 'test/ability2',
 					label: 'Test Ability 2',
 					description: 'Second test ability',
-					location: 'client',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -64,7 +63,7 @@ describe('API functions', () => {
 				getAbilities: mockGetAbilities,
 			});
 
-			const result = await listAbilities();
+			const result = await getAbilities();
 
 			expect(resolveSelect).toHaveBeenCalledWith(store);
 			expect(mockGetAbilities).toHaveBeenCalled();
@@ -78,7 +77,6 @@ describe('API functions', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Test ability description',
-				location: 'server',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -115,11 +113,15 @@ describe('API functions', () => {
 				registerAbility: mockRegisterAbility,
 			});
 
+			// Mock select to return no existing ability
+			(select as jest.Mock).mockReturnValue({
+				getAbility: jest.fn().mockReturnValue(null),
+			});
+
 			const ability = {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
-				location: 'client' as const,
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: jest.fn(),
@@ -131,33 +133,15 @@ describe('API functions', () => {
 			expect(mockRegisterAbility).toHaveBeenCalledWith(ability);
 		});
 
-		it('should throw error for server abilities', () => {
+		it('should throw error for abilities without callback', () => {
 			const mockRegisterAbility = jest.fn();
 			(dispatch as jest.Mock).mockReturnValue({
 				registerAbility: mockRegisterAbility,
 			});
 
-			const ability: ServerAbility = {
-				name: 'test/server-ability',
-				label: 'Server Ability',
-				description: 'Test server ability',
-				location: 'server',
-				input_schema: { type: 'object' },
-				output_schema: { type: 'object' },
-			};
-
-			// Use type assertion to bypass TypeScript check for testing runtime validation
-			expect(() =>
-				registerAbility(ability as unknown as ClientAbility)
-			).toThrow(
-				'Server abilities cannot be registered via registerAbility'
-			);
-		});
-
-		it('should throw error for client abilities without callback', () => {
-			const mockRegisterAbility = jest.fn();
-			(dispatch as jest.Mock).mockReturnValue({
-				registerAbility: mockRegisterAbility,
+			// Mock select to return no existing ability
+			(select as jest.Mock).mockReturnValue({
+				getAbility: jest.fn().mockReturnValue(null),
 			});
 
 			// Create an incomplete client ability for testing runtime validation
@@ -165,7 +149,6 @@ describe('API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
-				location: 'client' as const,
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				// Missing callback property
@@ -173,45 +156,45 @@ describe('API functions', () => {
 
 			// Use type assertion to bypass TypeScript check
 			expect(() =>
-				registerAbility(ability as unknown as ClientAbility)
-			).toThrow('Client abilities must include a callback function');
+				registerAbility(ability as unknown as Ability)
+			).toThrow('Abilities registered on the client require a callback function');
 		});
 
 		it('should throw error for ability without name', () => {
-			const ability: Partial<ClientAbility> = {
+			const ability: Partial<Ability> = {
 				label: 'Test Ability',
 				description: 'Test ability',
 				callback: jest.fn(),
 				// Missing name property
 			};
 
-			expect(() => registerAbility(ability as ClientAbility)).toThrow(
+			expect(() => registerAbility(ability as Ability)).toThrow(
 				'Ability name is required'
 			);
 		});
 
 		it('should throw error for ability without label', () => {
-			const ability: Partial<ClientAbility> = {
+			const ability: Partial<Ability> = {
 				name: 'test/ability',
 				description: 'Test ability',
 				callback: jest.fn(),
 				// Missing label property
 			};
 
-			expect(() => registerAbility(ability as ClientAbility)).toThrow(
+			expect(() => registerAbility(ability as Ability)).toThrow(
 				'Ability label is required'
 			);
 		});
 
 		it('should throw error for ability without description', () => {
-			const ability: Partial<ClientAbility> = {
+			const ability: Partial<Ability> = {
 				name: 'test/ability',
 				label: 'Test Ability',
 				callback: jest.fn(),
 				// Missing description property
 			};
 
-			expect(() => registerAbility(ability as ClientAbility)).toThrow(
+			expect(() => registerAbility(ability as Ability)).toThrow(
 				'Ability description is required'
 			);
 		});
@@ -237,7 +220,6 @@ describe('API functions', () => {
 				name: 'test/server-ability',
 				label: 'Server Ability',
 				description: 'Test server ability',
-				location: 'server',
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -274,7 +256,6 @@ describe('API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
-				location: 'client',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: mockCallback,
@@ -311,7 +292,6 @@ describe('API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
-				location: 'client',
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -338,7 +318,6 @@ describe('API functions', () => {
 				name: 'test/resource',
 				label: 'Resource Ability',
 				description: 'Test resource ability',
-				location: 'server',
 				meta: { type: 'resource' },
 				input_schema: {
 					type: 'object',
@@ -373,7 +352,6 @@ describe('API functions', () => {
 				name: 'test/resource',
 				label: 'Resource Ability',
 				description: 'Test resource ability',
-				location: 'server',
 				meta: { type: 'resource' },
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
@@ -390,7 +368,7 @@ describe('API functions', () => {
 			const result = await executeAbility('test/resource', {});
 
 			expect(apiFetch).toHaveBeenCalledWith({
-				path: '/wp/v2/abilities/test/resource/run',
+				path: '/wp/v2/abilities/test/resource/run?',
 				method: 'GET',
 			});
 			expect(result).toEqual(mockResponse);
@@ -407,7 +385,6 @@ describe('API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
-				location: 'client',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: mockCallback,
@@ -440,7 +417,6 @@ describe('API functions', () => {
 				name: 'test/server-ability',
 				label: 'Server Ability',
 				description: 'Test server ability',
-				location: 'server',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -464,27 +440,32 @@ describe('API functions', () => {
 			consoleErrorSpy.mockRestore();
 		});
 
-		it('should throw error when client ability is missing callback during execution', async () => {
+		it('should execute ability without callback as server ability', async () => {
 			const mockAbility: Ability = {
-				name: 'test/client-ability',
-				label: 'Client Ability',
-				description: 'Test client ability',
-				location: 'client',
+				name: 'test/ability',
+				label: 'Test Ability',
+				description: 'Test ability without callback',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
-				// Intentionally missing callback to test the edge case
-			} as Ability;
+				// No callback - should execute as server ability
+			};
 
 			const mockGetAbility = jest.fn().mockResolvedValue(mockAbility);
 			(resolveSelect as jest.Mock).mockReturnValue({
 				getAbility: mockGetAbility,
 			});
 
-			await expect(
-				executeAbility('test/client-ability', {})
-			).rejects.toThrow(
-				'Client ability test/client-ability is missing callback function'
-			);
+			const mockResponse = { success: true };
+			(apiFetch as unknown as jest.Mock).mockResolvedValue(mockResponse);
+
+			const result = await executeAbility('test/ability', { data: 'test' });
+
+			expect(apiFetch).toHaveBeenCalledWith({
+				path: '/wp/v2/abilities/test/ability/run',
+				method: 'POST',
+				data: { input: { data: 'test' } },
+			});
+			expect(result).toEqual(mockResponse);
 		});
 
 		it('should validate output for client abilities', async () => {
@@ -495,7 +476,6 @@ describe('API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
-				location: 'client',
 				input_schema: { type: 'object' },
 				output_schema: {
 					type: 'object',
