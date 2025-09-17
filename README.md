@@ -22,6 +22,7 @@
 - [Getting Started](docs/2.getting-started.md)
 - [Registering Abilities](docs/3.registering-abilities.md)
 - [Using Abilities](docs/4.using-abilities.md)
+- [REST API Reference](docs/5.rest-api.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 
 ## Inspiration
@@ -33,7 +34,7 @@
 ## Current Status
 
 | Milestone                           | State       |
-| ----------------------------------- |-------------|
+| ----------------------------------- | ----------- |
 | Placeholder repository              | **created** |
 | Spec draft                          | in progress |
 | Prototype plugin & Composer package | in progress |
