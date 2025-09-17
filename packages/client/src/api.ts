@@ -10,12 +10,7 @@ import { sprintf, __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { store } from './store';
-import type {
-	Ability,
-	ClientAbility,
-	AbilityInput,
-	AbilityOutput,
-} from './types';
+import type { Ability, AbilityInput, AbilityOutput } from './types';
 import { validateValueFromSchema } from './validation';
 
 /**
@@ -43,7 +38,7 @@ export async function getAbility(name: string): Promise<Ability | null> {
  * Client abilities are executed locally in the browser and must include
  * a callback function.
  *
- * @param ability The client ability definition including callback.
+ * @param ability The ability definition including callback.
  * @throws Error if ability is invalid or missing required fields.
  *
  * @example
@@ -52,7 +47,6 @@ export async function getAbility(name: string): Promise<Ability | null> {
  *   name: 'my-plugin/navigate',
  *   label: 'Navigate to URL',
  *   description: 'Navigates to a URL within WordPress admin',
- *   location: 'client',
  *   input_schema: {
  *     type: 'object',
  *     properties: {
@@ -67,7 +61,7 @@ export async function getAbility(name: string): Promise<Ability | null> {
  * });
  * ```
  */
-export function registerAbility(ability: ClientAbility): void {
+export function registerAbility(ability: Ability): void {
 	if (!ability.name) {
 		throw new Error('Ability name is required');
 	}
@@ -78,7 +72,7 @@ export function registerAbility(ability: ClientAbility): void {
 		throw new Error('Ability description is required');
 	}
 	if (!ability.callback || typeof ability.callback !== 'function') {
-		throw new Error('Client abilities must include a callback function');
+		throw new Error('Ability registered on the client require a callback function');
 	}
 
 	dispatch(store).registerAbility(ability);
@@ -203,7 +197,7 @@ async function executeServerAbility(
  * Execute an ability.
  *
  * Determines whether to execute locally (client abilities) or remotely (server abilities)
- * based on the ability's location property.
+ * based on whether the ability has a callback function.
  *
  * @param name  The ability name.
  * @param input Optional input parameters for the ability.
@@ -225,8 +219,8 @@ export async function executeAbility(
 		);
 	}
 
-	// Route to appropriate execution method
-	if (ability.location === 'client') {
+
+	if (ability.callback) {
 		return executeClientAbility(ability, input);
 	}
 

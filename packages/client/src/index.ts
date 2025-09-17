@@ -61,8 +61,6 @@ export { store } from './store';
  */
 export type {
 	Ability,
-	ClientAbility,
-	ServerAbility,
 	AbilitiesState,
 	AbilityCallback,
 	AbilityInput,

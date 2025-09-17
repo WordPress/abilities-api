@@ -48,25 +48,13 @@ function abilitiesByName(
 			if (!action.ability) {
 				return state;
 			}
-			const clientAbility = {
-				...action.ability,
-				location: 'client' as const,
-			};
 			return {
 				...state,
-				[clientAbility.name]: clientAbility,
+				[action.ability.name]: action.ability,
 			};
 		}
 		case UNREGISTER_ABILITY: {
 			if (!action.name || !state[action.name]) {
-				return state;
-			}
-			// Only allow unregistering client abilities
-			if (state[action.name].location !== 'client') {
-				// eslint-disable-next-line no-console
-				console.warn(
-					`Cannot unregister server-side ability: ${action.name}`
-				);
 				return state;
 			}
 			const newState = { ...state };

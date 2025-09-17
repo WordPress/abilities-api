@@ -41,12 +41,18 @@ export function getAbility(name: string) {
 			return;
 		}
 
-		const ability = await registry
-			.resolveSelect(coreStore)
-			.getEntityRecord(ENTITY_KIND, ENTITY_NAME, name);
+		try {
+			const ability = await registry
+				.resolveSelect(coreStore)
+				.getEntityRecord(ENTITY_KIND, ENTITY_NAME, name);
 
-		if (ability) {
-			dispatch(receiveAbilities([ability]));
+			if (ability) {
+				dispatch(receiveAbilities([ability]));
+			}
+		} catch (error) {
+			// If ability doesn't exist ore return, we'll return null from the selector
+			// eslint-disable-next-line no-console
+			console.debug(`Ability not found: ${name}`);
 		}
 	};
 }

@@ -47,16 +47,9 @@ export interface Ability {
 	output_schema?: Record<string, any>;
 
 	/**
-	 * Where the ability is executed.
-	 * 'server' means it's executed via REST API on the server.
-	 * 'client' means it's executed locally in the browser.
-	 * Defaults to 'server'.
-	 */
-	location?: 'server' | 'client';
-
-	/**
 	 * Callback function for client-side abilities.
-	 * Only used when location is 'client'.
+	 * If present, the ability will be executed locally in the browser.
+	 * If not present, the ability will be executed via REST API on the server.
 	 */
 	callback?: AbilityCallback;
 
@@ -71,22 +64,6 @@ export interface Ability {
 		type?: 'resource' | 'tool';
 		[key: string]: any;
 	};
-}
-
-/**
- * Server-side ability that is executed via REST API.
- */
-export interface ServerAbility extends Ability {
-	location: 'server';
-}
-
-/**
- * Client-side ability that is executed locally in the browser.
- * Must include a callback function.
- */
-export interface ClientAbility extends Ability {
-	location: 'client';
-	callback: AbilityCallback;
 }
 
 /**
