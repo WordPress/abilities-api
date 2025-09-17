@@ -57,7 +57,18 @@ describe('Store Actions', () => {
 	});
 
 	describe('registerAbility', () => {
-		it('should create an action to register an ability', () => {
+		let mockSelect: any;
+		let mockDispatch: jest.Mock;
+
+		beforeEach(() => {
+			jest.clearAllMocks();
+			mockSelect = {
+				getAbility: jest.fn().mockReturnValue(null),
+			};
+			mockDispatch = jest.fn();
+		});
+
+		it('should register a valid client ability', () => {
 			const ability: Ability = {
 				name: 'test/ability',
 				label: 'Test Ability',
@@ -78,8 +89,9 @@ describe('Store Actions', () => {
 			};
 
 			const action = registerAbility(ability);
+			action({ select: mockSelect, dispatch: mockDispatch });
 
-			expect(action).toEqual({
+			expect(mockDispatch).toHaveBeenCalledWith({
 				type: REGISTER_ABILITY,
 				ability,
 			});
@@ -95,11 +107,102 @@ describe('Store Actions', () => {
 			};
 
 			const action = registerAbility(ability);
+			action({ select: mockSelect, dispatch: mockDispatch });
 
-			expect(action).toEqual({
+			expect(mockDispatch).toHaveBeenCalledWith({
 				type: REGISTER_ABILITY,
 				ability,
 			});
+		});
+
+		it('should validate and reject ability without name', () => {
+			const ability: Ability = {
+				name: '',
+				label: 'Test Ability',
+				description: 'Test description',
+				callback: jest.fn(),
+			};
+
+			const action = registerAbility(ability);
+
+			expect(() =>
+				action({ select: mockSelect, dispatch: mockDispatch })
+			).toThrow('Ability name is required');
+			expect(mockDispatch).not.toHaveBeenCalled();
+		});
+
+		it('should validate and reject ability without label', () => {
+			const ability: Ability = {
+				name: 'test/ability',
+				label: '',
+				description: 'Test description',
+				callback: jest.fn(),
+			};
+
+			const action = registerAbility(ability);
+
+			expect(() =>
+				action({ select: mockSelect, dispatch: mockDispatch })
+			).toThrow('Ability "test/ability" must have a label');
+			expect(mockDispatch).not.toHaveBeenCalled();
+		});
+
+		it('should validate and reject ability without description', () => {
+			const ability: Ability = {
+				name: 'test/ability',
+				label: 'Test Ability',
+				description: '',
+				callback: jest.fn(),
+			};
+
+			const action = registerAbility(ability);
+
+			expect(() =>
+				action({ select: mockSelect, dispatch: mockDispatch })
+			).toThrow('Ability "test/ability" must have a description');
+			expect(mockDispatch).not.toHaveBeenCalled();
+		});
+
+		it('should validate and reject ability with invalid callback', () => {
+			const ability: Ability = {
+				name: 'test/ability',
+				label: 'Test Ability',
+				description: 'Test description',
+				callback: 'not a function' as any,
+			};
+
+			const action = registerAbility(ability);
+
+			expect(() =>
+				action({ select: mockSelect, dispatch: mockDispatch })
+			).toThrow(
+				'Ability "test/ability" has an invalid callback. Callback must be a function'
+			);
+			expect(mockDispatch).not.toHaveBeenCalled();
+		});
+
+		it('should validate and reject already registered ability', () => {
+			const existingAbility: Ability = {
+				name: 'test/ability',
+				label: 'Existing Ability',
+				description: 'Already registered',
+			};
+
+			mockSelect.getAbility.mockReturnValue(existingAbility);
+
+			const ability: Ability = {
+				name: 'test/ability',
+				label: 'Test Ability',
+				description: 'Test description',
+				callback: jest.fn(),
+			};
+
+			const action = registerAbility(ability);
+
+			expect(() =>
+				action({ select: mockSelect, dispatch: mockDispatch })
+			).toThrow('Ability "test/ability" is already registered');
+			expect(mockDispatch).not.toHaveBeenCalled();
 		});
 	});
 

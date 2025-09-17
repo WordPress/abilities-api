@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { dispatch, select, resolveSelect } from '@wordpress/data';
+import { dispatch, resolveSelect } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { sprintf, __ } from '@wordpress/i18n';
@@ -36,10 +36,11 @@ export async function getAbility(name: string): Promise<Ability | null> {
  * Register a client-side ability.
  *
  * Client abilities are executed locally in the browser and must include
- * a callback function.
+ * a callback function. The ability will be validated by the store action,
+ * and an error will be thrown if validation fails.
  *
  * @param ability The ability definition including callback.
- * @throws Error if ability is invalid or missing required fields.
+ * @throws {Error} If the ability fails validation.
  *
  * @example
  * ```js
@@ -62,34 +63,6 @@ export async function getAbility(name: string): Promise<Ability | null> {
  * ```
  */
 export function registerAbility(ability: Ability): void {
-	if (!ability.name) {
-		throw new Error(__('Ability name is required'));
-	}
-	if (!ability.label) {
-		throw new Error(__('Ability label is required'));
-	}
-	if (!ability.description) {
-		throw new Error(__('Ability description is required'));
-	}
-
-	if (!ability.callback || typeof ability.callback !== 'function') {
-		throw new Error(
-			__('Abilities registered on the client require a callback function')
-		);
-	}
-
-	// Check if ability is already registered
-	const existingAbility = select(store).getAbility(ability.name);
-	if (existingAbility) {
-		throw new Error(
-			sprintf(
-				/* translators: %s: ability name */
-				__('Ability "%s" is already registered'),
-				ability.name
-			)
-		);
-	}
-
 	dispatch(store).registerAbility(ability);
 }
 

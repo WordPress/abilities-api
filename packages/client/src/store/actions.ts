@@ -1,4 +1,9 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import type { Ability } from '../types';
@@ -22,15 +27,56 @@ export function receiveAbilities(abilities: Ability[]) {
 }
 
 /**
- * Returns an action object used to register a client-side ability.
+ * Registers an ability in the store.
+ *
+ * This action validates the ability before registration. If validation fails,
+ * an error will be thrown.
  *
  * @param ability The ability to register.
- * @return Action object.
+ * @return Action object or function.
+ * @throws {Error} If validation fails.
  */
 export function registerAbility(ability: Ability) {
-	return {
-		type: REGISTER_ABILITY,
-		ability,
+	// @ts-expect-error - registry types are not yet available
+	return ({ select, dispatch }) => {
+		if (!ability.name) {
+			throw new Error(__('Ability name is required'));
+		}
+
+		if (!ability.label) {
+			throw new Error(
+				__(`Ability "${ability.name}" must have a label`)
+			);
+		}
+
+		if (!ability.description) {
+			throw new Error(
+				__(`Ability "${ability.name}" must have a description`)
+			);
+		}
+
+		// Client-side abilities must have a callback
+		if (ability.callback && typeof ability.callback !== 'function') {
+			throw new Error(
+				__(
+					`Ability "${ability.name}" has an invalid callback. Callback must be a function`
+				)
+			);
+		}
+
+		// Check if ability is already registered
+		const existingAbility = select.getAbility(ability.name);
+		if (existingAbility) {
+			throw new Error(
+				__(`Ability "${ability.name}" is already registered`)
+			);
+		}
+
+		// All validation passed, dispatch the registration action
+		dispatch({
+			type: REGISTER_ABILITY,
+			ability,
+		});
 	};
 }
 
