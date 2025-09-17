@@ -180,4 +180,275 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		$this->assertSame( 42, $ability->execute() );
 	}
+
+	/**
+	 * Tests that before_execute_ability action is fired with correct parameters.
+	 */
+	public function test_before_execute_ability_action() {
+		$action_ability_name = null;
+		$action_input = null;
+
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'input_schema'     => array(
+					'type'        => 'integer',
+					'description' => 'Test input parameter.',
+					'required'    => true,
+				),
+				'execute_callback' => static function ( int $input ): int {
+					return $input * 2;
+				},
+			)
+		);
+
+		$callback = static function ( $ability_name, $input ) use ( &$action_ability_name, &$action_input ) {
+			$action_ability_name = $ability_name;
+			$action_input = $input;
+		};
+
+		add_action( 'before_execute_ability', $callback, 10, 2 );
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+		$result = $ability->execute( 5 );
+
+		remove_action( 'before_execute_ability', $callback );
+
+		$this->assertSame( self::$test_ability_name, $action_ability_name, 'Action should receive correct ability name' );
+		$this->assertSame( 5, $action_input, 'Action should receive correct input' );
+		$this->assertSame( 10, $result, 'Ability should execute correctly' );
+	}
+
+	/**
+	 * Tests that before_execute_ability action is fired with null input when no input schema is defined.
+	 */
+	public function test_before_execute_ability_action_no_input() {
+		$action_ability_name = null;
+		$action_input = null;
+
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'execute_callback' => static function (): int {
+					return 42;
+				},
+			)
+		);
+
+		$callback = static function ( $ability_name, $input ) use ( &$action_ability_name, &$action_input ) {
+			$action_ability_name = $ability_name;
+			$action_input = $input;
+		};
+
+		add_action( 'before_execute_ability', $callback, 10, 2 );
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+		$result = $ability->execute();
+
+		remove_action( 'before_execute_ability', $callback );
+
+		$this->assertSame( self::$test_ability_name, $action_ability_name, 'Action should receive correct ability name' );
+		$this->assertNull( $action_input, 'Action should receive null input when no input provided' );
+		$this->assertSame( 42, $result, 'Ability should execute correctly' );
+	}
+
+	/**
+	 * Tests that after_execute_ability action is fired with correct parameters.
+	 */
+	public function test_after_execute_ability_action() {
+		$action_ability_name = null;
+		$action_input = null;
+		$action_result = null;
+
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'input_schema'     => array(
+					'type'        => 'integer',
+					'description' => 'Test input parameter.',
+					'required'    => true,
+				),
+				'execute_callback' => static function ( int $input ): int {
+					return $input * 3;
+				},
+			)
+		);
+
+		$callback = static function ( $ability_name, $input, $result ) use ( &$action_ability_name, &$action_input, &$action_result ) {
+			$action_ability_name = $ability_name;
+			$action_input = $input;
+			$action_result = $result;
+		};
+
+		add_action( 'after_execute_ability', $callback, 10, 3 );
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+		$result = $ability->execute( 7 );
+
+		remove_action( 'after_execute_ability', $callback );
+
+		$this->assertSame( self::$test_ability_name, $action_ability_name, 'Action should receive correct ability name' );
+		$this->assertSame( 7, $action_input, 'Action should receive correct input' );
+		$this->assertSame( 21, $action_result, 'Action should receive correct result' );
+		$this->assertSame( 21, $result, 'Ability should execute correctly' );
+	}
+
+	/**
+	 * Tests that after_execute_ability action is fired with null input when no input schema is defined.
+	 */
+	public function test_after_execute_ability_action_no_input() {
+		$action_ability_name = null;
+		$action_input = null;
+		$action_result = null;
+
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'output_schema'    => array(),
+				'execute_callback' => static function (): string {
+					return 'test-result';
+				},
+			)
+		);
+
+		$callback = static function ( $ability_name, $input, $result ) use ( &$action_ability_name, &$action_input, &$action_result ) {
+			$action_ability_name = $ability_name;
+			$action_input = $input;
+			$action_result = $result;
+		};
+
+		add_action( 'after_execute_ability', $callback, 10, 3 );
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+		$result = $ability->execute();
+
+		remove_action( 'after_execute_ability', $callback );
+
+		$this->assertSame( self::$test_ability_name, $action_ability_name, 'Action should receive correct ability name' );
+		$this->assertNull( $action_input, 'Action should receive null input when no input provided' );
+		$this->assertSame( 'test-result', $action_result, 'Action should receive correct result' );
+		$this->assertSame( 'test-result', $result, 'Ability should execute correctly' );
+	}
+
+	/**
+	 * Tests that neither action is fired when execution fails due to permission issues.
+	 */
+	public function test_actions_not_fired_on_permission_failure() {
+		$before_action_fired = false;
+		$after_action_fired = false;
+
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'permission_callback' => static function (): bool {
+					return false;
+				},
+				'execute_callback'    => static function (): int {
+					return 42;
+				},
+			)
+		);
+
+		$before_callback = static function () use ( &$before_action_fired ) {
+			$before_action_fired = true;
+		};
+
+		$after_callback = static function () use ( &$after_action_fired ) {
+			$after_action_fired = true;
+		};
+
+		add_action( 'before_execute_ability', $before_callback );
+		add_action( 'after_execute_ability', $after_callback );
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+		$result = $ability->execute();
+
+		remove_action( 'before_execute_ability', $before_callback );
+		remove_action( 'after_execute_ability', $after_callback );
+
+		$this->assertFalse( $before_action_fired, 'before_execute_ability action should not be fired on permission failure' );
+		$this->assertFalse( $after_action_fired, 'after_execute_ability action should not be fired on permission failure' );
+		$this->assertInstanceOf( WP_Error::class, $result, 'Should return WP_Error on permission failure' );
+	}
+
+	/**
+	 * Tests that after_execute_ability action is not fired when execution callback returns WP_Error.
+	 */
+	public function test_after_action_not_fired_on_execution_error() {
+		$before_action_fired = false;
+		$after_action_fired = false;
+
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'execute_callback' => static function () {
+					return new WP_Error( 'test_error', 'Test execution error' );
+				},
+			)
+		);
+
+		$before_callback = static function () use ( &$before_action_fired ) {
+			$before_action_fired = true;
+		};
+
+		$after_callback = static function () use ( &$after_action_fired ) {
+			$after_action_fired = true;
+		};
+
+		add_action( 'before_execute_ability', $before_callback );
+		add_action( 'after_execute_ability', $after_callback );
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+		$result = $ability->execute();
+
+		remove_action( 'before_execute_ability', $before_callback );
+		remove_action( 'after_execute_ability', $after_callback );
+
+		$this->assertTrue( $before_action_fired, 'before_execute_ability action should be fired even if execution fails' );
+		$this->assertFalse( $after_action_fired, 'after_execute_ability action should not be fired when execution returns WP_Error' );
+		$this->assertInstanceOf( WP_Error::class, $result, 'Should return WP_Error from execution callback' );
+	}
+
+	/**
+	 * Tests that after_execute_ability action is not fired when output validation fails.
+	 */
+	public function test_after_action_not_fired_on_output_validation_error() {
+		$before_action_fired = false;
+		$after_action_fired = false;
+
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'output_schema'    => array(
+					'type'        => 'string',
+					'description' => 'Expected string output.',
+					'required'    => true,
+				),
+				'execute_callback' => static function (): int {
+					return 42;
+				},
+			)
+		);
+
+		$before_callback = static function () use ( &$before_action_fired ) {
+			$before_action_fired = true;
+		};
+
+		$after_callback = static function () use ( &$after_action_fired ) {
+			$after_action_fired = true;
+		};
+
+		add_action( 'before_execute_ability', $before_callback );
+		add_action( 'after_execute_ability', $after_callback );
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+		$result = $ability->execute();
+
+		remove_action( 'before_execute_ability', $before_callback );
+		remove_action( 'after_execute_ability', $after_callback );
+
+		$this->assertTrue( $before_action_fired, 'before_execute_ability action should be fired even if output validation fails' );
+		$this->assertFalse( $after_action_fired, 'after_execute_ability action should not be fired when output validation fails' );
+		$this->assertInstanceOf( WP_Error::class, $result, 'Should return WP_Error for output validation failure' );
+	}
 }

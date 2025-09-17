@@ -23,6 +23,7 @@
 - [Registering Abilities](docs/3.registering-abilities.md)
 - [Using Abilities](docs/4.using-abilities.md)
 - [REST API Reference](docs/5.rest-api.md)
+- [Hooks](docs/6.hooks.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 
 ## Inspiration
@@ -36,16 +37,16 @@
 | Milestone                           | State       |
 | ----------------------------------- | ----------- |
 | Placeholder repository              | **created** |
-| Spec draft                          | in progress |
-| Prototype plugin & Composer package | in progress |
-| Community feedback (#core‑ai Slack) | planned     |
+| Spec draft                          | **created** |
+| Prototype plugin & Composer package | **created** |
+| Community feedback (#core‑ai Slack) | in progress |
 | Core proposal                       | planned     |
 
 ## How to Get Involved
 
 - **Discuss:** `#core-ai` channel on WordPress Slack.
 - **File issues:** suggestions & use‑cases welcome in this repo.
-- **Prototype:** experiment with the upcoming Composer package once released.
+- **Prototype:** experiment with the [`wordpress/abilities-api`](https://packagist.org/packages/wordpress/abilities-api) Composer package.
 
 ## License
 

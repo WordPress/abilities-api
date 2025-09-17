@@ -421,8 +421,8 @@ class WP_Ability {
 		 *
 		 * @since n.e.x.t
 		 *
-		 * @param string              $ability_name The name of the ability.
-		 * @param array<string,mixed> $input        The input data for the ability.
+		 * @param string $ability_name The name of the ability.
+		 * @param mixed  $input        The input data for the ability.
 		 */
 		do_action( 'before_execute_ability', $this->name, $input );
 
@@ -441,9 +441,9 @@ class WP_Ability {
 		 *
 		 * @since n.e.x.t
 		 *
-		 * @param string              $ability_name The name of the ability.
-		 * @param array<string,mixed> $input        The input data for the ability.
-		 * @param mixed               $result       The result of the ability execution.
+		 * @param string $ability_name The name of the ability.
+		 * @param mixed  $input        The input data for the ability.
+		 * @param mixed  $result       The result of the ability execution.
 		 */
 		do_action( 'after_execute_ability', $this->name, $input, $result );
 
