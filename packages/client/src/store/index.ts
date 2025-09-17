@@ -3,6 +3,7 @@
  */
 import { createReduxStore, register, dispatch } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -33,7 +34,7 @@ dispatch( coreStore ).addEntities( [
 		baseURL: '/wp/v2/abilities',
 		baseURLParams: { context: 'edit' },
 		plural: 'abilities',
-		label: 'Abilities',
+		label: __( 'Abilities' ),
 		supportsPagination: true,
 	},
 ] );

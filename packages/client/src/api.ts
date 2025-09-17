@@ -4,6 +4,7 @@
 import { resolveSelect } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
+import { sprintf, __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -47,7 +48,13 @@ export async function executeAbility(
 ): Promise< AbilityOutput > {
 	const ability = await getAbility( name );
 	if ( ! ability ) {
-		throw new Error( `Ability not found: ${ name }` );
+		throw new Error(
+			sprintf(
+				/* translators: %s: ability name */
+				__( 'Ability not found: %s' ),
+				name
+			)
+		);
 	}
 
 	const isResource = ability.meta?.type === 'resource';
