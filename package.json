@@ -27,6 +27,8 @@
 	],
 	"scripts": {
 		"plugin-zip": "wp-scripts plugin-zip",
+		"build:client": "npm run build --workspace=@wordpress/abilities",
+		"dev:client": "npm run dev --workspace=@wordpress/abilities",
 		"format": "wp-scripts format",
 		"format:js": "npm run format --workspace=@wordpress/abilities",
 		"lint:js": "npm run lint:js --workspace=@wordpress/abilities",
