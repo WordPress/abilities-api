@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { dispatch, resolveSelect } from '@wordpress/data';
+import { dispatch, select, resolveSelect } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { sprintf, __ } from '@wordpress/i18n';
@@ -73,6 +73,18 @@ export function registerAbility(ability: Ability): void {
 	}
 	if (!ability.callback || typeof ability.callback !== 'function') {
 		throw new Error('Ability registered on the client require a callback function');
+	}
+
+	// Check if ability is already registered
+	const existingAbility = select(store).getAbility(ability.name);
+	if (existingAbility) {
+		throw new Error(
+			sprintf(
+				/* translators: %s: ability name */
+				__('Ability "%s" is already registered'),
+				ability.name
+			)
+		);
 	}
 
 	dispatch(store).registerAbility(ability);
