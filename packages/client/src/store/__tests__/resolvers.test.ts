@@ -230,11 +230,11 @@ describe('Store Resolvers', () => {
 			expect(mockDispatch).not.toHaveBeenCalled();
 		});
 
-		it('should handle namespaced ability names', async () => {
+		it('should handle valid namespaced ability names', async () => {
 			const mockAbility: Ability = {
-				name: 'my-plugin/feature/action',
+				name: 'my-plugin/feature-action',
 				label: 'Namespaced Action',
-				description: 'Complex namespaced ability',
+				description: 'Namespaced ability',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -246,7 +246,7 @@ describe('Store Resolvers', () => {
 			mockRegistry.resolveSelect.mockReturnValue(mockResolveSelect);
 			mockSelect.getAbility = jest.fn().mockReturnValue(null);
 
-			const resolver = getAbility('my-plugin/feature/action');
+			const resolver = getAbility('my-plugin/feature-action');
 			await resolver({
 				dispatch: mockDispatch,
 				registry: mockRegistry,
@@ -256,7 +256,7 @@ describe('Store Resolvers', () => {
 			expect(mockResolveSelect.getEntityRecord).toHaveBeenCalledWith(
 				ENTITY_KIND,
 				ENTITY_NAME,
-				'my-plugin/feature/action'
+				'my-plugin/feature-action'
 			);
 			expect(mockDispatch).toHaveBeenCalledWith(
 				receiveAbilities([mockAbility])

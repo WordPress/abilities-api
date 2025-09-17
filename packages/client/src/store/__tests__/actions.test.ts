@@ -131,6 +131,35 @@ describe('Store Actions', () => {
 			expect(mockDispatch).not.toHaveBeenCalled();
 		});
 
+		it('should validate and reject ability with invalid name format', () => {
+			const testCases = [
+				'invalid', // No namespace
+				'my-plugin/feature/action', // Multiple slashes
+				'My-Plugin/feature', // Uppercase letters
+				'my_plugin/feature', // Underscores not allowed
+				'my-plugin/feature!', // Special characters not allowed
+				'my plugin/feature', // Spaces not allowed
+			];
+
+			testCases.forEach((invalidName) => {
+				const ability: Ability = {
+					name: invalidName,
+					label: 'Test Ability',
+					description: 'Test description',
+					callback: jest.fn(),
+				};
+
+				const action = registerAbility(ability);
+
+				expect(() =>
+					action({ select: mockSelect, dispatch: mockDispatch })
+				).toThrow(
+					'Ability name must be a string containing a namespace prefix'
+				);
+				expect(mockDispatch).not.toHaveBeenCalled();
+			});
+		});
+
 		it('should validate and reject ability without label', () => {
 			const ability: Ability = {
 				name: 'test/ability',
@@ -217,8 +246,8 @@ describe('Store Actions', () => {
 			});
 		});
 
-		it('should handle namespaced ability names', () => {
-			const abilityName = 'my-plugin/feature/action';
+		it('should handle valid namespaced ability names', () => {
+			const abilityName = 'my-plugin/feature-action';
 			const action = unregisterAbility(abilityName);
 
 			expect(action).toEqual({

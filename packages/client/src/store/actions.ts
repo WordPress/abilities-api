@@ -43,6 +43,15 @@ export function registerAbility(ability: Ability) {
 			throw new Error(__('Ability name is required'));
 		}
 
+		// Validate name format matches server implementation
+		if (!/^[a-z0-9-]+\/[a-z0-9-]+$/.test(ability.name)) {
+			throw new Error(
+				__(
+					'Ability name must be a string containing a namespace prefix, i.e. "my-plugin/my-ability". It can only contain lowercase alphanumeric characters, dashes and the forward slash.'
+				)
+			);
+		}
+
 		if (!ability.label) {
 			throw new Error(
 				__(`Ability "${ability.name}" must have a label`)

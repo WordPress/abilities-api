@@ -158,13 +158,13 @@ describe('Store Selectors', () => {
 			expect(ability?.callback).toBeDefined();
 		});
 
-		it('should handle namespaced ability names correctly', () => {
+		it('should handle valid namespaced ability names correctly', () => {
 			const stateWithNamespaced: AbilitiesState = {
 				abilitiesByName: {
-					'my-plugin/feature/action': {
-						name: 'my-plugin/feature/action',
+					'my-plugin/feature-action': {
+						name: 'my-plugin/feature-action',
 						label: 'Namespaced Action',
-						description: 'Complex namespaced ability',
+						description: 'Namespaced ability',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},
@@ -173,11 +173,11 @@ describe('Store Selectors', () => {
 
 			const ability = getAbility(
 				stateWithNamespaced,
-				'my-plugin/feature/action'
+				'my-plugin/feature-action'
 			);
 
 			expect(ability).toEqual(
-				stateWithNamespaced.abilitiesByName['my-plugin/feature/action']
+				stateWithNamespaced.abilitiesByName['my-plugin/feature-action']
 			);
 		});
 	});
