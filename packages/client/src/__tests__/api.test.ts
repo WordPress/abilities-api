@@ -157,7 +157,9 @@ describe('API functions', () => {
 			// Use type assertion to bypass TypeScript check
 			expect(() =>
 				registerAbility(ability as unknown as Ability)
-			).toThrow('Abilities registered on the client require a callback function');
+			).toThrow(
+				'Abilities registered on the client require a callback function'
+			);
 		});
 
 		it('should throw error for ability without name', () => {
@@ -458,7 +460,9 @@ describe('API functions', () => {
 			const mockResponse = { success: true };
 			(apiFetch as unknown as jest.Mock).mockResolvedValue(mockResponse);
 
-			const result = await executeAbility('test/ability', { data: 'test' });
+			const result = await executeAbility('test/ability', {
+				data: 'test',
+			});
 
 			expect(apiFetch).toHaveBeenCalledWith({
 				path: '/wp/v2/abilities/test/ability/run',
