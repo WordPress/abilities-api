@@ -63,16 +63,16 @@ export async function getAbility(name: string): Promise<Ability | null> {
  */
 export function registerAbility(ability: Ability): void {
 	if (!ability.name) {
-		throw new Error('Ability name is required');
+		throw new Error(__('Ability name is required'));
 	}
 	if (!ability.label) {
-		throw new Error('Ability label is required');
+		throw new Error(__('Ability label is required'));
 	}
 	if (!ability.description) {
-		throw new Error('Ability description is required');
+		throw new Error(__('Ability description is required'));
 	}
 	if (!ability.callback || typeof ability.callback !== 'function') {
-		throw new Error('Ability registered on the client require a callback function');
+		throw new Error(__('Abilities registered on the client require a callback function'));
 	}
 
 	// Check if ability is already registered
@@ -116,7 +116,11 @@ async function executeClientAbility(
 ): Promise<AbilityOutput> {
 	if (!ability.callback) {
 		throw new Error(
-			`Client ability ${ability.name} is missing callback function`
+			sprintf(
+				/* translators: %s: ability name */
+				__('Client ability %s is missing callback function'),
+				ability.name
+			)
 		);
 	}
 
@@ -144,7 +148,12 @@ async function executeClientAbility(
 		);
 		if (inputValidation !== true) {
 			const error = new Error(
-				`Ability "${ability.name}" has invalid input. Reason: ${inputValidation}`
+				sprintf(
+					/* translators: 1: ability name, 2: validation error */
+					__('Ability "%1$s" has invalid input. Reason: %2$s'),
+					ability.name,
+					inputValidation
+				)
 			);
 			(error as any).code = 'ability_invalid_input';
 			throw error;
@@ -168,7 +177,12 @@ async function executeClientAbility(
 		);
 		if (outputValidation !== true) {
 			const error = new Error(
-				`Ability "${ability.name}" has invalid output. Reason: ${outputValidation}`
+				sprintf(
+					/* translators: 1: ability name, 2: validation error */
+					__('Ability "%1$s" has invalid output. Reason: %2$s'),
+					ability.name,
+					outputValidation
+				)
 			);
 			(error as any).code = 'ability_invalid_output';
 			throw error;
