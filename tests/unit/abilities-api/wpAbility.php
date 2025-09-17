@@ -186,7 +186,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 */
 	public function test_before_execute_ability_action() {
 		$action_ability_name = null;
-		$action_input = null;
+		$action_input        = null;
 
 		$args = array_merge(
 			self::$test_ability_properties,
@@ -204,13 +204,13 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		$callback = static function ( $ability_name, $input ) use ( &$action_ability_name, &$action_input ) {
 			$action_ability_name = $ability_name;
-			$action_input = $input;
+			$action_input        = $input;
 		};
 
 		add_action( 'before_execute_ability', $callback, 10, 2 );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
-		$result = $ability->execute( 5 );
+		$result  = $ability->execute( 5 );
 
 		remove_action( 'before_execute_ability', $callback );
 
@@ -224,7 +224,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 */
 	public function test_before_execute_ability_action_no_input() {
 		$action_ability_name = null;
-		$action_input = null;
+		$action_input        = null;
 
 		$args = array_merge(
 			self::$test_ability_properties,
@@ -237,13 +237,13 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		$callback = static function ( $ability_name, $input ) use ( &$action_ability_name, &$action_input ) {
 			$action_ability_name = $ability_name;
-			$action_input = $input;
+			$action_input        = $input;
 		};
 
 		add_action( 'before_execute_ability', $callback, 10, 2 );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
-		$result = $ability->execute();
+		$result  = $ability->execute();
 
 		remove_action( 'before_execute_ability', $callback );
 
@@ -257,8 +257,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 */
 	public function test_after_execute_ability_action() {
 		$action_ability_name = null;
-		$action_input = null;
-		$action_result = null;
+		$action_input        = null;
+		$action_result       = null;
 
 		$args = array_merge(
 			self::$test_ability_properties,
@@ -276,14 +276,14 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		$callback = static function ( $ability_name, $input, $result ) use ( &$action_ability_name, &$action_input, &$action_result ) {
 			$action_ability_name = $ability_name;
-			$action_input = $input;
-			$action_result = $result;
+			$action_input        = $input;
+			$action_result       = $result;
 		};
 
 		add_action( 'after_execute_ability', $callback, 10, 3 );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
-		$result = $ability->execute( 7 );
+		$result  = $ability->execute( 7 );
 
 		remove_action( 'after_execute_ability', $callback );
 
@@ -298,8 +298,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 */
 	public function test_after_execute_ability_action_no_input() {
 		$action_ability_name = null;
-		$action_input = null;
-		$action_result = null;
+		$action_input        = null;
+		$action_result       = null;
 
 		$args = array_merge(
 			self::$test_ability_properties,
@@ -313,14 +313,14 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		$callback = static function ( $ability_name, $input, $result ) use ( &$action_ability_name, &$action_input, &$action_result ) {
 			$action_ability_name = $ability_name;
-			$action_input = $input;
-			$action_result = $result;
+			$action_input        = $input;
+			$action_result       = $result;
 		};
 
 		add_action( 'after_execute_ability', $callback, 10, 3 );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
-		$result = $ability->execute();
+		$result  = $ability->execute();
 
 		remove_action( 'after_execute_ability', $callback );
 
@@ -335,7 +335,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 */
 	public function test_actions_not_fired_on_permission_failure() {
 		$before_action_fired = false;
-		$after_action_fired = false;
+		$after_action_fired  = false;
 
 		$args = array_merge(
 			self::$test_ability_properties,
@@ -361,7 +361,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		add_action( 'after_execute_ability', $after_callback );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
-		$result = $ability->execute();
+		$result  = $ability->execute();
 
 		remove_action( 'before_execute_ability', $before_callback );
 		remove_action( 'after_execute_ability', $after_callback );
@@ -376,7 +376,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 */
 	public function test_after_action_not_fired_on_execution_error() {
 		$before_action_fired = false;
-		$after_action_fired = false;
+		$after_action_fired  = false;
 
 		$args = array_merge(
 			self::$test_ability_properties,
@@ -399,7 +399,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		add_action( 'after_execute_ability', $after_callback );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
-		$result = $ability->execute();
+		$result  = $ability->execute();
 
 		remove_action( 'before_execute_ability', $before_callback );
 		remove_action( 'after_execute_ability', $after_callback );
@@ -414,7 +414,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 */
 	public function test_after_action_not_fired_on_output_validation_error() {
 		$before_action_fired = false;
-		$after_action_fired = false;
+		$after_action_fired  = false;
 
 		$args = array_merge(
 			self::$test_ability_properties,
@@ -442,7 +442,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		add_action( 'after_execute_ability', $after_callback );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
-		$result = $ability->execute();
+		$result  = $ability->execute();
 
 		remove_action( 'before_execute_ability', $before_callback );
 		remove_action( 'after_execute_ability', $after_callback );
