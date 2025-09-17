@@ -132,7 +132,6 @@ describe('API functions', () => {
 			expect(dispatch).toHaveBeenCalledWith(store);
 			expect(mockRegisterAbility).toHaveBeenCalledWith(ability);
 		});
-
 	});
 
 	describe('unregisterAbility', () => {

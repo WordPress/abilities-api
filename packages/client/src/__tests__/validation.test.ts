@@ -156,7 +156,11 @@ describe('validateValueFromSchema', () => {
 		it('should include param name in warning when provided', () => {
 			const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
 			const schema = { format: 'email' }; // Schema without type
-			const result = validateValueFromSchema('test@example.com', schema, 'email_field');
+			const result = validateValueFromSchema(
+				'test@example.com',
+				schema,
+				'email_field'
+			);
 
 			expect(result).toBe(true);
 			expect(consoleSpy).toHaveBeenCalledWith(
@@ -445,7 +449,7 @@ describe('validateValueFromSchema', () => {
 				)
 			).toBe(true);
 			expect(consoleSpy).toHaveBeenCalledWith(
-				'Schema must be an object. Received object.'  // typeof null === 'object'
+				'Schema must be an object. Received object.' // typeof null === 'object'
 			);
 
 			consoleSpy.mockClear();

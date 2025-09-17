@@ -151,9 +151,7 @@ export function validateValueFromSchema(
 		// WordPress issues a _doing_it_wrong for invalid schema
 		// Match this behavior with console.warn on client-side
 		// eslint-disable-next-line no-console
-		console.warn(
-			`Schema must be an object. Received ${typeof args}.`
-		);
+		console.warn(`Schema must be an object. Received ${typeof args}.`);
 		// Continue validation, treating as valid (matching server behavior)
 		return true;
 	}

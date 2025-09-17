@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -32,7 +32,7 @@ export function receiveAbilities(abilities: Ability[]) {
  * This action validates the ability before registration. If validation fails,
  * an error will be thrown.
  *
- * @param ability The ability to register.
+ * @param  ability The ability to register.
  * @return Action object or function.
  * @throws {Error} If validation fails.
  */
@@ -54,21 +54,33 @@ export function registerAbility(ability: Ability) {
 
 		if (!ability.label) {
 			throw new Error(
-				__(`Ability "${ability.name}" must have a label`)
+				sprintf(
+					/* translators: %s: ability name */
+					__('Ability "%s" must have a label'),
+					ability.name
+				)
 			);
 		}
 
 		if (!ability.description) {
 			throw new Error(
-				__(`Ability "${ability.name}" must have a description`)
+				sprintf(
+					/* translators: %s: ability name */
+					__('Ability "%s" must have a description'),
+					ability.name
+				)
 			);
 		}
 
 		// Client-side abilities must have a callback
 		if (ability.callback && typeof ability.callback !== 'function') {
 			throw new Error(
-				__(
-					`Ability "${ability.name}" has an invalid callback. Callback must be a function`
+				sprintf(
+					/* translators: %s: ability name */
+					__(
+						'Ability "%s" has an invalid callback. Callback must be a function'
+					),
+					ability.name
 				)
 			);
 		}
@@ -77,7 +89,11 @@ export function registerAbility(ability: Ability) {
 		const existingAbility = select.getAbility(ability.name);
 		if (existingAbility) {
 			throw new Error(
-				__(`Ability "${ability.name}" is already registered`)
+				sprintf(
+					/* translators: %s: ability name */
+					__('Ability "%s" is already registered'),
+					ability.name
+				)
 			);
 		}
 

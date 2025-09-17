@@ -39,7 +39,7 @@ export async function getAbility(name: string): Promise<Ability | null> {
  * a callback function. The ability will be validated by the store action,
  * and an error will be thrown if validation fails.
  *
- * @param ability The ability definition including callback.
+ * @param  ability The ability definition including callback.
  * @throws {Error} If the ability fails validation.
  *
  * @example
