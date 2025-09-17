@@ -46,7 +46,7 @@
 
 - **Discuss:** `#core-ai` channel on WordPress Slack.
 - **File issues:** suggestions & use‑cases welcome in this repo.
-- **Prototype:** experiment with the [`wordpress/abilities-api`](https://packagist.org/packages/wordpress/abilities-api) Composer package.
+- **Prototype:** experiment with the [feature plugin](https://github.com/WordPress/abilities-api/releases/latest) or the [`wordpress/abilities-api`](https://packagist.org/packages/wordpress/abilities-api) Composer package.
 
 ## License
 
