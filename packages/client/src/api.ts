@@ -3,6 +3,7 @@
  */
 import { resolveSelect } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -60,19 +61,9 @@ export async function executeAbility(
 		method,
 	};
 
-	if ( method === 'GET' && input !== null && typeof input === 'object' && ! Array.isArray( input ) && Object.keys( input ).length > 0 ) {
-		// For GET requests with object inputs, convert to URL parameters
-		// e.g., input[format]=iso&input[timezone]=UTC
-		const params = new URLSearchParams();
-		Object.entries( input ).forEach( ( [ key, value ] ) => {
-			params.append( `input[${ key }]`, String( value ) );
-		} );
-		path = `${ path }?${ params.toString() }`;
-	} else if ( method === 'GET' && input !== null ) {
-		// For GET requests with non-object inputs, pass as single parameter
-		const params = new URLSearchParams();
-		params.append( 'input', JSON.stringify( input ) );
-		path = `${ path }?${ params.toString() }`;
+	if ( method === 'GET' && input !== null ) {
+		// For GET requests, pass the input directly
+		path = addQueryArgs( path, { input } );
 	} else if ( method === 'POST' && input !== null ) {
 		options.data = { input };
 	}
