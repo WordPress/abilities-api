@@ -129,9 +129,41 @@ describe('validateValueFromSchema', () => {
 	});
 
 	describe('edge cases', () => {
-		it('should pass validation when no schema provided', () => {
+		it('should pass validation when empty schema provided', () => {
+			const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
 			expect(validateValueFromSchema('anything', {})).toBe(true);
-			expect(validateValueFromSchema('anything')).toBe(true);
+			expect(consoleSpy).toHaveBeenCalledWith(
+				'The "type" schema keyword for value is required.'
+			);
+
+			consoleSpy.mockRestore();
+		});
+
+		it('should warn when type is missing but still pass validation', () => {
+			const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+			const schema = { properties: { name: { type: 'string' } } };
+			const result = validateValueFromSchema({ name: 'test' }, schema);
+
+			expect(result).toBe(true);
+			expect(consoleSpy).toHaveBeenCalledWith(
+				'The "type" schema keyword for value is required.'
+			);
+
+			consoleSpy.mockRestore();
+		});
+
+		it('should include param name in warning when provided', () => {
+			const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+			const schema = { format: 'email' }; // Schema without type
+			const result = validateValueFromSchema('test@example.com', schema, 'email_field');
+
+			expect(result).toBe(true);
+			expect(consoleSpy).toHaveBeenCalledWith(
+				'The "type" schema keyword for email_field is required.'
+			);
+
+			consoleSpy.mockRestore();
 		});
 
 		it('should handle null values correctly', () => {
@@ -379,21 +411,55 @@ describe('validateValueFromSchema', () => {
 	});
 
 	describe('schema edge cases and errors', () => {
-		it('should handle empty schema as valid', () => {
-			expect(validateValueFromSchema('anything', undefined)).toBe(true);
-			// Testing edge cases where schema is null or falsy
+		it('should handle empty schema object as valid but warn about missing type', () => {
+			const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+			// Empty object schema triggers warning about missing type
+			expect(validateValueFromSchema('anything', {})).toBe(true);
+			expect(consoleSpy).toHaveBeenCalledWith(
+				'The "type" schema keyword for value is required.'
+			);
+
+			consoleSpy.mockRestore();
+		});
+
+		it('should warn for invalid schema types but still pass validation', () => {
+			const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+			// Testing edge cases where schema is not a valid object
+			expect(
+				validateValueFromSchema(
+					'anything',
+					undefined as unknown as Record<string, any>
+				)
+			).toBe(true);
+			expect(consoleSpy).toHaveBeenCalledWith(
+				'Schema must be an object. Received undefined.'
+			);
+
+			consoleSpy.mockClear();
 			expect(
 				validateValueFromSchema(
 					123,
 					null as unknown as Record<string, any>
 				)
 			).toBe(true);
+			expect(consoleSpy).toHaveBeenCalledWith(
+				'Schema must be an object. Received object.'  // typeof null === 'object'
+			);
+
+			consoleSpy.mockClear();
 			expect(
 				validateValueFromSchema(
 					true,
 					false as unknown as Record<string, any>
 				)
 			).toBe(true);
+			expect(consoleSpy).toHaveBeenCalledWith(
+				'Schema must be an object. Received boolean.'
+			);
+
+			consoleSpy.mockRestore();
 		});
 
 		it('should handle schema compilation errors', () => {
