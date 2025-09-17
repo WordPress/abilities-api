@@ -63,6 +63,7 @@ export type {
 	Ability,
 	AbilitiesState,
 	AbilityCallback,
+	PermissionCallback,
 	AbilityInput,
 	AbilityOutput,
 	ValidationError,

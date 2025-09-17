@@ -108,6 +108,22 @@ async function executeClientAbility(
 		);
 	}
 
+	// Check permission callback if defined
+	if (ability.permissionCallback) {
+		const hasPermission = await ability.permissionCallback(input);
+		if (!hasPermission) {
+			const error = new Error(
+				sprintf(
+					/* translators: %s: ability name */
+					__('Permission denied for ability: %s'),
+					ability.name
+				)
+			);
+			(error as any).code = 'ability_permission_denied';
+			throw error;
+		}
+	}
+
 	if (ability.input_schema) {
 		const inputValidation = validateValueFromSchema(
 			input,

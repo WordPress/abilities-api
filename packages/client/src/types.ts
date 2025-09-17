@@ -10,6 +10,14 @@ export type AbilityCallback = (
 ) => AbilityOutput | Promise<AbilityOutput>;
 
 /**
+ * Permission callback function for client-side abilities.
+ * Returns true if the ability can be executed, false otherwise.
+ */
+export type PermissionCallback = (
+	input?: AbilityInput
+) => boolean | Promise<boolean>;
+
+/**
  * Represents an ability in the WordPress Abilities API.
  *
  * @see WP_Ability
@@ -52,6 +60,13 @@ export interface Ability {
 	 * If not present, the ability will be executed via REST API on the server.
 	 */
 	callback?: AbilityCallback;
+
+	/**
+	 * Client Permission callback for abilities.
+	 * Called before executing the ability to check if it's allowed.
+	 * If it returns false, the ability execution will be denied.
+	 */
+	permissionCallback?: PermissionCallback;
 
 	/**
 	 * Metadata about the ability.
