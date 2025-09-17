@@ -64,8 +64,9 @@ export interface AbilitiesState {
 
 /**
  * Input parameters for ability execution.
+ * Can be any JSON-serializable value: primitive, array, object, or null.
  */
-export type AbilityInput = Record< string, any >;
+export type AbilityInput = any;
 
 /**
  * Result from ability execution.
