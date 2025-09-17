@@ -248,16 +248,17 @@ jobs:
           path: tests/_output/html
           overwrite: true
 
-  # Runs JavaScript tests for the client package.
+  # Runs JavaScript code quality checks.
   #
   # Performs the following steps:
   # - Checks out the repository.
   # - Sets up Node.js.
   # - Installs NPM dependencies.
-  # - Runs JavaScript tests with coverage.
-  # - Uploads coverage reports.
-  javascript:
-    name: Run JavaScript tests
+  # - Runs Prettier formatting check.
+  # - Runs JavaScript linting.
+  # - Runs TypeScript type checking.
+  jslint:
+    name: Run JavaScript code quality checks
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -279,15 +280,45 @@ jobs:
       - name: Install NPM dependencies
         run: npm ci
 
+      - name: Run Prettier format check
+        run: npm run format
+
       - name: Run JavaScript linting
-        run: |
-          cd packages/client
-          npm run lint:js
+        run: npm run lint:js
 
       - name: Run TypeScript type checking
-        run: |
-          cd packages/client
-          npm run typecheck
+        run: npm run typecheck
+
+  # Runs JavaScript tests for the client package.
+  #
+  # Performs the following steps:
+  # - Checks out the repository.
+  # - Sets up Node.js.
+  # - Installs NPM dependencies.
+  # - Runs JavaScript tests with coverage.
+  # - Uploads coverage reports.
+  jstest:
+    name: Run JavaScript tests
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+
+      - name: Install NPM dependencies
+        run: npm ci
 
       - name: Run JavaScript tests with coverage
         run: npm run test:client:coverage
