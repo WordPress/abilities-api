@@ -36,15 +36,17 @@ class WP_Abilities_Assets_Init {
 
 		if ( defined( 'WP_ABILITIES_API_DIR' ) ) {
 			// Running as a plugin
-			$base_path = WP_ABILITIES_API_DIR;
+			$base_path = wp_normalize_path( WP_ABILITIES_API_DIR );
 			$base_url  = plugins_url( '', dirname( __DIR__, 2 ) . '/abilities-api.php' );
 		} else {
 			// Running as a Composer package
 			$base_path = dirname( __DIR__, 2 );
 
+			$base_path  = wp_normalize_path( $base_path );
+			$plugin_dir = wp_normalize_path( WP_PLUGIN_DIR );
+
 			// For Composer, we need to determine the URL based on the installation location
-			$plugin_dir = WP_PLUGIN_DIR;
-			if ( strpos( $base_path, $plugin_dir ) === 0 ) {
+			if ( str_starts_with( $base_path, $plugin_dir ) ) {
 				// Inside a plugin directory
 				$relative_path = str_replace( $plugin_dir, '', $base_path );
 				$base_url      = plugins_url( $relative_path );
