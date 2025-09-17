@@ -45,6 +45,7 @@
     "@wordpress/api-fetch": "^7.30.0",
     "@wordpress/core-data": "^7.30.0",
     "@wordpress/data": "^10.30.0",
+    "@wordpress/i18n": "6.4.0",
     "@wordpress/url": "^4.30.0"
   },
   "publishConfig": {
