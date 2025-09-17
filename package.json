@@ -6,14 +6,26 @@
 		"type": "git",
 		"url": "git+https://github.com/WordPress/abilities.git"
 	},
+	"workspaces": [
+		"packages/*"
+	],
 	"engines": {
 		"node": ">=20.10.0",
 		"npm": ">=10.2.3"
 	},
 	"devDependencies": {
+		"@types/wordpress__api-fetch": "^3.23.1",
+		"@typescript-eslint/eslint-plugin": "^8.42.0",
+		"@typescript-eslint/parser": "^8.42.0",
 		"@wordpress/env": "^10.30.0",
+		"@wordpress/eslint-plugin": "^22.16.0",
+		"@wordpress/prettier-config": "^4.30.0",
 		"@wordpress/scripts": "^30.23.0",
-		"@wordpress/prettier-config": "^4.30.0"
+		"eslint": "^8.57.0",
+		"eslint-plugin-import": "^2.32.0",
+		"eslint-plugin-jest": "^29.0.1",
+		"prettier": "npm:wp-prettier@3.0.3",
+		"typescript": "^5.9.2"
 	},
 	"files": [
 		"docs",
@@ -24,11 +36,16 @@
 	],
 	"scripts": {
 		"plugin-zip": "wp-scripts plugin-zip",
+		"build:client": "npm run build -w packages/client",
+		"dev:client": "npm run dev -w packages/client",
 		"format": "wp-scripts format",
+		"lint:js": "wp-scripts lint-js",
+		"lint:js:fix": "wp-scripts lint-js --fix",
 		"lint:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/$(basename \"$(pwd)\")/ composer run-script lint",
 		"lint:php:fix": "wp-env run tests-cli --env-cwd=wp-content/plugins/$(basename \"$(pwd)\")/ composer run-script format",
 		"lint:php:stan": "wp-env run tests-cli --env-cwd=wp-content/plugins/$(basename \"$(pwd)\")/ composer run-script phpstan",
 		"test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/$(basename \"$(pwd)\")/ vendor/bin/phpunit -c phpunit.xml.dist",
+		"typecheck": "tsc --noEmit -p packages/client",
 		"wp-env": "wp-env"
 	}
 }
