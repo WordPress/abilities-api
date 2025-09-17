@@ -445,7 +445,7 @@ class WP_Ability {
 		 * @param array<string,mixed> $input        The input data for the ability.
 		 * @param mixed               $result       The result of the ability execution.
 		 */
-		do_action( 'executed_ability', $this->name, $input, $result );
+		do_action( 'after_execute_ability', $this->name, $input, $result );
 
 		return $result;
 	}
