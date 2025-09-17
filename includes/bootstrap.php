@@ -45,7 +45,13 @@ if ( ! class_exists( 'WP_REST_Abilities_Init' ) ) {
 	}
 }
 
-// Load client registration helper for Composer users.
-if ( ! function_exists( 'wp_abilities_register_client_assets' ) ) {
-	require_once __DIR__ . '/abilities-api/client-registration.php';
+// Load assets init class for plugin bootstrap.
+if ( ! class_exists( 'WP_Abilities_Assets_Init' ) ) {
+	require_once __DIR__ . '/assets/class-wp-abilities-assets-init.php';
+
+	// Initialize client assets when WordPress is available.
+	if ( function_exists( 'add_action' ) ) {
+		add_action( 'init', array( 'WP_Abilities_Assets_Init', 'register_assets' ) );
+		add_action( 'admin_enqueue_scripts', array( 'WP_Abilities_Assets_Init', 'admin_enqueue_scripts' ) );
+	}
 }
