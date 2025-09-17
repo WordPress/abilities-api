@@ -28,7 +28,7 @@ declare global {
 /**
  * Public API functions
  */
-export { listAbilities, getAbility, executeAbility } from './api';
+export { getAbilities, getAbility, executeAbility } from './api';
 
 /**
  * The store can be used directly with @wordpress/data via selectors
