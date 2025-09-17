@@ -92,37 +92,37 @@ function formatAjvError(ajvError: any, param: string): string {
 			return `${fullParam} is invalid (failed ${ajvError.keyword} validation).`;
 
 		case 'minLength':
-			return `${fullParam} must be at least ${ajvError.params.limit} character${
-				ajvError.params.limit === 1 ? '' : 's'
-			} long.`;
+			return `${fullParam} must be at least ${
+				ajvError.params.limit
+			} character${ajvError.params.limit === 1 ? '' : 's'} long.`;
 
 		case 'maxLength':
-			return `${fullParam} must be at most ${ajvError.params.limit} character${
-				ajvError.params.limit === 1 ? '' : 's'
-			} long.`;
+			return `${fullParam} must be at most ${
+				ajvError.params.limit
+			} character${ajvError.params.limit === 1 ? '' : 's'} long.`;
 
 		case 'minItems':
-			return `${fullParam} must contain at least ${ajvError.params.limit} item${
-				ajvError.params.limit === 1 ? '' : 's'
-			}.`;
+			return `${fullParam} must contain at least ${
+				ajvError.params.limit
+			} item${ajvError.params.limit === 1 ? '' : 's'}.`;
 
 		case 'maxItems':
-			return `${fullParam} must contain at most ${ajvError.params.limit} item${
-				ajvError.params.limit === 1 ? '' : 's'
-			}.`;
+			return `${fullParam} must contain at most ${
+				ajvError.params.limit
+			} item${ajvError.params.limit === 1 ? '' : 's'}.`;
 
 		case 'uniqueItems':
 			return `${fullParam} has duplicate items.`;
 
 		case 'minProperties':
-			return `${fullParam} must contain at least ${ajvError.params.limit} propert${
-				ajvError.params.limit === 1 ? 'y' : 'ies'
-			}.`;
+			return `${fullParam} must contain at least ${
+				ajvError.params.limit
+			} propert${ajvError.params.limit === 1 ? 'y' : 'ies'}.`;
 
 		case 'maxProperties':
-			return `${fullParam} must contain at most ${ajvError.params.limit} propert${
-				ajvError.params.limit === 1 ? 'y' : 'ies'
-			}.`;
+			return `${fullParam} must contain at most ${
+				ajvError.params.limit
+			} propert${ajvError.params.limit === 1 ? 'y' : 'ies'}.`;
 
 		default:
 			// Fallback for any unhandled validation keywords
