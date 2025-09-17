@@ -4,49 +4,11 @@ Client library for the WordPress Abilities API, providing a standardized way to 
 
 ## Installation
 
-The client is available in two ways:
+The client is currently available as a part of the Composer package.
 
-### 1. As an npm Package (Coming Soon)
+### As a WordPress Script
 
-The npm package `@wordpress/abilities` is planned for future publication. Once published, you'll be able to install it via:
-
-```bash
-npm install @wordpress/abilities
-```
-
-The npm package is designed for use with WordPress build tools (`@wordpress/scripts`). It requires the Abilities API plugin to be active in WordPress or via the Composer package, as it references the globally-loaded `wp.abilities` script at runtime.
-
-For now, the client is available through the WordPress script registration below.
-
-### 2. As a WordPress Script (Available Now)
-
-When the Abilities API is installed as a WordPress plugin, the client is automatically registered and available to enqueue:
-
-```php
-wp_enqueue_script( 'wp-abilities' );
-```
-
-#### For Composer Installations
-
-If you've installed the Abilities API via Composer, you need to register the script first.
-
-```php
-// Register the client script (usually in your plugin's init hook)
-add_action( 'init', function() {
-    if ( function_exists( 'wp_abilities_register_client_script' ) ) {
-        // Provide the path and URL to your vendor directory
-        $base_path = __DIR__ . '/vendor/wordpress/abilities-api';
-        $base_url = plugins_url( 'vendor/wordpress/abilities-api', __FILE__ );
-
-        wp_abilities_register_client_script( $base_path, $base_url );
-    }
-} );
-
-// Then enqueue it where needed
-add_action( 'wp_enqueue_scripts', function() {
-    wp_enqueue_script( 'wp-abilities' );
-} );
-```
+When the Abilities API is installed, the client is automatically registered and enqueue in the admin.
 
 ## Usage
 
