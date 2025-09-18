@@ -13,9 +13,9 @@ Join the `#core-ai` channel [on WordPress Slack](http://wordpress.slack.com) ([s
 In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). All code in the Abilities API plugin must follow these requirements:
 
 - **WordPress**: The plugin's minimum WordPress version requirement is 6.8.
-- **PHP**: The minimum required version of the code slated for WordPress Core includes is PHP7.2, but the tooling and development environment requires PHP 7.4 or higher.
+- **PHP**: The minimum required version of the code slated for WordPress Core includes PHP 7.2, but the tooling and development environment requires PHP 7.4 or higher.
 
-We include [several tools](#useful-commands) to help ensure your code meets contribution
+We include [several tools](#useful-commands) to help ensure your code meets the contribution
 
 ## Guidelines
 
