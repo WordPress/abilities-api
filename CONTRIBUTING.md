@@ -15,7 +15,7 @@ In general, all code must follow the [WordPress Coding Standards and best practi
 - **WordPress**: The plugin's minimum WordPress version requirement is 6.8.
 - **PHP**: The minimum required version of the code slated for WordPress Core includes PHP 7.2, but the tooling and development environment requires PHP 7.4 or higher.
 
-We include [several tools](#useful-commands) to help ensure your code meets the contribution
+We include [several tools](#useful-commands) to help ensure your code meets contribution requirements.
 
 ## Guidelines
 
