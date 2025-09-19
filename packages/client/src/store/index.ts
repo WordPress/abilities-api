@@ -34,7 +34,7 @@ dispatch(coreStore).addEntities([
 		baseURL: '/wp/v2/abilities',
 		baseURLParams: { context: 'edit' },
 		plural: 'abilities',
-		label: __( 'Abilities' ),
+		label: __('Abilities'),
 		supportsPagination: true,
 	},
 ]);

@@ -92,37 +92,37 @@ function formatAjvError(ajvError: any, param: string): string {
 			return `${fullParam} is invalid (failed ${ajvError.keyword} validation).`;
 
 		case 'minLength':
-			return `${fullParam} must be at least ${ajvError.params.limit} character${
-				ajvError.params.limit === 1 ? '' : 's'
-			} long.`;
+			return `${fullParam} must be at least ${
+				ajvError.params.limit
+			} character${ajvError.params.limit === 1 ? '' : 's'} long.`;
 
 		case 'maxLength':
-			return `${fullParam} must be at most ${ajvError.params.limit} character${
-				ajvError.params.limit === 1 ? '' : 's'
-			} long.`;
+			return `${fullParam} must be at most ${
+				ajvError.params.limit
+			} character${ajvError.params.limit === 1 ? '' : 's'} long.`;
 
 		case 'minItems':
-			return `${fullParam} must contain at least ${ajvError.params.limit} item${
-				ajvError.params.limit === 1 ? '' : 's'
-			}.`;
+			return `${fullParam} must contain at least ${
+				ajvError.params.limit
+			} item${ajvError.params.limit === 1 ? '' : 's'}.`;
 
 		case 'maxItems':
-			return `${fullParam} must contain at most ${ajvError.params.limit} item${
-				ajvError.params.limit === 1 ? '' : 's'
-			}.`;
+			return `${fullParam} must contain at most ${
+				ajvError.params.limit
+			} item${ajvError.params.limit === 1 ? '' : 's'}.`;
 
 		case 'uniqueItems':
 			return `${fullParam} has duplicate items.`;
 
 		case 'minProperties':
-			return `${fullParam} must contain at least ${ajvError.params.limit} propert${
-				ajvError.params.limit === 1 ? 'y' : 'ies'
-			}.`;
+			return `${fullParam} must contain at least ${
+				ajvError.params.limit
+			} propert${ajvError.params.limit === 1 ? 'y' : 'ies'}.`;
 
 		case 'maxProperties':
-			return `${fullParam} must contain at most ${ajvError.params.limit} propert${
-				ajvError.params.limit === 1 ? 'y' : 'ies'
-			}.`;
+			return `${fullParam} must contain at most ${
+				ajvError.params.limit
+			} propert${ajvError.params.limit === 1 ? 'y' : 'ies'}.`;
 
 		default:
 			// Fallback for any unhandled validation keywords
@@ -143,18 +143,26 @@ function formatAjvError(ajvError: any, param: string): string {
  */
 export function validateValueFromSchema(
 	value: any,
-	args: Record<string, any> = {},
+	args: Record<string, any>,
 	param = ''
 ): true | ValidationError {
-	// If no schema provided, consider it valid
-	if (!args || Object.keys(args).length === 0) {
+	// WordPress server expects schema to be an array/object
+	if (!args || typeof args !== 'object') {
+		// WordPress issues a _doing_it_wrong for invalid schema
+		// Match this behavior with console.warn on client-side
+		// eslint-disable-next-line no-console
+		console.warn(`Schema must be an object. Received ${typeof args}.`);
+		// Continue validation, treating as valid (matching server behavior)
 		return true;
 	}
 
 	// Type validation - WordPress REST API requires type to be set
 	if (!args.type && !args.anyOf && !args.oneOf) {
 		// WordPress issues a _doing_it_wrong but continues
-		// For client-side, we'll treat as valid for now, but could consider a warning
+		// eslint-disable-next-line no-console
+		console.warn(
+			`The "type" schema keyword for ${param || 'value'} is required.`
+		);
 		return true;
 	}
 

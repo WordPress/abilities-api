@@ -2,6 +2,14 @@
 
 Client library for the WordPress Abilities API, providing a standardized way to discover and execute WordPress capabilities.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Reference](#api-reference)
+- [Development](#development)
+- [Testing](#testing)
+
 ## Installation
 
 The client is currently available as a part of the Composer package.
@@ -21,13 +29,13 @@ const { getAbilities, getAbility, executeAbility } = wp.abilities;
 const abilities = await getAbilities();
 
 // Get a specific ability
-const ability = await getAbility( 'my-plugin/my-ability' );
+const ability = await getAbility('my-plugin/my-ability');
 
 // Execute an ability
-const result = await executeAbility( 'my-plugin/my-ability', {
-    param1: 'value1',
-    param2: 'value2'
-} );
+const result = await executeAbility('my-plugin/my-ability', {
+  param1: 'value1',
+  param2: 'value2',
+});
 ```
 
 ### Using with React and WordPress Data
@@ -39,28 +47,28 @@ import { useSelect } from '@wordpress/data';
 import { store as abilitiesStore } from '@wordpress/abilities';
 
 function MyComponent() {
-    const abilities = useSelect(
-        ( select ) => select( abilitiesStore ).getAbilities(),
-        []
-    );
+  const abilities = useSelect(
+    (select) => select(abilitiesStore).getAbilities(),
+    []
+  );
 
-    const specificAbility = useSelect(
-        ( select ) => select( abilitiesStore ).getAbility( 'my-plugin/my-ability' ),
-        []
-    );
+  const specificAbility = useSelect(
+    (select) => select(abilitiesStore).getAbility('my-plugin/my-ability'),
+    []
+  );
 
-    return (
-        <div>
-            <h2>All Abilities</h2>
-            <ul>
-                { abilities.map( ( ability ) => (
-                    <li key={ ability.name }>
-                        <strong>{ ability.label }</strong>: { ability.description }
-                    </li>
-                ) ) }
-            </ul>
-        </div>
-    );
+  return (
+    <div>
+      <h2>All Abilities</h2>
+      <ul>
+        {abilities.map((ability) => (
+          <li key={ability.name}>
+            <strong>{ability.label}</strong>: {ability.description}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 ```
 
@@ -74,7 +82,7 @@ Returns all registered abilities. Automatically handles pagination to fetch all 
 
 ```javascript
 const abilities = await getAbilities();
-console.log( `Found ${abilities.length} abilities` );
+console.log(`Found ${abilities.length} abilities`);
 ```
 
 #### `getAbility(name: string): Promise<Ability | null>`
@@ -82,9 +90,9 @@ console.log( `Found ${abilities.length} abilities` );
 Returns a specific ability by name, or null if not found.
 
 ```javascript
-const ability = await getAbility( 'my-plugin/create-post' );
-if ( ability ) {
-    console.log( `Found ability: ${ability.label}` );
+const ability = await getAbility('my-plugin/create-post');
+if (ability) {
+  console.log(`Found ability: ${ability.label}`);
 }
 ```
 
@@ -97,15 +105,15 @@ Executes an ability with optional input parameters. The HTTP method is automatic
 
 ```javascript
 // Execute a resource ability (GET)
-const data = await executeAbility( 'my-plugin/get-data', {
-    id: 123
-} );
+const data = await executeAbility('my-plugin/get-data', {
+  id: 123,
+});
 
 // Execute a tool ability (POST)
-const result = await executeAbility( 'my-plugin/create-item', {
-    title: 'New Item',
-    content: 'Item content'
-} );
+const result = await executeAbility('my-plugin/create-item', {
+  title: 'New Item',
+  content: 'Item content',
+});
 ```
 
 ### Store Selectors
@@ -130,3 +138,32 @@ npm run lint:js
 # Type checking
 npm run typecheck
 ```
+
+## Testing
+
+The client package includes unit tests using Jest and follows WordPress testing standards.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm run test:unit
+
+# Run tests in watch mode (recommended for development)
+npm run test:unit:watch
+
+# Generate coverage report
+npm run test:unit:coverage
+
+# Debug tests
+npm run test:unit:debug
+```
+
+### Test Structure
+
+Tests are organized following WordPress conventions:
+
+- Unit tests are located in `src/__tests__/`
+- Store tests are located in `src/store/__tests__/`
+- Test files use `.test.ts` or `.test.js` extension
+- Tests use Jest with `@wordpress/jest-preset-default` configuration

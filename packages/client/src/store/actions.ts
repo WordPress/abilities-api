@@ -1,4 +1,9 @@
 /**
+ * WordPress dependencies
+ */
+import { __, sprintf } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import type { Ability } from '../types';
@@ -22,15 +27,81 @@ export function receiveAbilities(abilities: Ability[]) {
 }
 
 /**
- * Returns an action object used to register a client-side ability.
+ * Registers an ability in the store.
  *
- * @param ability The ability to register.
- * @return Action object.
+ * This action validates the ability before registration. If validation fails,
+ * an error will be thrown.
+ *
+ * @param  ability The ability to register.
+ * @return Action object or function.
+ * @throws {Error} If validation fails.
  */
 export function registerAbility(ability: Ability) {
-	return {
-		type: REGISTER_ABILITY,
-		ability,
+	// @ts-expect-error - registry types are not yet available
+	return ({ select, dispatch }) => {
+		if (!ability.name) {
+			throw new Error(__('Ability name is required'));
+		}
+
+		// Validate name format matches server implementation
+		if (!/^[a-z0-9-]+\/[a-z0-9-]+$/.test(ability.name)) {
+			throw new Error(
+				__(
+					'Ability name must be a string containing a namespace prefix, i.e. "my-plugin/my-ability". It can only contain lowercase alphanumeric characters, dashes and the forward slash.'
+				)
+			);
+		}
+
+		if (!ability.label) {
+			throw new Error(
+				sprintf(
+					/* translators: %s: ability name */
+					__('Ability "%s" must have a label'),
+					ability.name
+				)
+			);
+		}
+
+		if (!ability.description) {
+			throw new Error(
+				sprintf(
+					/* translators: %s: ability name */
+					__('Ability "%s" must have a description'),
+					ability.name
+				)
+			);
+		}
+
+		// Client-side abilities must have a callback
+		if (ability.callback && typeof ability.callback !== 'function') {
+			throw new Error(
+				sprintf(
+					/* translators: %s: ability name */
+					__(
+						'Ability "%s" has an invalid callback. Callback must be a function'
+					),
+					ability.name
+				)
+			);
+		}
+
+		// Check if ability is already registered
+		const existingAbility = select.getAbility(ability.name);
+		if (existingAbility) {
+			throw new Error(
+				sprintf(
+					/* translators: %s: ability name */
+					__('Ability "%s" is already registered'),
+					ability.name
+				)
+			);
+		}
+
+		// All validation passed, dispatch the registration action
+		dispatch({
+			type: REGISTER_ABILITY,
+			ability,
+		});
 	};
 }
 
