@@ -1,54 +1,65 @@
 {
-  "name": "@wordpress/abilities",
-  "version": "0.1.0",
-  "description": "JavaScript client for WordPress Abilities API",
-  "author": "The WordPress Contributors",
-  "license": "GPL-2.0-or-later",
-  "keywords": [
-    "wordpress",
-    "abilities",
-    "api",
-    "ai"
-  ],
-  "homepage": "https://github.com/WordPress/abilities-api/tree/HEAD/packages/abilities/README.md",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/WordPress/abilities-api.git",
-    "directory": "packages/abilities"
-  },
-  "bugs": {
-    "url": "https://github.com/WordPress/abilities-api/issues"
-  },
-  "engines": {
-    "node": ">=18.12.0",
-    "npm": ">=8.19.2"
-  },
-  "main": "build/index.js",
-  "module": "build-module/index.js",
-  "react-native": "src/index",
-  "wpScript": true,
-  "types": "build-types",
-  "files": [
-    "build",
-    "build-module",
-    "build-types",
-    "src",
-    "*.md"
-  ],
-  "scripts": {
-    "build": "wp-scripts build && tsc --emitDeclarationOnly --outDir build-types",
-    "clean": "rm -rf build build-module build-types tsconfig.tsbuildinfo",
-    "dev": "wp-scripts build --watch",
-    "prepublishOnly": "npm run clean && npm run build"
-  },
-  "dependencies": {
-    "@wordpress/api-fetch": "^7.30.0",
-    "@wordpress/core-data": "^7.30.0",
-    "@wordpress/data": "^10.30.0",
-    "@wordpress/i18n": "6.4.0",
-    "@wordpress/url": "^4.30.0"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+	"name": "@wordpress/abilities",
+	"version": "0.1.0",
+	"description": "JavaScript client for WordPress Abilities API",
+	"author": "The WordPress Contributors",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"abilities",
+		"api",
+		"ai"
+	],
+	"homepage": "https://github.com/WordPress/abilities-api/tree/HEAD/packages/abilities/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/WordPress/abilities-api.git",
+		"directory": "packages/abilities"
+	},
+	"bugs": {
+		"url": "https://github.com/WordPress/abilities-api/issues"
+	},
+	"engines": {
+		"node": ">=18.12.0",
+		"npm": ">=8.19.2"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"react-native": "src/index",
+	"wpScript": true,
+	"types": "build-types",
+	"files": [
+		"build",
+		"build-module",
+		"build-types",
+		"src",
+		"*.md"
+	],
+	"scripts": {
+		"build": "wp-scripts build && tsc --emitDeclarationOnly --outDir build-types",
+		"dev": "wp-scripts build --watch",
+		"clean": "rm -rf build build-module build-types tsconfig.tsbuildinfo",
+		"lint:js": "wp-scripts lint-js",
+		"lint:js:fix": "wp-scripts lint-js --fix",
+		"format": "wp-scripts format",
+		"typecheck": "tsc --noEmit",
+		"test:unit": "wp-scripts test-unit-js",
+		"test:unit:watch": "wp-scripts test-unit-js --watch",
+		"test:unit:coverage": "wp-scripts test-unit-js --coverage",
+		"test:unit:debug": "wp-scripts --inspect-brk test-unit-js --runInBand --no-cache",
+		"prepublishOnly": "npm run clean && npm run build"
+	},
+	"dependencies": {
+		"@wordpress/api-fetch": "^7.30.0",
+		"@wordpress/core-data": "^7.30.0",
+		"@wordpress/data": "^10.30.0",
+		"@wordpress/i18n": "^5.14.0",
+		"@wordpress/url": "^4.14.0",
+		"ajv": "^8.12.0",
+		"ajv-draft-04": "^1.0.0",
+		"ajv-formats": "^3.0.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }

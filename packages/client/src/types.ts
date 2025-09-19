@@ -3,6 +3,21 @@
  */
 
 /**
+ * Callback function for client-side abilities.
+ */
+export type AbilityCallback = (
+	input: AbilityInput
+) => AbilityOutput | Promise<AbilityOutput>;
+
+/**
+ * Permission callback function for client-side abilities.
+ * Returns true if the ability can be executed, false otherwise.
+ */
+export type PermissionCallback = (
+	input?: AbilityInput
+) => boolean | Promise<boolean>;
+
+/**
  * Represents an ability in the WordPress Abilities API.
  *
  * @see WP_Ability
@@ -31,13 +46,27 @@ export interface Ability {
 	 * JSON Schema for the ability's input parameters.
 	 * @see WP_Ability::get_input_schema()
 	 */
-	input_schema?: Record< string, any >;
+	input_schema?: Record<string, any>;
 
 	/**
 	 * JSON Schema for the ability's output format.
 	 * @see WP_Ability::get_output_schema()
 	 */
-	output_schema?: Record< string, any >;
+	output_schema?: Record<string, any>;
+
+	/**
+	 * Callback function for client-side abilities.
+	 * If present, the ability will be executed locally in the browser.
+	 * If not present, the ability will be executed via REST API on the server.
+	 */
+	callback?: AbilityCallback;
+
+	/**
+	 * Client Permission callback for abilities.
+	 * Called before executing the ability to check if it's allowed.
+	 * If it returns false, the ability execution will be denied.
+	 */
+	permissionCallback?: PermissionCallback;
 
 	/**
 	 * Metadata about the ability.
@@ -48,7 +77,7 @@ export interface Ability {
 		 * The type of ability - 'resource' uses GET, 'tool' uses POST.
 		 */
 		type?: 'resource' | 'tool';
-		[ key: string ]: any;
+		[key: string]: any;
 	};
 }
 
@@ -59,7 +88,7 @@ export interface AbilitiesState {
 	/**
 	 * Map of ability names to ability objects.
 	 */
-	abilitiesByName: Record< string, Ability >;
+	abilitiesByName: Record<string, Ability>;
 }
 
 /**
@@ -73,3 +102,9 @@ export type AbilityInput = any;
  * The actual shape depends on the ability's output schema.
  */
 export type AbilityOutput = any;
+
+/**
+ * Validation error - just a message string.
+ * The Abilities API wraps this with the appropriate error code.
+ */
+export type ValidationError = string;

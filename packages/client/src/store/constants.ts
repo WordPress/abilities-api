@@ -7,3 +7,5 @@ export const ENTITY_NAME = 'abilities';
 
 // Action types
 export const RECEIVE_ABILITIES = 'RECEIVE_ABILITIES';
+export const REGISTER_ABILITY = 'REGISTER_ABILITY';
+export const UNREGISTER_ABILITY = 'UNREGISTER_ABILITY';

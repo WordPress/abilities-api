@@ -20,7 +20,7 @@ declare global {
 			abilities?: typeof api & {
 				store: typeof store;
 			};
-			[ key: string ]: any;
+			[key: string]: any;
 		};
 	}
 }
@@ -28,7 +28,13 @@ declare global {
 /**
  * Public API functions
  */
-export { getAbilities, getAbility, executeAbility } from './api';
+export {
+	getAbilities,
+	getAbility,
+	executeAbility,
+	registerAbility,
+	unregisterAbility,
+} from './api';
 
 /**
  * The store can be used directly with @wordpress/data via selectors
@@ -53,4 +59,17 @@ export { store } from './store';
 /**
  * Type definitions
  */
-export type { Ability, AbilitiesState } from './types';
+export type {
+	Ability,
+	AbilitiesState,
+	AbilityCallback,
+	PermissionCallback,
+	AbilityInput,
+	AbilityOutput,
+	ValidationError,
+} from './types';
+
+/**
+ * Validation utilities
+ */
+export { validateValueFromSchema } from './validation';
