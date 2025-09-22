@@ -31,6 +31,7 @@
 	"files": [
 		"docs",
 		"includes",
+		"packages/client/build",
 		"LICENSE.md",
 		"README.md",
 		"abilities-api.php"
