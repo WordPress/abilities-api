@@ -197,6 +197,7 @@
 		<exclude-pattern>includes/abilities-api/*</exclude-pattern>
 		<properties>
 			<property name="prefixes" type="array">
+				<element value="WP_Abilities_Assets_Init" /><!-- Asset loader -->
 				<element value="WP_REST_Abilities" />
 				<element value="WP_ABILITIES_API" /><!-- Constant -->
 			</property>
