@@ -37,8 +37,8 @@
 	],
 	"scripts": {
 		"plugin-zip": "wp-scripts plugin-zip",
-		"build": "wp-scripts build --webpack-src-dir=packages/client/src --webpack-copy-php=false --output-path=packages/client/build && tsc --project packages/client --emitDeclarationOnly --outDir packages/client/build-types",
-		"dev": "wp-scripts start --webpack-src-dir=packages/client/src --webpack-copy-php=false --output-path=packages/client/build",
+		"build": "wp-scripts build --webpack-copy-php=false --config packages/client/webpack.config.js && tsc --project packages/client --emitDeclarationOnly --outDir packages/client/build-types",
+		"dev": "wp-scripts start --webpack-copy-php=false --config packages/client/webpack.config.js",
 		"clean": "rimraf packages/client/{build,build-module,build-types,tsconfig.tsbuildinfo}",
 		"format": "wp-scripts format",
 		"lint:js": "wp-scripts lint-js",
