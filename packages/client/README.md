@@ -7,8 +7,7 @@ Client library for the WordPress Abilities API, providing a standardized way to 
 - [Installation](#installation)
 - [Usage](#usage)
 - [API Reference](#api-reference)
-- [Development](#development)
-- [Testing](#testing)
+- [Development and Testing](#development-and-testing)
 
 ## Installation
 
@@ -123,47 +122,6 @@ When using with `@wordpress/data`:
 - `getAbilities()` - Returns all abilities from the store
 - `getAbility(name)` - Returns a specific ability from the store
 
-## Development
+## Development and Testing
 
-```bash
-# Install dependencies
-npm install
-
-# Build the package
-npm run build
-
-# Run linting
-npm run lint:js
-
-# Type checking
-npm run typecheck
-```
-
-## Testing
-
-The client package includes unit tests using Jest and follows WordPress testing standards.
-
-### Running Tests
-
-```bash
-# Run all tests
-npm run test:unit
-
-# Run tests in watch mode (recommended for development)
-npm run test:unit:watch
-
-# Generate coverage report
-npm run test:unit:coverage
-
-# Debug tests
-npm run test:unit:debug
-```
-
-### Test Structure
-
-Tests are organized following WordPress conventions:
-
-- Unit tests are located in `src/__tests__/`
-- Store tests are located in `src/store/__tests__/`
-- Test files use `.test.ts` or `.test.js` extension
-- Tests use Jest with `@wordpress/jest-preset-default` configuration
+For development and contributing guidelines, see [CONTRIBUTING.md](../../CONTRIBUTING.md).
