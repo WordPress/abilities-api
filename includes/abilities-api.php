@@ -29,10 +29,10 @@ declare( strict_types = 1 );
  * @return ?\WP_Ability An instance of registered ability on success, null on failure.
  *
  * @phpstan-param array{
- *   label?: string,
- *   description?: string,
- *   execute_callback?: callable( mixed $input= ): (mixed|\WP_Error),
- *   permission_callback?: callable( mixed $input= ): (bool|\WP_Error),
+ *   label: string,
+ *   description: string,
+ *   execute_callback: callable( mixed $input= ): (mixed|\WP_Error),
+ *   permission_callback: callable( mixed $input= ): (bool|\WP_Error),
  *   input_schema?: array<string,mixed>,
  *   output_schema?: array<string,mixed>,
  *   meta?: array<string,mixed>,
