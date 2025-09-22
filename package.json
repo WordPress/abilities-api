@@ -25,6 +25,7 @@
 		"eslint": "^8.57.0",
 		"eslint-plugin-import": "^2.32.0",
 		"eslint-plugin-jest": "^27.9.0",
+		"rimraf": "^5.0.10",
 		"typescript": "^5.9.2"
 	},
 	"files": [
@@ -38,6 +39,7 @@
 		"plugin-zip": "wp-scripts plugin-zip",
 		"build": "npm run build --workspace=@wordpress/abilities",
 		"dev": "npm run dev --workspace=@wordpress/abilities",
+		"clean": "rimraf packages/client/{build,build-module,build-types,tsconfig.tsbuildinfo}",
 		"format": "wp-scripts format",
 		"format:js": "npm run format --workspace=@wordpress/abilities",
 		"lint:js": "npm run lint:js --workspace=@wordpress/abilities",
@@ -51,7 +53,9 @@
 		"test:client": "npm run test:unit --workspace=@wordpress/abilities",
 		"test:client:watch": "npm run test:unit:watch --workspace=@wordpress/abilities",
 		"test:client:coverage": "npm run test:unit:coverage --workspace=@wordpress/abilities",
+		"test:client:debug": "npm run test:unit:debug --workspace=@wordpress/abilities",
 		"test:all": "npm run test:php && npm run test:client",
+		"prepublishOnly": "npm run clean && npm run build",
 		"wp-env": "wp-env"
 	}
 }
