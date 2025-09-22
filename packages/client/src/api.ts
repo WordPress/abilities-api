@@ -4,7 +4,7 @@
 import { dispatch, resolveSelect } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
-import { sprintf, __ } from '@wordpress/i18n';
+import { sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -93,8 +93,7 @@ async function executeClientAbility(
 	if (!ability.callback) {
 		throw new Error(
 			sprintf(
-				/* translators: %s: ability name */
-				__('Client ability %s is missing callback function'),
+				'Client ability %s is missing callback function',
 				ability.name
 			)
 		);
@@ -105,11 +104,7 @@ async function executeClientAbility(
 		const hasPermission = await ability.permissionCallback(input);
 		if (!hasPermission) {
 			const error = new Error(
-				sprintf(
-					/* translators: %s: ability name */
-					__('Permission denied for ability: %s'),
-					ability.name
-				)
+				sprintf('Permission denied for ability: %s', ability.name)
 			);
 			(error as any).code = 'ability_permission_denied';
 			throw error;
@@ -125,8 +120,7 @@ async function executeClientAbility(
 		if (inputValidation !== true) {
 			const error = new Error(
 				sprintf(
-					/* translators: 1: ability name, 2: validation error */
-					__('Ability "%1$s" has invalid input. Reason: %2$s'),
+					'Ability "%1$s" has invalid input. Reason: %2$s',
 					ability.name,
 					inputValidation
 				)
@@ -154,8 +148,7 @@ async function executeClientAbility(
 		if (outputValidation !== true) {
 			const error = new Error(
 				sprintf(
-					/* translators: 1: ability name, 2: validation error */
-					__('Ability "%1$s" has invalid output. Reason: %2$s'),
+					'Ability "%1$s" has invalid output. Reason: %2$s',
 					ability.name,
 					outputValidation
 				)
@@ -228,13 +221,7 @@ export async function executeAbility(
 ): Promise<AbilityOutput> {
 	const ability = await getAbility(name);
 	if (!ability) {
-		throw new Error(
-			sprintf(
-				/* translators: %s: ability name */
-				__('Ability not found: %s'),
-				name
-			)
-		);
+		throw new Error(sprintf('Ability not found: %s', name));
 	}
 
 	if (ability.callback) {

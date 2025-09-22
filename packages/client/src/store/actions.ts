@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -40,35 +40,25 @@ export function registerAbility(ability: Ability) {
 	// @ts-expect-error - registry types are not yet available
 	return ({ select, dispatch }) => {
 		if (!ability.name) {
-			throw new Error(__('Ability name is required'));
+			throw new Error('Ability name is required');
 		}
 
 		// Validate name format matches server implementation
 		if (!/^[a-z0-9-]+\/[a-z0-9-]+$/.test(ability.name)) {
 			throw new Error(
-				__(
-					'Ability name must be a string containing a namespace prefix, i.e. "my-plugin/my-ability". It can only contain lowercase alphanumeric characters, dashes and the forward slash.'
-				)
+				'Ability name must be a string containing a namespace prefix, i.e. "my-plugin/my-ability". It can only contain lowercase alphanumeric characters, dashes and the forward slash.'
 			);
 		}
 
 		if (!ability.label) {
 			throw new Error(
-				sprintf(
-					/* translators: %s: ability name */
-					__('Ability "%s" must have a label'),
-					ability.name
-				)
+				sprintf('Ability "%s" must have a label', ability.name)
 			);
 		}
 
 		if (!ability.description) {
 			throw new Error(
-				sprintf(
-					/* translators: %s: ability name */
-					__('Ability "%s" must have a description'),
-					ability.name
-				)
+				sprintf('Ability "%s" must have a description', ability.name)
 			);
 		}
 
@@ -76,10 +66,7 @@ export function registerAbility(ability: Ability) {
 		if (ability.callback && typeof ability.callback !== 'function') {
 			throw new Error(
 				sprintf(
-					/* translators: %s: ability name */
-					__(
-						'Ability "%s" has an invalid callback. Callback must be a function'
-					),
+					'Ability "%s" has an invalid callback. Callback must be a function',
 					ability.name
 				)
 			);
@@ -89,11 +76,7 @@ export function registerAbility(ability: Ability) {
 		const existingAbility = select.getAbility(ability.name);
 		if (existingAbility) {
 			throw new Error(
-				sprintf(
-					/* translators: %s: ability name */
-					__('Ability "%s" is already registered'),
-					ability.name
-				)
+				sprintf('Ability "%s" is already registered', ability.name)
 			);
 		}
 
