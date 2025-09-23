@@ -323,6 +323,10 @@ class WP_Ability {
 			return $is_valid;
 		}
 
+		if ( empty( $this->get_input_schema() ) ) {
+			return call_user_func( $this->permission_callback );
+		}
+
 		return call_user_func( $this->permission_callback, $input );
 	}
 
