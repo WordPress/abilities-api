@@ -7,8 +7,6 @@
  * @package WordPress
  * @subpackage Abilities_API
  * @since 0.1.0
- *
- * phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
  */
 
 declare( strict_types = 1 );

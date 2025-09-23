@@ -366,7 +366,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	/**
 	 * Test output validation against schema.
 	 * Note: When output validation fails in WP_Ability::execute(), it returns null,
-	 * which causes the REST controller to return 'rest_ability_execution_failed'.
+	 * which causes the REST controller to return 'ability_invalid_output'.
 	 */
 	public function test_output_validation(): void {
 		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/invalid-output/run' );
