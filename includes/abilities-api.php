@@ -1,15 +1,103 @@
 <?php
-/**
- * Abilities API
- *
- * Defines functions for managing abilities in WordPress.
- *
- * @package WordPress
- * @subpackage Abilities_API
- * @since 0.1.0
- */
-
 declare( strict_types = 1 );
+
+/**
+ * Queries registered abilities with flexible filtering options.
+ * Supports filtering by namespace, meta, and arbitrary ability properties.
+ *
+ * @since 0.2.0
+ *
+ * @param array $args Array of query arguments. Supports property, meta, namespace, and special keys:
+ *   - 'namespace' (string|array): Filter by ability namespace(s).
+ *   - '?meta_key' (bool): Require presence of meta key.
+ *   - '!property' (mixed): Negate match for property.
+ *   - Other keys: Match ability property or meta value.
+ * @return WP_Ability[] Array of matching abilities.
+ */
+function wp_query_abilities( array $args = array() ): array {
+	$abilities = wp_get_abilities();
+	if ( empty( $args ) ) {
+		/**
+		 * Filter the list of abilities returned by wp_query_abilities when no args are provided.
+		 *
+		 * @since 0.2.0
+		 *
+		 * @param WP_Ability[] $abilities Array of all abilities.
+		 * @param array        $args      Query arguments (empty).
+		 */
+		return apply_filters( 'wp_query_abilities', $abilities, $args );
+	}
+
+	$filtered = array();
+	foreach ( $abilities as $name => $ability ) {
+		$pass = true;
+		foreach ( $args as $key => $expected ) {
+			$negate = false;
+			$require_key = false;
+			$property = $key;
+
+			if ( is_string( $key ) ) {
+				if ( $key[0] === '!' ) {
+					$negate = true;
+					$property = substr( $key, 1 );
+				} elseif ( $key[0] === '?' ) {
+					$require_key = true;
+					$property = substr( $key, 1 );
+				}
+			}
+
+			// Namespace filter (special case)
+			if ( $property === 'namespace' ) {
+				$ability_ns = explode( '/', $ability->get_name() )[0] ?? '';
+				$expected_ns = (array) $expected;
+				$match = in_array( $ability_ns, $expected_ns, true );
+				$pass = $negate ? !$match : $match;
+				if ( ! $pass ) break;
+				continue;
+			}
+
+			// Check meta
+			if ( $ability->get_meta() && array_key_exists( $property, $ability->get_meta() ) ) {
+				$actual = $ability->get_meta()[ $property ];
+			} elseif ( method_exists( $ability, 'get_' . $property ) ) {
+				$actual = $ability->{'get_' . $property}();
+			} else {
+				$actual = null;
+			}
+
+			if ( $require_key ) {
+				$has_key = $actual !== null;
+				$pass = (bool) $has_key === (bool) $expected;
+			} else {
+				if ( is_array( $expected ) ) {
+					$actArr = is_array( $actual ) ? $actual : ( null !== $actual ? [ $actual ] : [] );
+					$pass = ! empty( array_intersect( $expected, $actArr ) );
+				} else {
+					$pass = ( $actual === $expected );
+				}
+			}
+			if ( $negate ) {
+				$pass = ! $pass;
+			}
+			if ( ! $pass ) break;
+		}
+		if ( $pass ) {
+			$filtered[ $name ] = $ability;
+		}
+	}
+
+	/**
+	 * Filter the list of abilities returned by wp_query_abilities.
+	 *
+	 * @since 0.2.0
+	 *
+	 * @param WP_Ability[] $filtered Array of filtered abilities.
+	 * @param array        $args     Query arguments.
+	 */
+	return apply_filters( 'wp_query_abilities', $filtered, $args );
+}
+
+
 
 /**
  * Registers a new ability using Abilities API.
