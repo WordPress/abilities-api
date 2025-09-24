@@ -8,9 +8,9 @@
 import { getAbilities, getAbility } from '../selectors';
 import type { AbilitiesState } from '../../types';
 
-describe('Store Selectors', () => {
-	describe('getAbilities', () => {
-		it('should return all abilities as an array', () => {
+describe( 'Store Selectors', () => {
+	describe( 'getAbilities', () => {
+		it( 'should return all abilities as an array', () => {
 			const state: AbilitiesState = {
 				abilitiesByName: {
 					'test/ability1': {
@@ -31,28 +31,28 @@ describe('Store Selectors', () => {
 				},
 			};
 
-			const abilities = getAbilities(state);
+			const abilities = getAbilities( state );
 
-			expect(abilities).toHaveLength(2);
-			expect(abilities).toContainEqual(
-				state.abilitiesByName['test/ability1']
+			expect( abilities ).toHaveLength( 2 );
+			expect( abilities ).toContainEqual(
+				state.abilitiesByName[ 'test/ability1' ]
 			);
-			expect(abilities).toContainEqual(
-				state.abilitiesByName['test/ability2']
+			expect( abilities ).toContainEqual(
+				state.abilitiesByName[ 'test/ability2' ]
 			);
-		});
+		} );
 
-		it('should return empty array when no abilities exist', () => {
+		it( 'should return empty array when no abilities exist', () => {
 			const state: AbilitiesState = {
 				abilitiesByName: {},
 			};
 
-			const abilities = getAbilities(state);
+			const abilities = getAbilities( state );
 
-			expect(abilities).toEqual([]);
-		});
+			expect( abilities ).toEqual( [] );
+		} );
 
-		it('should memoize results when state unchanged', () => {
+		it( 'should memoize results when state unchanged', () => {
 			const state: AbilitiesState = {
 				abilitiesByName: {
 					'test/ability': {
@@ -65,14 +65,14 @@ describe('Store Selectors', () => {
 				},
 			};
 
-			const result1 = getAbilities(state);
-			const result2 = getAbilities(state);
+			const result1 = getAbilities( state );
+			const result2 = getAbilities( state );
 
 			// Should return the same reference when state unchanged
-			expect(result1).toBe(result2);
-		});
+			expect( result1 ).toBe( result2 );
+		} );
 
-		it('should return new array reference when state changes', () => {
+		it( 'should return new array reference when state changes', () => {
 			const state1: AbilitiesState = {
 				abilitiesByName: {
 					'test/ability1': {
@@ -98,17 +98,17 @@ describe('Store Selectors', () => {
 				},
 			};
 
-			const result1 = getAbilities(state1);
-			const result2 = getAbilities(state2);
+			const result1 = getAbilities( state1 );
+			const result2 = getAbilities( state2 );
 
 			// Should return different references when state changes
-			expect(result1).not.toBe(result2);
-			expect(result1).toHaveLength(1);
-			expect(result2).toHaveLength(2);
-		});
-	});
+			expect( result1 ).not.toBe( result2 );
+			expect( result1 ).toHaveLength( 1 );
+			expect( result2 ).toHaveLength( 2 );
+		} );
+	} );
 
-	describe('getAbility', () => {
+	describe( 'getAbility', () => {
 		const state: AbilitiesState = {
 			abilitiesByName: {
 				'test/ability1': {
@@ -129,36 +129,40 @@ describe('Store Selectors', () => {
 			},
 		};
 
-		it('should return a specific ability by name', () => {
-			const ability = getAbility(state, 'test/ability1');
+		it( 'should return a specific ability by name', () => {
+			const ability = getAbility( state, 'test/ability1' );
 
-			expect(ability).toEqual(state.abilitiesByName['test/ability1']);
-		});
+			expect( ability ).toEqual(
+				state.abilitiesByName[ 'test/ability1' ]
+			);
+		} );
 
-		it('should return null if ability not found', () => {
-			const ability = getAbility(state, 'non-existent');
+		it( 'should return null if ability not found', () => {
+			const ability = getAbility( state, 'non-existent' );
 
-			expect(ability).toBeNull();
-		});
+			expect( ability ).toBeNull();
+		} );
 
-		it('should handle empty state', () => {
+		it( 'should handle empty state', () => {
 			const emptyState: AbilitiesState = {
 				abilitiesByName: {},
 			};
 
-			const ability = getAbility(emptyState, 'test/ability');
+			const ability = getAbility( emptyState, 'test/ability' );
 
-			expect(ability).toBeNull();
-		});
+			expect( ability ).toBeNull();
+		} );
 
-		it('should return client abilities with callbacks', () => {
-			const ability = getAbility(state, 'test/ability2');
+		it( 'should return client abilities with callbacks', () => {
+			const ability = getAbility( state, 'test/ability2' );
 
-			expect(ability).toEqual(state.abilitiesByName['test/ability2']);
-			expect(ability?.callback).toBeDefined();
-		});
+			expect( ability ).toEqual(
+				state.abilitiesByName[ 'test/ability2' ]
+			);
+			expect( ability?.callback ).toBeDefined();
+		} );
 
-		it('should handle valid namespaced ability names correctly', () => {
+		it( 'should handle valid namespaced ability names correctly', () => {
 			const stateWithNamespaced: AbilitiesState = {
 				abilitiesByName: {
 					'my-plugin/feature-action': {
@@ -176,9 +180,11 @@ describe('Store Selectors', () => {
 				'my-plugin/feature-action'
 			);
 
-			expect(ability).toEqual(
-				stateWithNamespaced.abilitiesByName['my-plugin/feature-action']
+			expect( ability ).toEqual(
+				stateWithNamespaced.abilitiesByName[
+					'my-plugin/feature-action'
+				]
 			);
-		});
-	});
-});
+		} );
+	} );
+} );

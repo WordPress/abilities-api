@@ -2,13 +2,13 @@
  * Jest configuration for @wordpress/abilities package
  */
 
-const defaultConfig = require('@wordpress/scripts/config/jest-unit.config');
+const defaultConfig = require( '@wordpress/scripts/config/jest-unit.config' );
 
 module.exports = {
 	...defaultConfig,
 	// Exclude TypeScript declaration files from test runs
 	testPathIgnorePatterns: [
-		...(defaultConfig.testPathIgnorePatterns || []),
+		...( defaultConfig.testPathIgnorePatterns || [] ),
 		'<rootDir>/build-types/',
 		'\\.d\\.ts$',
 	],

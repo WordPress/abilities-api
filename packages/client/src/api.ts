@@ -18,8 +18,8 @@ import { validateValueFromSchema } from './validation';
  *
  * @return Promise resolving to array of abilities.
  */
-export async function getAbilities(): Promise<Ability[]> {
-	return await resolveSelect(store).getAbilities();
+export async function getAbilities(): Promise< Ability[] > {
+	return await resolveSelect( store ).getAbilities();
 }
 
 /**
@@ -28,8 +28,8 @@ export async function getAbilities(): Promise<Ability[]> {
  * @param name The ability name.
  * @return Promise resolving to the ability or null if not found.
  */
-export async function getAbility(name: string): Promise<Ability | null> {
-	return await resolveSelect(store).getAbility(name);
+export async function getAbility( name: string ): Promise< Ability | null > {
+	return await resolveSelect( store ).getAbility( name );
 }
 
 /**
@@ -62,8 +62,8 @@ export async function getAbility(name: string): Promise<Ability | null> {
  * });
  * ```
  */
-export function registerAbility(ability: Ability): void {
-	dispatch(store).registerAbility(ability);
+export function registerAbility( ability: Ability ): void {
+	dispatch( store ).registerAbility( ability );
 }
 
 /**
@@ -74,8 +74,8 @@ export function registerAbility(ability: Ability): void {
  *
  * @param name The ability name to unregister.
  */
-export function unregisterAbility(name: string): void {
-	dispatch(store).unregisterAbility(name);
+export function unregisterAbility( name: string ): void {
+	dispatch( store ).unregisterAbility( name );
 }
 
 /**
@@ -89,8 +89,8 @@ export function unregisterAbility(name: string): void {
 async function executeClientAbility(
 	ability: Ability,
 	input: AbilityInput
-): Promise<AbilityOutput> {
-	if (!ability.callback) {
+): Promise< AbilityOutput > {
+	if ( ! ability.callback ) {
 		throw new Error(
 			sprintf(
 				'Client ability %s is missing callback function',
@@ -100,24 +100,24 @@ async function executeClientAbility(
 	}
 
 	// Check permission callback if defined
-	if (ability.permissionCallback) {
-		const hasPermission = await ability.permissionCallback(input);
-		if (!hasPermission) {
+	if ( ability.permissionCallback ) {
+		const hasPermission = await ability.permissionCallback( input );
+		if ( ! hasPermission ) {
 			const error = new Error(
-				sprintf('Permission denied for ability: %s', ability.name)
+				sprintf( 'Permission denied for ability: %s', ability.name )
 			);
-			(error as any).code = 'ability_permission_denied';
+			( error as any ).code = 'ability_permission_denied';
 			throw error;
 		}
 	}
 
-	if (ability.input_schema) {
+	if ( ability.input_schema ) {
 		const inputValidation = validateValueFromSchema(
 			input,
 			ability.input_schema,
 			'input'
 		);
-		if (inputValidation !== true) {
+		if ( inputValidation !== true ) {
 			const error = new Error(
 				sprintf(
 					'Ability "%1$s" has invalid input. Reason: %2$s',
@@ -125,27 +125,30 @@ async function executeClientAbility(
 					inputValidation
 				)
 			);
-			(error as any).code = 'ability_invalid_input';
+			( error as any ).code = 'ability_invalid_input';
 			throw error;
 		}
 	}
 
 	let result: AbilityOutput;
 	try {
-		result = await ability.callback(input);
-	} catch (error) {
+		result = await ability.callback( input );
+	} catch ( error ) {
 		// eslint-disable-next-line no-console
-		console.error(`Error executing client ability ${ability.name}:`, error);
+		console.error(
+			`Error executing client ability ${ ability.name }:`,
+			error
+		);
 		throw error;
 	}
 
-	if (ability.output_schema) {
+	if ( ability.output_schema ) {
 		const outputValidation = validateValueFromSchema(
 			result,
 			ability.output_schema,
 			'output'
 		);
-		if (outputValidation !== true) {
+		if ( outputValidation !== true ) {
 			const error = new Error(
 				sprintf(
 					'Ability "%1$s" has invalid output. Reason: %2$s',
@@ -153,7 +156,7 @@ async function executeClientAbility(
 					outputValidation
 				)
 			);
-			(error as any).code = 'ability_invalid_output';
+			( error as any ).code = 'ability_invalid_output';
 			throw error;
 		}
 	}
@@ -172,11 +175,11 @@ async function executeClientAbility(
 async function executeServerAbility(
 	ability: Ability,
 	input: AbilityInput
-): Promise<AbilityOutput> {
+): Promise< AbilityOutput > {
 	const isResource = ability.meta?.type === 'resource';
 	const method = isResource ? 'GET' : 'POST';
 
-	let path = `/wp/v2/abilities/${ability.name}/run`;
+	let path = `/wp/v2/abilities/${ ability.name }/run`;
 	const options: {
 		method: string;
 		data?: { input: AbilityInput };
@@ -184,22 +187,22 @@ async function executeServerAbility(
 		method,
 	};
 
-	if (method === 'GET' && input !== null) {
+	if ( method === 'GET' && input !== null ) {
 		// For GET requests, pass the input directly
-		path = addQueryArgs(path, { input });
-	} else if (method === 'POST' && input !== null) {
+		path = addQueryArgs( path, { input } );
+	} else if ( method === 'POST' && input !== null ) {
 		options.data = { input };
 	}
 
 	// Note: Input and output validation happens on the server side for these abilities.
 	try {
-		return await apiFetch<AbilityOutput>({
+		return await apiFetch< AbilityOutput >( {
 			path,
 			...options,
-		});
-	} catch (error) {
+		} );
+	} catch ( error ) {
 		// eslint-disable-next-line no-console
-		console.error(`Error executing ability ${ability.name}:`, error);
+		console.error( `Error executing ability ${ ability.name }:`, error );
 		throw error;
 	}
 }
@@ -218,15 +221,15 @@ async function executeServerAbility(
 export async function executeAbility(
 	name: string,
 	input: AbilityInput = null
-): Promise<AbilityOutput> {
-	const ability = await getAbility(name);
-	if (!ability) {
-		throw new Error(sprintf('Ability not found: %s', name));
+): Promise< AbilityOutput > {
+	const ability = await getAbility( name );
+	if ( ! ability ) {
+		throw new Error( sprintf( 'Ability not found: %s', name ) );
 	}
 
-	if (ability.callback) {
-		return executeClientAbility(ability, input);
+	if ( ability.callback ) {
+		return executeClientAbility( ability, input );
 	}
 
-	return executeServerAbility(ability, input);
+	return executeServerAbility( ability, input );
 }

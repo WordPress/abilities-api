@@ -7,7 +7,7 @@
 		"jsx": "preserve",
 		"target": "esnext",
 		"module": "esnext",
-		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"lib": [ "DOM", "DOM.Iterable", "ESNext" ],
 		"declaration": true,
 		"declarationMap": true,
 		"composite": true,
@@ -30,13 +30,13 @@
 		"esModuleInterop": false,
 		"resolveJsonModule": true,
 
-		"typeRoots": ["./typings", "./node_modules/@types"],
+		"typeRoots": [ "./typings", "./node_modules/@types" ],
 		"types": [],
 
 		"rootDir": "${configDir}/src",
 		"declarationDir": "${configDir}/build-types"
 	},
-	"include": ["${configDir}/src"],
+	"include": [ "${configDir}/src" ],
 	"exclude": [
 		"packages/*/build-*/**",
 		"packages/*/build/**",

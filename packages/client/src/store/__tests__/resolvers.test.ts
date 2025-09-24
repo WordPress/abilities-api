@@ -16,26 +16,26 @@ import { ENTITY_KIND, ENTITY_NAME } from '../constants';
 import type { Ability } from '../../types';
 
 // Mock the WordPress core data store
-jest.mock('@wordpress/core-data', () => ({
+jest.mock( '@wordpress/core-data', () => ( {
 	store: 'core',
-}));
+} ) );
 
-describe('Store Resolvers', () => {
+describe( 'Store Resolvers', () => {
 	let mockDispatch: jest.Mock;
 	let mockRegistry: any;
 	let mockSelect: any;
 
-	beforeEach(() => {
+	beforeEach( () => {
 		mockDispatch = jest.fn();
 		mockSelect = jest.fn();
 		mockRegistry = {
 			resolveSelect: jest.fn(),
 			select: jest.fn(),
 		};
-	});
+	} );
 
-	describe('getAbilities', () => {
-		it('should fetch and dispatch abilities from the server', async () => {
+	describe( 'getAbilities', () => {
+		it( 'should fetch and dispatch abilities from the server', async () => {
 			const mockAbilities: Ability[] = [
 				{
 					name: 'test/ability1',
@@ -47,57 +47,72 @@ describe('Store Resolvers', () => {
 			];
 
 			const mockResolveSelect = {
-				getEntityRecords: jest.fn().mockResolvedValue(mockAbilities),
+				getEntityRecords: jest.fn().mockResolvedValue( mockAbilities ),
 			};
 
 			const mockSelectInstance = {
-				getEntityRecordsTotalPages: jest.fn().mockReturnValue(1),
+				getEntityRecordsTotalPages: jest.fn().mockReturnValue( 1 ),
 			};
 
-			mockRegistry.resolveSelect.mockReturnValue(mockResolveSelect);
-			mockRegistry.select.mockReturnValue(mockSelectInstance);
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+			mockRegistry.select.mockReturnValue( mockSelectInstance );
 
 			const resolver = getAbilities();
-			await resolver({ dispatch: mockDispatch, registry: mockRegistry });
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+			} );
 
-			expect(mockRegistry.resolveSelect).toHaveBeenCalledWith(coreStore);
-			expect(mockResolveSelect.getEntityRecords).toHaveBeenCalledWith(
+			expect( mockRegistry.resolveSelect ).toHaveBeenCalledWith(
+				coreStore
+			);
+			expect( mockResolveSelect.getEntityRecords ).toHaveBeenCalledWith(
 				ENTITY_KIND,
 				ENTITY_NAME,
 				{ per_page: -1 }
 			);
-			expect(mockDispatch).toHaveBeenCalledWith(
-				receiveAbilities(mockAbilities)
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveAbilities( mockAbilities )
 			);
-		});
+		} );
 
-		it('should handle empty abilities', async () => {
+		it( 'should handle empty abilities', async () => {
 			const mockResolveSelect = {
-				getEntityRecords: jest.fn().mockResolvedValue([]),
+				getEntityRecords: jest.fn().mockResolvedValue( [] ),
 			};
 
-			mockRegistry.resolveSelect.mockReturnValue(mockResolveSelect);
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
 
 			const resolver = getAbilities();
-			await resolver({ dispatch: mockDispatch, registry: mockRegistry });
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+			} );
 
-			expect(mockDispatch).toHaveBeenCalledWith(receiveAbilities([]));
-		});
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveAbilities( [] )
+			);
+		} );
 
-		it('should handle null response', async () => {
+		it( 'should handle null response', async () => {
 			const mockResolveSelect = {
-				getEntityRecords: jest.fn().mockResolvedValue(null),
+				getEntityRecords: jest.fn().mockResolvedValue( null ),
 			};
 
-			mockRegistry.resolveSelect.mockReturnValue(mockResolveSelect);
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
 
 			const resolver = getAbilities();
-			await resolver({ dispatch: mockDispatch, registry: mockRegistry });
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+			} );
 
-			expect(mockDispatch).toHaveBeenCalledWith(receiveAbilities([]));
-		});
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveAbilities( [] )
+			);
+		} );
 
-		it('should fetch all abilities in a single request', async () => {
+		it( 'should fetch all abilities in a single request', async () => {
 			const allAbilities: Ability[] = [
 				{
 					name: 'test/ability1',
@@ -123,32 +138,36 @@ describe('Store Resolvers', () => {
 			];
 
 			const mockResolveSelect = {
-				getEntityRecords: jest.fn().mockResolvedValue(allAbilities),
+				getEntityRecords: jest.fn().mockResolvedValue( allAbilities ),
 			};
 
-			mockRegistry.resolveSelect.mockReturnValue(mockResolveSelect);
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
 
 			const resolver = getAbilities();
-			await resolver({ dispatch: mockDispatch, registry: mockRegistry });
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+			} );
 
 			// Should fetch all abilities in one request with per_page: -1
-			expect(mockResolveSelect.getEntityRecords).toHaveBeenCalledTimes(1);
-			expect(mockResolveSelect.getEntityRecords).toHaveBeenNthCalledWith(
-				1,
-				ENTITY_KIND,
-				ENTITY_NAME,
-				{ per_page: -1 }
+			expect( mockResolveSelect.getEntityRecords ).toHaveBeenCalledTimes(
+				1
 			);
+			expect(
+				mockResolveSelect.getEntityRecords
+			).toHaveBeenNthCalledWith( 1, ENTITY_KIND, ENTITY_NAME, {
+				per_page: -1,
+			} );
 
 			// Should dispatch all abilities
-			expect(mockDispatch).toHaveBeenCalledWith(
-				receiveAbilities(allAbilities)
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveAbilities( allAbilities )
 			);
-		});
-	});
+		} );
+	} );
 
-	describe('getAbility', () => {
-		it('should fetch and dispatch a specific ability', async () => {
+	describe( 'getAbility', () => {
+		it( 'should fetch and dispatch a specific ability', async () => {
 			const mockAbility: Ability = {
 				name: 'test/ability',
 				label: 'Test Ability',
@@ -158,32 +177,36 @@ describe('Store Resolvers', () => {
 			};
 
 			const mockResolveSelect = {
-				getEntityRecord: jest.fn().mockResolvedValue(mockAbility),
+				getEntityRecord: jest.fn().mockResolvedValue( mockAbility ),
 			};
 
-			mockRegistry.resolveSelect.mockReturnValue(mockResolveSelect);
-			mockSelect.getAbility = jest.fn().mockReturnValue(null); // Ability not in store
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+			mockSelect.getAbility = jest.fn().mockReturnValue( null ); // Ability not in store
 
-			const resolver = getAbility('test/ability');
-			await resolver({
+			const resolver = getAbility( 'test/ability' );
+			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
 				select: mockSelect,
-			});
+			} );
 
-			expect(mockSelect.getAbility).toHaveBeenCalledWith('test/ability');
-			expect(mockRegistry.resolveSelect).toHaveBeenCalledWith(coreStore);
-			expect(mockResolveSelect.getEntityRecord).toHaveBeenCalledWith(
+			expect( mockSelect.getAbility ).toHaveBeenCalledWith(
+				'test/ability'
+			);
+			expect( mockRegistry.resolveSelect ).toHaveBeenCalledWith(
+				coreStore
+			);
+			expect( mockResolveSelect.getEntityRecord ).toHaveBeenCalledWith(
 				ENTITY_KIND,
 				ENTITY_NAME,
 				'test/ability'
 			);
-			expect(mockDispatch).toHaveBeenCalledWith(
-				receiveAbilities([mockAbility])
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveAbilities( [ mockAbility ] )
 			);
-		});
+		} );
 
-		it('should not fetch if ability already exists in store', async () => {
+		it( 'should not fetch if ability already exists in store', async () => {
 			const existingAbility: Ability = {
 				name: 'test/ability',
 				label: 'Test Ability',
@@ -193,44 +216,48 @@ describe('Store Resolvers', () => {
 				callback: jest.fn(),
 			};
 
-			mockSelect.getAbility = jest.fn().mockReturnValue(existingAbility);
+			mockSelect.getAbility = jest
+				.fn()
+				.mockReturnValue( existingAbility );
 
-			const resolver = getAbility('test/ability');
-			await resolver({
+			const resolver = getAbility( 'test/ability' );
+			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
 				select: mockSelect,
-			});
+			} );
 
-			expect(mockSelect.getAbility).toHaveBeenCalledWith('test/ability');
-			expect(mockRegistry.resolveSelect).not.toHaveBeenCalled();
-			expect(mockDispatch).not.toHaveBeenCalled();
-		});
+			expect( mockSelect.getAbility ).toHaveBeenCalledWith(
+				'test/ability'
+			);
+			expect( mockRegistry.resolveSelect ).not.toHaveBeenCalled();
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
 
-		it('should handle non-existent abilities', async () => {
+		it( 'should handle non-existent abilities', async () => {
 			const mockResolveSelect = {
-				getEntityRecord: jest.fn().mockResolvedValue(null),
+				getEntityRecord: jest.fn().mockResolvedValue( null ),
 			};
 
-			mockRegistry.resolveSelect.mockReturnValue(mockResolveSelect);
-			mockSelect.getAbility = jest.fn().mockReturnValue(null);
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+			mockSelect.getAbility = jest.fn().mockReturnValue( null );
 
-			const resolver = getAbility('non-existent');
-			await resolver({
+			const resolver = getAbility( 'non-existent' );
+			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
 				select: mockSelect,
-			});
+			} );
 
-			expect(mockResolveSelect.getEntityRecord).toHaveBeenCalledWith(
+			expect( mockResolveSelect.getEntityRecord ).toHaveBeenCalledWith(
 				ENTITY_KIND,
 				ENTITY_NAME,
 				'non-existent'
 			);
-			expect(mockDispatch).not.toHaveBeenCalled();
-		});
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
 
-		it('should handle valid namespaced ability names', async () => {
+		it( 'should handle valid namespaced ability names', async () => {
 			const mockAbility: Ability = {
 				name: 'my-plugin/feature-action',
 				label: 'Namespaced Action',
@@ -240,27 +267,27 @@ describe('Store Resolvers', () => {
 			};
 
 			const mockResolveSelect = {
-				getEntityRecord: jest.fn().mockResolvedValue(mockAbility),
+				getEntityRecord: jest.fn().mockResolvedValue( mockAbility ),
 			};
 
-			mockRegistry.resolveSelect.mockReturnValue(mockResolveSelect);
-			mockSelect.getAbility = jest.fn().mockReturnValue(null);
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+			mockSelect.getAbility = jest.fn().mockReturnValue( null );
 
-			const resolver = getAbility('my-plugin/feature-action');
-			await resolver({
+			const resolver = getAbility( 'my-plugin/feature-action' );
+			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
 				select: mockSelect,
-			});
+			} );
 
-			expect(mockResolveSelect.getEntityRecord).toHaveBeenCalledWith(
+			expect( mockResolveSelect.getEntityRecord ).toHaveBeenCalledWith(
 				ENTITY_KIND,
 				ENTITY_NAME,
 				'my-plugin/feature-action'
 			);
-			expect(mockDispatch).toHaveBeenCalledWith(
-				receiveAbilities([mockAbility])
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveAbilities( [ mockAbility ] )
 			);
-		});
-	});
-});
+		} );
+	} );
+} );

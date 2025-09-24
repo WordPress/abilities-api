@@ -20,7 +20,7 @@ interface AbilitiesAction {
 	name?: string;
 }
 
-const DEFAULT_STATE: Record<string, Ability> = {};
+const DEFAULT_STATE: Record< string, Ability > = {};
 
 /**
  * Reducer managing the abilities by name.
@@ -30,35 +30,35 @@ const DEFAULT_STATE: Record<string, Ability> = {};
  * @return New state.
  */
 function abilitiesByName(
-	state: Record<string, Ability> = DEFAULT_STATE,
+	state: Record< string, Ability > = DEFAULT_STATE,
 	action: AbilitiesAction
-): Record<string, Ability> {
-	switch (action.type) {
+): Record< string, Ability > {
+	switch ( action.type ) {
 		case RECEIVE_ABILITIES: {
-			if (!action.abilities) {
+			if ( ! action.abilities ) {
 				return state;
 			}
 			const newState = { ...state };
-			action.abilities.forEach((ability) => {
-				newState[ability.name] = ability;
-			});
+			action.abilities.forEach( ( ability ) => {
+				newState[ ability.name ] = ability;
+			} );
 			return newState;
 		}
 		case REGISTER_ABILITY: {
-			if (!action.ability) {
+			if ( ! action.ability ) {
 				return state;
 			}
 			return {
 				...state,
-				[action.ability.name]: action.ability,
+				[ action.ability.name ]: action.ability,
 			};
 		}
 		case UNREGISTER_ABILITY: {
-			if (!action.name || !state[action.name]) {
+			if ( ! action.name || ! state[ action.name ] ) {
 				return state;
 			}
 			const newState = { ...state };
-			delete newState[action.name];
+			delete newState[ action.name ];
 			return newState;
 		}
 		default:
@@ -66,6 +66,6 @@ function abilitiesByName(
 	}
 }
 
-export default combineReducers({
+export default combineReducers( {
 	abilitiesByName,
-});
+} );

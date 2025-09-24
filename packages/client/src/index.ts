@@ -20,7 +20,7 @@ declare global {
 			abilities?: typeof api & {
 				store: typeof store;
 			};
-			[key: string]: any;
+			[ key: string ]: any;
 		};
 	}
 }
