@@ -7,7 +7,7 @@
  *
  * @see https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/#json-schema-basics
  */
-import Ajv from 'ajv';
+import Ajv from 'ajv-draft-04';
 import addFormats from 'ajv-formats';
 import type { ValidationError } from './types';
 

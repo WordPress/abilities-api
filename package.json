@@ -14,10 +14,8 @@
 		"packages/*"
 	],
 	"devDependencies": {
-		"@types/jest": "^29.5.14",
 		"@wordpress/env": "^10.31.0",
 		"@wordpress/eslint-plugin": "^22.17.0",
-		"@wordpress/jest-console": "^8.31.0",
 		"@wordpress/prettier-config": "^4.31.0",
 		"@wordpress/scripts": "^30.24.0",
 		"rimraf": "^5.0.10",
