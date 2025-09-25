@@ -13,6 +13,41 @@ import {
 	UNREGISTER_ABILITY,
 } from './constants';
 
+/**
+ * Valid keys for an Ability object.
+ * Used to filter out non-standard properties from server responses.
+ */
+const ABILITY_KEYS = [
+	'name',
+	'label',
+	'description',
+	'input_schema',
+	'output_schema',
+	'meta',
+	'callback',
+	'permissionCallback',
+] as const;
+
+/**
+ * Filters an ability object to only include valid properties.
+ * This ensures consistent shape regardless of source (server/client).
+ *
+ * @param ability Raw ability object that may contain extra properties.
+ * @return Filtered ability with only valid properties.
+ */
+function filterAbility( ability: any ): Ability {
+	return Object.keys( ability )
+		.filter(
+			( key ) =>
+				ABILITY_KEYS.includes( key as any ) &&
+				ability[ key ] !== undefined
+		)
+		.reduce(
+			( obj, key ) => ( { ...obj, [ key ]: ability[ key ] } ),
+			{} as Ability
+		);
+}
+
 interface AbilitiesAction {
 	type: string;
 	abilities?: Ability[];
@@ -40,7 +75,7 @@ function abilitiesByName(
 			}
 			const newState = { ...state };
 			action.abilities.forEach( ( ability ) => {
-				newState[ ability.name ] = ability;
+				newState[ ability.name ] = filterAbility( ability );
 			} );
 			return newState;
 		}
@@ -50,7 +85,7 @@ function abilitiesByName(
 			}
 			return {
 				...state,
-				[ action.ability.name ]: action.ability,
+				[ action.ability.name ]: filterAbility( action.ability ),
 			};
 		}
 		case UNREGISTER_ABILITY: {
