@@ -1,4 +1,4 @@
-import wpConfig from '@wordpress/prettier-config';
+const wpConfig = require( '@wordpress/prettier-config' );
 
 /**
  * @see https://prettier.io/docs/configuration
@@ -17,7 +17,7 @@ const config = {
 			},
 		},
 		{
-			files: ['*.yml', '*.yaml'],
+			files: [ '*.yml', '*.yaml' ],
 			options: {
 				tabWidth: 2,
 				useTabs: false,
@@ -27,4 +27,4 @@ const config = {
 	],
 };
 
-export default config;
+module.exports = config;
