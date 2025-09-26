@@ -412,7 +412,7 @@ class WP_Ability {
 	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
 	public function execute( $input = null ) {
-		$has_permissions = $this->has_permission( $input );
+		$has_permissions = $this->check_permission( $input );
 		if ( true !== $has_permissions ) {
 			if ( is_wp_error( $has_permissions ) ) {
 				if ( 'ability_invalid_input' === $has_permissions->get_error_code() ) {
