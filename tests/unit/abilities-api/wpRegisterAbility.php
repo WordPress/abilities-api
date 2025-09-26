@@ -164,7 +164,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
 		$this->assertFalse(
-			$result->has_permission(
+			$result->check_permission(
 				array(
 					'a' => 2,
 					'b' => 3,
