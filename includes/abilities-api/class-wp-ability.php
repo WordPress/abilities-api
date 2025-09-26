@@ -400,6 +400,24 @@ class WP_Ability {
 	}
 
 	/**
+	 * Invokes a callable, ensuring the input is passed through only if the input schema is defined.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param callable $callback The callable to invoke.
+	 * @param mixed    $input    Optional. The input data for the ability. Default `null`.
+	 * @return mixed The result of the callable execution.
+	 */
+	protected function invoke_callback( $callback, $input = null ) {
+		$args = array();
+		if ( ! empty( $this->get_input_schema() ) ) {
+			$args[] = $input;
+		}
+
+		return $callback( ...$args );
+	}
+
+	/**
 	 * Checks whether the ability has the necessary permissions.
 	 *
 	 * The input is validated against the input schema before it is passed to to permission callback.
@@ -415,11 +433,7 @@ class WP_Ability {
 			return $is_valid;
 		}
 
-		if ( empty( $this->get_input_schema() ) ) {
-			return call_user_func( $this->permission_callback );
-		}
-
-		return call_user_func( $this->permission_callback, $input );
+		return $this->invoke_callback( $this->permission_callback, $input );
 	}
 
 	/**
@@ -457,11 +471,7 @@ class WP_Ability {
 			);
 		}
 
-		if ( empty( $this->get_input_schema() ) ) {
-			return call_user_func( $this->execute_callback );
-		}
-
-		return call_user_func( $this->execute_callback, $input );
+		return $this->invoke_callback( $this->execute_callback, $input );
 	}
 
 	/**
