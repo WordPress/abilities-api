@@ -163,7 +163,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		}
 
 		$input = $this->get_input_from_request( $request );
-		if ( ! $ability->has_permission( $input ) ) {
+		if ( ! $ability->check_permission( $input ) ) {
 			return new \WP_Error(
 				'rest_ability_cannot_execute',
 				__( 'Sorry, you are not allowed to execute this ability.' ),
