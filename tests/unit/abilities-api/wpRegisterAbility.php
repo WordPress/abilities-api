@@ -134,7 +134,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		$this->assertSame( self::$test_ability_args['output_schema'], $result->get_output_schema() );
 		$this->assertSame( self::$test_ability_args['meta'], $result->get_meta() );
 		$this->assertTrue(
-			$result->has_permission(
+			$result->check_permission(
 				array(
 					'a' => 2,
 					'b' => 3,
@@ -289,7 +289,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
-		$actual = $result->has_permission(
+		$actual = $result->check_permission(
 			array(
 				'a'       => 2,
 				'b'       => 3,
@@ -305,6 +305,27 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		$this->assertSame(
 			'Ability "test/add-numbers" has invalid input. Reason: unknown is not a valid property of Object.',
 			$actual->get_error_message()
+		);
+	}
+
+	/**
+	 * Tests that the deprecated has_permission() method still works and shows deprecation.
+	 *
+	 * @expectedDeprecated WP_Ability::has_permission
+	 */
+	public function test_has_permission_deprecated_method(): void {
+		do_action( 'abilities_api_init' );
+
+		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
+
+		// Test that deprecated method still works
+		$this->assertTrue(
+			$result->has_permission(
+				array(
+					'a' => 2,
+					'b' => 3,
+				)
+			)
 		);
 	}
 
@@ -325,7 +346,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		// Test with a > b (should be allowed)
 		$this->assertTrue(
-			$result->has_permission(
+			$result->check_permission(
 				array(
 					'a' => 5,
 					'b' => 3,
@@ -342,7 +363,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		// Test with a < b (should be denied)
 		$this->assertFalse(
-			$result->has_permission(
+			$result->check_permission(
 				array(
 					'a' => 2,
 					'b' => 8,
