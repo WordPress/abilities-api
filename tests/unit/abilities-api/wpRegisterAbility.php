@@ -309,16 +309,15 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that deprecated has_permission() method still works
+	 * Tests that deprecated has_permission() method still works (for coverage).
 	 */
 	public function test_has_permission_deprecated_coverage(): void {
 		do_action( 'abilities_api_init' );
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
-		// Suppress deprecation notice for coverage testing
-		$original_error_reporting = error_reporting();
-		error_reporting( $original_error_reporting & ~E_USER_DEPRECATED );
+		// Expect the deprecation notice
+		$this->setExpectedDeprecated( 'WP_Ability::has_permission' );
 		
 		// Test that deprecated method still works
 		$this->assertTrue(
@@ -329,9 +328,6 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 				)
 			)
 		);
-		
-		// Restore error reporting
-		error_reporting( $original_error_reporting );
 	}
 
 	/**
