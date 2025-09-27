@@ -63,16 +63,6 @@ final class WP_Abilities_Registry {
 	 * } $args
 	 */
 	public function register( string $name, array $args ): ?WP_Ability {
-		/**
-		 * Filters the ability arguments before they are validated.
-		 *
-		 * @since n.e.x.t
-		 *
-		 * @param array<string,mixed> $args The arguments used to instantiate the ability.
-		 * @param string              $name The name of the ability, with its namespace.
-		 */
-		$args = apply_filters( 'wp_ability_args', $args, $name );
-
 		if ( ! preg_match( '/^[a-z0-9-]+\/[a-z0-9-]+$/', $name ) ) {
 			_doing_it_wrong(
 				__METHOD__,
@@ -93,6 +83,16 @@ final class WP_Abilities_Registry {
 			);
 			return null;
 		}
+
+		/**
+		 * Filters the ability arguments before they are validated and used to instantiate the ability.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param array<string,mixed> $args The arguments used to instantiate the ability.
+		 * @param string              $name The name of the ability, with its namespace.
+		 */
+		$args = apply_filters( 'register_ability_args', $args, $name );
 
 		// The class is only used to instantiate the ability, and is not a property of the ability itself.
 		if ( isset( $args['ability_class'] ) && ! is_a( $args['ability_class'], WP_Ability::class, true ) ) {
