@@ -193,11 +193,11 @@
 
 	<!-- Plugin-specific rule configs  -->
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<exclude-pattern>includes/abilities-api.php</exclude-pattern>
+		<exclude-pattern>includes/abilities-api/*</exclude-pattern>
 		<properties>
 			<property name="prefixes" type="array">
-				<element value="abilities_api_" /><!-- Hook prefix -->
-				<element value="WP_Ability" />
-				<element value="WP_Abilities" />
+				<element value="WP_Abilities_Assets_Init" /><!-- Asset loader -->
 				<element value="WP_REST_Abilities" />
 				<element value="WP_ABILITIES_API" /><!-- Constant -->
 			</property>

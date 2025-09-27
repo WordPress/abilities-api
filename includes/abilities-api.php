@@ -7,8 +7,6 @@
  * @package WordPress
  * @subpackage Abilities_API
  * @since 0.1.0
- *
- * phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
  */
 
 declare( strict_types = 1 );
@@ -33,10 +31,10 @@ declare( strict_types = 1 );
  * @phpstan-param array{
  *   label?: string,
  *   description?: string,
- *   input_schema?: array<string,mixed>,
- *   output_schema?: array<string,mixed>,
  *   execute_callback?: callable( mixed $input= ): (mixed|\WP_Error),
  *   permission_callback?: callable( mixed $input= ): (bool|\WP_Error),
+ *   input_schema?: array<string,mixed>,
+ *   output_schema?: array<string,mixed>,
  *   meta?: array<string,mixed>,
  *   ability_class?: class-string<\WP_Ability>,
  *   ...<string, mixed>

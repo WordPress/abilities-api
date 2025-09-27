@@ -13,9 +13,9 @@ Join the `#core-ai` channel [on WordPress Slack](http://wordpress.slack.com) ([s
 In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). All code in the Abilities API plugin must follow these requirements:
 
 - **WordPress**: The plugin's minimum WordPress version requirement is 6.8.
-- **PHP**: The minimum required version of the code slated for WordPress Core includes is PHP7.2, but the tooling and development environment requires PHP 7.4 or higher.
+- **PHP**: The minimum required version of the code slated for WordPress Core includes PHP 7.2, but the tooling and development environment requires PHP 7.4 or higher.
 
-We include [several tools](#useful-commands) to help ensure your code meets contribution
+We include [several tools](#useful-commands) to help ensure your code meets contribution requirements.
 
 ## Guidelines
 
@@ -83,12 +83,38 @@ For more information on using `wp-env`, see the [wp-env documentation](https://d
 
 #### Linting and Formatting
 
+##### PHP Code Quality
+
 - `npm run lint:php`: Runs PHPCS linting on the PHP code.
 - `npm run lint:php:fix`: Autofixes PHPCS linting issues.
 - `npm run lint:php:stan`: Runs PHPStan static analysis.
-- `npm run format`: Formats non-PHP files using Prettier.
+
+##### JavaScript Code Quality
+
+The project uses ESLint for linting and Prettier for code formatting, configured through `@wordpress/scripts`.
+
+```bash
+# Lint all JavaScript/TypeScript files
+npm run lint:js
+
+# Auto-fix linting issues
+npm run lint:js:fix
+
+# Run TypeScript typecheck
+npm run typecheck
+```
+
+##### Formatting Code
+
+Format all files (JavaScript, JSON, Markdown, etc.):
+
+```bash
+npm run format
+```
 
 ### Running Tests
+
+#### PHP Tests
 
 PHPUnit tests can be run using the following command:
 
@@ -105,6 +131,26 @@ npm run test:php
 ```
 
 You should see the html coverage report in the `tests/_output/html` directory and the clover XML report in `tests/_output/php-coverage.xml`.
+
+#### JavaScript Tests
+
+The JavaScript client package tests can be run using the following commands:
+
+```bash
+# Run all JavaScript tests
+npm run test:client
+
+# Run tests in watch mode (great for development)
+npm run test:client:watch
+```
+
+To generate a code coverage report, run:
+
+```bash
+npm run test:client:coverage
+```
+
+Coverage reports are generated in the `packages/client/coverage/` directory.
 
 ### Building the plugin for distribution
 
