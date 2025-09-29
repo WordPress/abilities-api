@@ -40,7 +40,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 */
 	public function data_execute_input() {
 		return array(
-			'null input'     => array(
+			'null input'    => array(
 				array(
 					'type'        => array( 'null', 'integer' ),
 					'description' => 'The null or integer to convert to integer.',
@@ -52,7 +52,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				null,
 				0,
 			),
-			'boolean input'  => array(
+			'boolean input' => array(
 				array(
 					'type'        => 'boolean',
 					'description' => 'The boolean to convert to integer.',
@@ -64,7 +64,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				true,
 				1,
 			),
-			'integer input'  => array(
+			'integer input' => array(
 				array(
 					'type'        => 'integer',
 					'description' => 'The integer to add 5 to.',
@@ -76,7 +76,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				2,
 				7,
 			),
-			'number input'   => array(
+			'number input'  => array(
 				array(
 					'type'        => 'number',
 					'description' => 'The floating number to round.',
@@ -88,7 +88,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				2.7,
 				3,
 			),
-			'string input'   => array(
+			'string input'  => array(
 				array(
 					'type'        => 'string',
 					'description' => 'The string to measure the length of.',
@@ -100,7 +100,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				'Hello world!',
 				12,
 			),
-			'object input'   => array(
+			'object input'  => array(
 				array(
 					'type'                 => 'object',
 					'description'          => 'An object containing two numbers to add.',
@@ -117,24 +117,27 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 						),
 					),
 					'additionalProperties' => false,
-			    ),
+				),
 				static function ( array $input ): int {
 					return $input['a'] + $input['b'];
 				},
-				array( 'a' => 2, 'b' => 3 ),
+				array(
+					'a' => 2,
+					'b' => 3,
+				),
 				5,
 			),
-			'array input'    => array(
+			'array input'   => array(
 				array(
 					'type'        => 'array',
 					'description' => 'An array containing two numbers to add.',
 					'required'    => true,
 					'minItems'    => 2,
-    				'maxItems'    => 2,
+					'maxItems'    => 2,
 					'items'       => array(
 						'type' => 'integer',
 					),
-			    ),
+				),
 				static function ( array $input ): int {
 					return $input[0] + $input[1];
 				},

@@ -300,7 +300,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$request->set_param( 'page', 1 );
 		$response = $this->server->dispatch( $request );
 
-		$headers = $response->get_headers();
+		$headers     = $response->get_headers();
 		$link_header = $headers['Link'] ?? '';
 
 		// Parse Link header for rel="next" and rel="prev"
@@ -311,7 +311,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$request->set_param( 'page', 3 );
 		$response = $this->server->dispatch( $request );
 
-		$headers = $response->get_headers();
+		$headers     = $response->get_headers();
 		$link_header = $headers['Link'] ?? '';
 
 		$this->assertStringContainsString( 'rel="next"', $link_header );
@@ -323,7 +323,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$request->set_param( 'page', $last_page );
 		$response = $this->server->dispatch( $request );
 
-		$headers = $response->get_headers();
+		$headers     = $response->get_headers();
 		$link_header = $headers['Link'] ?? '';
 
 		$this->assertStringNotContainsString( 'rel="next"', $link_header );
