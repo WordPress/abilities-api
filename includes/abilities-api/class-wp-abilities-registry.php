@@ -87,7 +87,7 @@ final class WP_Abilities_Registry {
 		/**
 		 * Filters the ability arguments before they are validated and used to instantiate the ability.
 		 *
-		 * @since n.e.x.t
+		 * @since 0.2.0
 		 *
 		 * @param array<string,mixed> $args The arguments used to instantiate the ability.
 		 * @param string              $name The name of the ability, with its namespace.

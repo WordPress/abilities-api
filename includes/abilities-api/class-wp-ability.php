@@ -436,7 +436,7 @@ class WP_Ability {
 		/**
 		 * Fires before an ability gets executed.
 		 *
-		 * @since n.e.x.t
+		 * @since 0.2.0
 		 *
 		 * @param string $ability_name The name of the ability.
 		 * @param mixed  $input        The input data for the ability.
@@ -456,7 +456,7 @@ class WP_Ability {
 		/**
 		 * Fires immediately after an ability finished executing.
 		 *
-		 * @since n.e.x.t
+		 * @since 0.2.0
 		 *
 		 * @param string $ability_name The name of the ability.
 		 * @param mixed  $input        The input data for the ability.
