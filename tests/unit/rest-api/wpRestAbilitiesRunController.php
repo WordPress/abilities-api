@@ -356,10 +356,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertSame( 405, $response->get_status() );
+		$this->assertSame( 403, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertSame( 'rest_ability_invalid_method', $data['code'] );
-		$this->assertSame( 'Resource abilities require GET method.', $data['message'] );
+		$this->assertSame( 'rest_ability_cannot_execute', $data['code'] );
+		$this->assertSame( 'Sorry, you are not allowed to execute this ability.', $data['message'] );
 	}
 
 
@@ -561,8 +561,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		);
 
 		$response = $this->server->dispatch( $request );
-		// When input is not an array, WordPress returns 400 Bad Request
-		$this->assertEquals( 400, $response->get_status() );
+		// Our security fix now catches invalid input in permission check
+		$this->assertEquals( 403, $response->get_status() );
 	}
 
 	/**
@@ -580,8 +580,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		);
 
 		$response = $this->server->dispatch( $request );
-		// When input is not an array, WordPress returns 400 Bad Request
-		$this->assertEquals( 400, $response->get_status() );
+		// Our security fix now catches invalid input in permission check
+		$this->assertEquals( 403, $response->get_status() );
 	}
 
 	/**
@@ -662,12 +662,12 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		// Should return error when input validation fails.
-		$this->assertSame( 400, $response->get_status() );
+		// Our security fix now catches input validation failures in permission check
+		$this->assertSame( 403, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertSame( 'ability_invalid_input', $data['code'] );
+		$this->assertSame( 'rest_ability_cannot_execute', $data['code'] );
 		$this->assertSame(
-			'Ability "test/strict-input" has invalid input. Reason: required_field is a required property of input.',
+			'Sorry, you are not allowed to execute this ability.',
 			$data['message']
 		);
 	}
