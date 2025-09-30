@@ -312,12 +312,12 @@ class WP_Ability {
 	 *
 	 * The input is validated against the input schema before it is passed to to permission callback.
 	 *
-	 * @since 0.1.0
+	 * @since N.E.X.T
 	 *
 	 * @param mixed $input Optional. The input data for permission checking. Default `null`.
 	 * @return bool|\WP_Error Whether the ability has the necessary permission.
 	 */
-	public function has_permission( $input = null ) {
+	public function check_permission( $input = null ) {
 		$is_valid = $this->validate_input( $input );
 		if ( is_wp_error( $is_valid ) ) {
 			return $is_valid;
@@ -328,6 +328,24 @@ class WP_Ability {
 		}
 
 		return call_user_func( $this->permission_callback, $input );
+	}
+
+	/**
+	 * Checks whether the ability has the necessary permissions (deprecated).
+	 *
+	 * The input is validated against the input schema before it is passed to to permission callback.
+	 *
+	 * @deprecated N.E.X.T Use check_permission() instead.
+	 * @see WP_Ability::check_permission()
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param mixed $input Optional. The input data for permission checking. Default `null`.
+	 * @return bool|\WP_Error Whether the ability has the necessary permission.
+	 */
+	public function has_permission( $input = null ) {
+		_deprecated_function( __METHOD__, 'N.E.X.T', 'WP_Ability::check_permission()' );
+		return $this->check_permission( $input );
 	}
 
 	/**
@@ -394,7 +412,7 @@ class WP_Ability {
 	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
 	public function execute( $input = null ) {
-		$has_permissions = $this->has_permission( $input );
+		$has_permissions = $this->check_permission( $input );
 		if ( true !== $has_permissions ) {
 			if ( is_wp_error( $has_permissions ) ) {
 				if ( 'ability_invalid_input' === $has_permissions->get_error_code() ) {
