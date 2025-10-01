@@ -312,7 +312,7 @@ class WP_Ability {
 	 *
 	 * The input is validated against the input schema before it is passed to to permission callback.
 	 *
-	 * @since N.E.X.T
+	 * @since 0.2.0
 	 *
 	 * @param mixed $input Optional. The input data for permission checking. Default `null`.
 	 * @return bool|\WP_Error Whether the ability has the necessary permission.
@@ -335,7 +335,7 @@ class WP_Ability {
 	 *
 	 * The input is validated against the input schema before it is passed to to permission callback.
 	 *
-	 * @deprecated N.E.X.T Use check_permissions() instead.
+	 * @deprecated 0.2.0 Use check_permissions() instead.
 	 * @see WP_Ability::check_permissions()
 	 *
 	 * @since 0.1.0
@@ -344,7 +344,7 @@ class WP_Ability {
 	 * @return bool|\WP_Error Whether the ability has the necessary permission.
 	 */
 	public function has_permission( $input = null ) {
-		_deprecated_function( __METHOD__, 'N.E.X.T', 'WP_Ability::check_permissions()' );
+		_deprecated_function( __METHOD__, '0.2.0', 'WP_Ability::check_permissions()' );
 		return $this->check_permissions( $input );
 	}
 
