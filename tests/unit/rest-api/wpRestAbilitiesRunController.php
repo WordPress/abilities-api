@@ -121,9 +121,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'permission_callback' => static function () {
 					return current_user_can( 'edit_posts' );
 				},
-				'meta'                => array(
-					'type' => 'tool',
-				),
 			)
 		);
 
@@ -163,8 +160,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'permission_callback' => static function () {
 					return is_user_logged_in();
 				},
-				'meta'                => array(
-					'type' => 'resource',
+				'annotations'         => array(
+					'read_only' => true,
 				),
 			)
 		);
@@ -193,9 +190,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					// Only allow if secret matches
 					return isset( $input['secret'] ) && 'valid_secret' === $input['secret'];
 				},
-				'meta'                => array(
-					'type' => 'tool',
-				),
 			)
 		);
 
@@ -209,9 +203,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return null;
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array(
-					'type' => 'tool',
-				),
 			)
 		);
 
@@ -225,9 +216,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return new \WP_Error( 'test_error', 'This is a test error' );
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array(
-					'type' => 'tool',
-				),
 			)
 		);
 
@@ -244,9 +232,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return 'not a number'; // Invalid - schema expects number
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array(
-					'type' => 'tool',
-				),
 			)
 		);
 
@@ -267,8 +252,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return $input;
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array(
-					'type' => 'resource',
+				'annotations'         => array(
+					'read_only' => true,
 				),
 			)
 		);
@@ -298,9 +283,9 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test executing a resource ability with GET.
+	 * Test executing a read only ability with GET.
 	 */
-	public function test_execute_resource_ability_get(): void {
+	public function test_execute_read_only_ability_get(): void {
 		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/user-info/run' );
 		$request->set_query_params(
 			array(
@@ -330,9 +315,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return 'success';
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array(
-					'type' => 'tool',
-				),
 			)
 		);
 
@@ -342,7 +324,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$this->assertSame( 405, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertSame( 'rest_ability_invalid_method', $data['code'] );
-		$this->assertSame( 'Tool abilities require POST method.', $data['message'] );
+		$this->assertSame( 'Abilities that perform updates require POST method.', $data['message'] );
 	}
 
 	/**
@@ -359,7 +341,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$this->assertSame( 405, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertSame( 'rest_ability_invalid_method', $data['code'] );
-		$this->assertSame( 'Resource abilities require GET method.', $data['message'] );
+		$this->assertSame( 'Read only abilities require GET method.', $data['message'] );
 	}
 
 
@@ -609,7 +591,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'wrong_field' => 'value' );
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -651,7 +632,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'status' => 'success' );
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -717,7 +697,9 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array( 'type' => 'resource' ),
+				'annotations'         => array(
+					'read_only' => true,
+				),
 			)
 		);
 
@@ -730,7 +712,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -803,7 +784,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'echo' => $input );
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -847,7 +827,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'echo' => $input );
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -907,7 +886,6 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'success' => true );
 				},
 				'permission_callback' => '__return_true', // No permission requirements
-				'meta'                => array( 'type' => 'tool' ),
 			)
 		);
 
@@ -918,7 +896,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$this->assertSame( 405, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertSame( 'rest_ability_invalid_method', $data['code'] );
-		$this->assertSame( 'Tool abilities require POST method.', $data['message'] );
+		$this->assertSame( 'Abilities that perform updates require POST method.', $data['message'] );
 	}
 
 	/**

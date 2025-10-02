@@ -191,6 +191,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			'description'   => $ability->get_description(),
 			'input_schema'  => $ability->get_input_schema(),
 			'output_schema' => $ability->get_output_schema(),
+			'annotations'   => $ability->get_annotations(),
 			'meta'          => $ability->get_meta(),
 		);
 
@@ -260,6 +261,12 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 				),
 				'output_schema' => array(
 					'description' => __( 'JSON Schema for the ability output.' ),
+					'type'        => 'object',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'annotations'   => array(
+					'description' => __( 'Annotations for the ability.' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
