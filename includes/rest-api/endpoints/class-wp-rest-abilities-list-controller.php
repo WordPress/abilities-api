@@ -105,7 +105,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		$total_abilities = count( $abilities );
 		$max_pages       = ceil( $total_abilities / $per_page );
 
-		if ( $request->is_method( 'HEAD' ) ) {
+		if ( $request->get_method() === 'HEAD' ) {
 			$response = new \WP_REST_Response( array() );
 		} else {
 			$abilities = array_slice( $abilities, $offset, $per_page );
