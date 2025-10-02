@@ -26,7 +26,7 @@ class WP_Ability {
 	 * @since n.e.x.t
 	 * @var array<string,(bool|string)>
 	 */
-	const DEFAULT_ANNOTATIONS = array(
+	protected static $default_annotations = array(
 		// An instruction on how to use the ability.
 		'instruction' => '',
 		// If true, the ability does not modify its environment.
@@ -41,7 +41,6 @@ class WP_Ability {
 		 * on its environment.
 		 */
 		'idempotent'  => false,
-
 	);
 
 	/**
@@ -107,7 +106,7 @@ class WP_Ability {
 	 * @since n.e.x.t
 	 * @var array<string,(bool|string)>
 	 */
-	protected $annotations = self::DEFAULT_ANNOTATIONS;
+	protected $annotations = array();
 
 	/**
 	 * The optional ability metadata.
@@ -179,6 +178,7 @@ class WP_Ability {
 	 *   permission_callback: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
+	 *   annotations?: array<string,mixed>,
 	 *   meta?: array<string,mixed>,
 	 *   ...<string, mixed>,
 	 * } $args
@@ -222,7 +222,7 @@ class WP_Ability {
 			);
 		}
 
-		if ( isset( $args['annotations']) && ! is_array( $args['annotations'] ) ) {
+		if ( isset( $args['annotations'] ) && ! is_array( $args['annotations'] ) ) {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties should provide a valid `annotations` array.' )
 			);
@@ -232,6 +232,11 @@ class WP_Ability {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties should provide a valid `meta` array.' )
 			);
+		}
+
+		// Set defaults for optional args.
+		if ( ! isset( $args['annotations'] ) ) {
+			$args['annotations'] = static::$default_annotations;
 		}
 
 		return $args;

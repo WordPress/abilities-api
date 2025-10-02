@@ -57,6 +57,7 @@ final class WP_Abilities_Registry {
 	 *   permission_callback?: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
+	 *   annotations?: array<string,mixed>,
 	 *   meta?: array<string,mixed>,
 	 *   ability_class?: class-string<\WP_Ability>,
 	 *   ...<string, mixed>
