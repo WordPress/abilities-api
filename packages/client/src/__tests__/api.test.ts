@@ -259,12 +259,12 @@ describe( 'API functions', () => {
 			).rejects.toThrow( 'invalid input' );
 		} );
 
-		it( 'should execute a resource-type ability via GET', async () => {
+		it( 'should execute a read only ability via GET', async () => {
 			const mockAbility: Ability = {
-				name: 'test/resource',
-				label: 'Resource Ability',
-				description: 'Test resource ability',
-				meta: { type: 'resource' },
+				name: 'test/read-only',
+				label: 'Read only Ability',
+				description: 'Test read only ability.',
+				annotations: { read_only: true },
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -280,27 +280,27 @@ describe( 'API functions', () => {
 				getAbility: mockGetAbility,
 			} );
 
-			const mockResponse = { data: 'resource data' };
+			const mockResponse = { data: 'read only data' };
 			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
 				mockResponse
 			);
 
 			const input = { id: '123', format: 'json' };
-			const result = await executeAbility( 'test/resource', input );
+			const result = await executeAbility( 'test/read-only', input );
 
 			expect( apiFetch ).toHaveBeenCalledWith( {
-				path: '/wp/v2/abilities/test/resource/run?input%5Bid%5D=123&input%5Bformat%5D=json',
+				path: '/wp/v2/abilities/test/read-only/run?input%5Bid%5D=123&input%5Bformat%5D=json',
 				method: 'GET',
 			} );
 			expect( result ).toEqual( mockResponse );
 		} );
 
-		it( 'should execute a resource-type ability with empty input', async () => {
+		it( 'should execute a read only ability with empty input', async () => {
 			const mockAbility: Ability = {
-				name: 'test/resource',
-				label: 'Resource Ability',
-				description: 'Test resource ability',
-				meta: { type: 'resource' },
+				name: 'test/read-only',
+				label: 'Read only Ability',
+				description: 'Test read only ability.',
+				annotations: { read_only: true },
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -310,15 +310,15 @@ describe( 'API functions', () => {
 				getAbility: mockGetAbility,
 			} );
 
-			const mockResponse = { data: 'all resources' };
+			const mockResponse = { data: 'read only data' };
 			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
 				mockResponse
 			);
 
-			const result = await executeAbility( 'test/resource', {} );
+			const result = await executeAbility( 'test/read-only', {} );
 
 			expect( apiFetch ).toHaveBeenCalledWith( {
-				path: '/wp/v2/abilities/test/resource/run?',
+				path: '/wp/v2/abilities/test/read-only/run?',
 				method: 'GET',
 			} );
 			expect( result ).toEqual( mockResponse );

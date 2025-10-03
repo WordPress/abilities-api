@@ -27,20 +27,20 @@ class WP_Ability {
 	 * @var array<string,(bool|string)>
 	 */
 	protected static $default_annotations = array(
-		// An instruction on how to use the ability.
-		'instruction' => '',
+		// Instructions on how to use the ability.
+		'instructions' => '',
 		// If true, the ability does not modify its environment.
-		'read_only'   => false,
+		'read_only'    => false,
 		/*
 		 * If true, the ability may perform destructive updates to its environment.
 		 * If false, the ability performs only additive updates.
 		 */
-		'destructive' => true,
+		'destructive'  => true,
 		/*
 		 * If true, calling the ability repeatedly with the same arguments will have no additional effect
 		 * on its environment.
 		 */
-		'idempotent'  => false,
+		'idempotent'   => false,
 	);
 
 	/**

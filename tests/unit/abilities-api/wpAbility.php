@@ -29,6 +29,9 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			'permission_callback' => static function (): bool {
 				return true;
 			},
+			'annotations'         => array(
+				'read_only' => true,
+			),
 			'meta'                => array(
 				'category' => 'math',
 			),

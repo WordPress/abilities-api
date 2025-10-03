@@ -91,7 +91,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	 * Register test abilities for testing.
 	 */
 	private function register_test_abilities(): void {
-		// Tool ability (POST only)
+		// Regular ability (POST only).
 		wp_register_ability(
 			'test/calculator',
 			array(
@@ -124,7 +124,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		// Resource ability (GET only)
+		// Read only ability (GET method).
 		wp_register_ability(
 			'test/user-info',
 			array(
@@ -235,7 +235,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		// Resource ability for query params testing
+		// Read only ability for query params testing.
 		wp_register_ability(
 			'test/query-params',
 			array(
@@ -260,9 +260,9 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test executing a tool ability with POST.
+	 * Test executing a regular ability with POST.
 	 */
-	public function test_execute_tool_ability_post(): void {
+	public function test_execute_regular_ability_post(): void {
 		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -303,9 +303,9 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test HTTP method validation for tool abilities.
+	 * Test HTTP method validation for regular abilities.
 	 */
-	public function test_tool_ability_requires_post(): void {
+	public function test_regular_ability_requires_post(): void {
 		wp_register_ability(
 			'test/open-tool',
 			array(
@@ -328,10 +328,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test HTTP method validation for resource abilities.
+	 * Test HTTP method validation for read only abilities.
 	 */
-	public function test_resource_ability_requires_get(): void {
-		// Try POST on a resource ability (should fail)
+	public function test_read_only_ability_requires_get(): void {
+		// Try POST on a read only ability (should fail).
 		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/user-info/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body( wp_json_encode( array( 'user_id' => 1 ) ) );
@@ -653,30 +653,29 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ability type not set defaults to tool.
+	 * Test ability without annotations defaults to POST method.
 	 */
-	public function test_ability_without_type_defaults_to_tool(): void {
-		// Register ability without type in meta.
+	public function test_ability_without_annotations_defaults_to_post_method(): void {
+		// Register ability without annotations.
 		wp_register_ability(
-			'test/no-type',
+			'test/no-annotations',
 			array(
-				'label'               => 'No Type',
-				'description'         => 'Ability without type',
+				'label'               => 'No Annotations',
+				'description'         => 'Ability without annotations.',
 				'execute_callback'    => static function () {
 					return array( 'executed' => true );
 				},
 				'permission_callback' => '__return_true',
-				'meta'                => array(), // No type specified
 			)
 		);
 
-		// Should require POST (default tool behavior)
-		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/no-type/run' );
+		// Should require POST (default behavior).
+		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/no-annotations/run' );
 		$get_response = $this->server->dispatch( $get_request );
 		$this->assertEquals( 405, $get_response->get_status() );
 
-		// Should work with POST
-		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/no-type/run' );
+		// Should work with POST.
+		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/no-annotations/run' );
 		$post_request->set_header( 'Content-Type', 'application/json' );
 
 		$post_response = $this->server->dispatch( $post_request );
@@ -684,15 +683,15 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test edge case with empty input for both GET and POST.
+	 * Test edge case with empty input for both GET and POST methods.
 	 */
 	public function test_empty_input_handling(): void {
 		// Registers abilities for empty input testing.
 		wp_register_ability(
-			'test/resource-empty',
+			'test/read-only-empty',
 			array(
-				'label'               => 'Resource Empty',
-				'description'         => 'Resource with empty input',
+				'label'               => 'Read Only Empty',
+				'description'         => 'Read only with empty input.',
 				'execute_callback'    => static function () {
 					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
@@ -704,10 +703,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		);
 
 		wp_register_ability(
-			'test/tool-empty',
+			'test/regular-empty',
 			array(
-				'label'               => 'Tool Empty',
-				'description'         => 'Tool with empty input',
+				'label'               => 'Regular Empty',
+				'description'         => 'Regular with empty input.',
 				'execute_callback'    => static function () {
 					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
@@ -716,13 +715,13 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		);
 
 		// Tests GET with no input parameter.
-		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/resource-empty/run' );
+		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/read-only-empty/run' );
 		$get_response = $this->server->dispatch( $get_request );
 		$this->assertEquals( 200, $get_response->get_status() );
 		$this->assertTrue( $get_response->get_data()['input_was_empty'] );
 
 		// Tests POST with no body.
-		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/tool-empty/run' );
+		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/regular-empty/run' );
 		$post_request->set_header( 'Content-Type', 'application/json' );
 		$post_request->set_body( '{}' ); // Empty JSON object
 
@@ -892,7 +891,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$request  = new WP_REST_Request( $method, '/wp/v2/abilities/test/method-test/run' );
 		$response = $this->server->dispatch( $request );
 
-		// Tool abilities should only accept POST, so these should return 405.
+		// Regular abilities should only accept POST, so these should return 405.
 		$this->assertSame( 405, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertSame( 'rest_ability_invalid_method', $data['code'] );

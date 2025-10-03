@@ -69,7 +69,7 @@ export interface Ability {
 	permissionCallback?: PermissionCallback;
 
 	/**
-	 * Annotation for the ability.
+	 * Annotations for the ability.
 	 * @see WP_Ability::get_annotations()
 	 */
 	annotations?: {
