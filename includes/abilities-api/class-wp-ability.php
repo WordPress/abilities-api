@@ -235,9 +235,10 @@ class WP_Ability {
 		}
 
 		// Set defaults for optional args.
-		if ( ! isset( $args['annotations'] ) ) {
-			$args['annotations'] = static::$default_annotations;
-		}
+		$args['annotations'] = wp_parse_args(
+			$args['annotations'] ?? array(),
+			static::$default_annotations
+		);
 
 		return $args;
 	}

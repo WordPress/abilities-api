@@ -26,11 +26,15 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				'description' => 'The result of performing a math operation.',
 				'required'    => true,
 			),
+			'execute_callback'   => static function (): int {
+				return 0;
+			},
 			'permission_callback' => static function (): bool {
 				return true;
 			},
 			'annotations'         => array(
-				'read_only' => true,
+				'read_only'    => true,
+				'destructive'  => false,
 			),
 			'meta'                => array(
 				'category' => 'math',
@@ -349,9 +353,6 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				'permission_callback' => static function (): bool {
 					return false;
 				},
-				'execute_callback'    => static function (): int {
-					return 42;
-				},
 			)
 		);
 
@@ -456,5 +457,65 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$this->assertTrue( $before_action_fired, 'before_execute_ability action should be fired even if output validation fails' );
 		$this->assertFalse( $after_action_fired, 'after_execute_ability action should not be fired when output validation fails' );
 		$this->assertInstanceOf( WP_Error::class, $result, 'Should return WP_Error for output validation failure' );
+	}
+
+	/**
+	 * Tests getting all annotations when selective overrides are applied.
+	 */
+	public function test_get_all_annotations() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$this->assertEquals(
+			array_merge(
+				self::$test_ability_properties['annotations'],
+				array(
+					'instructions' => '',
+					'idempotent'   => false,
+				),
+			),
+			$ability->get_annotations()
+		);
+	}
+
+	/**
+	 * Tests getting default annotations when not provided.
+	 */
+	public function test_get_default_annotations() {
+		$args = self::$test_ability_properties;
+		unset( $args['annotations'] );
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+
+		$this->assertSame(
+			array(
+				'instructions' => '',
+				'read_only'    => false,
+				'destructive'  => true,
+				'idempotent'   => false,
+			),
+			$ability->get_annotations()
+		);
+	}
+
+	/**
+	 * Tests getting all annotations when values overridden.
+	 */
+	public function test_get_all_annotations_overridden() {
+		$annotations = array(
+			'instructions' => 'Enjoy responsibly.',
+			'read_only'    => true,
+			'destructive'  => false,
+			'idempotent'   => false,
+		);
+		$args        = array_merge(
+			self::$test_ability_properties,
+			array(
+				'annotations' => $annotations,
+			)
+		);
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+
+		$this->assertSame( $annotations, $ability->get_annotations() );
 	}
 }
