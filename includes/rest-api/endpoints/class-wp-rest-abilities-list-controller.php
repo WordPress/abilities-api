@@ -102,7 +102,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			$abilities = array_filter(
 				$abilities,
 				function ( $ability ) use ( $category ) {
-					return in_array( $category, $ability->get_categories(), true );
+					return $ability->get_category() === $category;
 				}
 			);
 			// Reset array keys after filtering.
@@ -202,7 +202,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			'name'          => $ability->get_name(),
 			'label'         => $ability->get_label(),
 			'description'   => $ability->get_description(),
-			'categories'    => $ability->get_categories(),
+			'category'      => $ability->get_category(),
 			'input_schema'  => $ability->get_input_schema(),
 			'output_schema' => $ability->get_output_schema(),
 			'meta'          => $ability->get_meta(),
@@ -266,12 +266,9 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'categories'    => array(
-					'description' => __( 'Categories this ability belongs to.' ),
-					'type'        => 'array',
-					'items'       => array(
-						'type' => 'string',
-					),
+				'category'      => array(
+					'description' => __( 'Category this ability belongs to.' ),
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
@@ -294,7 +291,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 					'readonly'    => true,
 				),
 			),
-			'required'   => array( 'name', 'label', 'description' ),
+			'required'   => array( 'name', 'label', 'description', 'category' ),
 		);
 
 		return $this->add_additional_fields_schema( $schema );
