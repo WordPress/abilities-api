@@ -239,9 +239,11 @@ final class WP_Abilities_Registry {
 	public function get_abilities_by_category( string $category ): array {
 		$filtered = array();
 		foreach ( $this->registered_abilities as $ability ) {
-			if ( $ability->get_category() === $category ) {
-				$filtered[ $ability->get_name() ] = $ability;
+			if ( $ability->get_category() !== $category ) {
+				continue;
 			}
+
+			$filtered[ $ability->get_name() ] = $ability;
 		}
 		return $filtered;
 	}

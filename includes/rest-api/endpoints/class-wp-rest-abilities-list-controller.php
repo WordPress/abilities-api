@@ -101,7 +101,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		if ( ! empty( $category ) ) {
 			$abilities = array_filter(
 				$abilities,
-				function ( $ability ) use ( $category ) {
+				static function ( $ability ) use ( $category ) {
 					return $ability->get_category() === $category;
 				}
 			);
