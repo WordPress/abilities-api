@@ -86,12 +86,12 @@ class WP_Ability {
 	protected $meta = array();
 
 	/**
-	 * The ability categories.
+	 * The ability category (required).
 	 *
 	 * @since 0.3.0
-	 * @var array<string>
+	 * @var string
 	 */
-	protected $categories = array();
+	protected $category;
 
 	/**
 	 * Constructor.
@@ -106,8 +106,8 @@ class WP_Ability {
 	 *
 	 * @param string              $name The name of the ability, with its namespace.
 	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should
-	 *                                  include `label`, `description`, `input_schema`, `output_schema`,
-	 *                                  `execute_callback`, `permission_callback`, and `meta`.
+	 *                                  include `label`, `description`, `category`, `input_schema`,
+	 *                                  `output_schema`, `execute_callback`, `permission_callback`, and `meta`.
 	 */
 	public function __construct( string $name, array $args ) {
 		$this->name = $name;
@@ -151,6 +151,7 @@ class WP_Ability {
 	 * @phpstan-return array{
 	 *   label: string,
 	 *   description: string,
+	 *   category: string,
 	 *   execute_callback: callable( mixed $input= ): (mixed|\WP_Error),
 	 *   permission_callback: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
@@ -204,34 +205,18 @@ class WP_Ability {
 			);
 		}
 
-		if ( isset( $args['categories'] ) ) {
-			// 1. NORMALIZE: Convert single string to array.
-			if ( is_string( $args['categories'] ) ) {
-				$args['categories'] = array( $args['categories'] );
-			}
+		// VALIDATE: Category is required and must be a string.
+		if ( empty( $args['category'] ) || ! is_string( $args['category'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties must contain a `category` string.' )
+			);
+		}
 
-			// 2. VALIDATE: Check type.
-			if ( ! is_array( $args['categories'] ) ) {
-				throw new \InvalidArgumentException(
-					esc_html__( 'The ability properties should provide a valid `categories` array or string.' )
-				);
-			}
-
-			// 3. VALIDATE: Check each item.
-			foreach ( $args['categories'] as $category ) {
-				if ( ! is_string( $category ) ) {
-					throw new \InvalidArgumentException(
-						esc_html__( 'All category values must be strings.' )
-					);
-				}
-
-				// Validate category slug format.
-				if ( ! preg_match( '/^[a-z0-9]+(-[a-z0-9]+)*$/', $category ) ) {
-					throw new \InvalidArgumentException(
-						esc_html__( 'Category slugs must contain only lowercase alphanumeric characters and dashes.' )
-					);
-				}
-			}
+		// Validate category slug format.
+		if ( ! preg_match( '/^[a-z0-9]+(-[a-z0-9]+)*$/', $args['category'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'Category slug must contain only lowercase alphanumeric characters and dashes.' )
+			);
 		}
 
 		return $args;
@@ -305,14 +290,14 @@ class WP_Ability {
 	}
 
 	/**
-	 * Retrieves the categories for the ability.
+	 * Retrieves the category for the ability.
 	 *
 	 * @since 0.3.0
 	 *
-	 * @return array<string> The categories for the ability.
+	 * @return string The category for the ability.
 	 */
-	public function get_categories(): array {
-		return $this->categories;
+	public function get_category(): string {
+		return $this->category;
 	}
 
 	/**
