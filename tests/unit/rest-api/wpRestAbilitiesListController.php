@@ -579,4 +579,79 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$data = $response->get_data();
 		$this->assertIsArray( $data );
 	}
+
+	/**
+	 * Test filtering abilities by category.
+	 */
+	public function test_filter_by_category(): void {
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		$request->set_param( 'category', 'math' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data );
+
+		// Should only have math category abilities
+		foreach ( $data as $ability ) {
+			$this->assertEquals( 'math', $ability['category'], 'All abilities should be in math category' );
+		}
+
+		// Should at least contain the calculator
+		$ability_names = wp_list_pluck( $data, 'name' );
+		$this->assertContains( 'test/calculator', $ability_names );
+		$this->assertNotContains( 'test/system-info', $ability_names, 'System info should not be in math category' );
+	}
+
+	/**
+	 * Test filtering by non-existent category returns empty results.
+	 */
+	public function test_filter_by_nonexistent_category(): void {
+		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		$request->set_param( 'category', 'nonexistent' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data );
+		$this->assertEmpty( $data, 'Should return empty array for non-existent category' );
+	}
+
+	/**
+	 * Test that category field is present in response.
+	 */
+	public function test_category_field_in_response(): void {
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/calculator' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'category', $data );
+		$this->assertEquals( 'math', $data['category'] );
+		$this->assertIsString( $data['category'], 'Category should be a string' );
+	}
+
+	/**
+	 * Test that category is in schema and marked as required.
+	 */
+	public function test_category_in_schema(): void {
+		$request  = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$schema = $data['schema'];
+		$this->assertArrayHasKey( 'properties', $schema );
+		$this->assertArrayHasKey( 'category', $schema['properties'] );
+
+		$category_property = $schema['properties']['category'];
+		$this->assertEquals( 'string', $category_property['type'] );
+		$this->assertTrue( $category_property['readonly'] );
+
+		// Check that category is in required fields
+		$this->assertArrayHasKey( 'required', $schema );
+		$this->assertContains( 'category', $schema['required'] );
+	}
 }
