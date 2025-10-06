@@ -24,13 +24,14 @@ declare( strict_types = 1 );
  *                                  prefix, i.e. `my-plugin/my-ability`. It can only contain lowercase
  *                                  alphanumeric characters, dashes and the forward slash.
  * @param array<string,mixed> $args An associative array of arguments for the ability. This should include
- *                                  `label`, `description`, `input_schema`, `output_schema`, `execute_callback`,
- *                                  `permission_callback`, `meta`, and `ability_class`.
+ *                                  `label`, `description`, `category`, `input_schema`, `output_schema`,
+ *                                  `execute_callback`, `permission_callback`, `meta`, and `ability_class`.
  * @return ?\WP_Ability An instance of registered ability on success, null on failure.
  *
  * @phpstan-param array{
  *   label?: string,
  *   description?: string,
+ *   category?: string,
  *   execute_callback?: callable( mixed $input= ): (mixed|\WP_Error),
  *   permission_callback?: callable( mixed $input= ): (bool|\WP_Error),
  *   input_schema?: array<string,mixed>,

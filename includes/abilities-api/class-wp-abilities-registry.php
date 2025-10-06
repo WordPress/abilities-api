@@ -53,6 +53,7 @@ final class WP_Abilities_Registry {
 	 * @phpstan-param array{
 	 *   label?: string,
 	 *   description?: string,
+	 *   category?: string,
 	 *   execute_callback?: callable( mixed $input= ): (mixed|\WP_Error),
 	 *   permission_callback?: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
@@ -220,7 +221,7 @@ final class WP_Abilities_Registry {
 	public function get_abilities_by_category( string $category ): array {
 		$filtered = array();
 		foreach ( $this->registered_abilities as $ability ) {
-			if ( in_array( $category, $ability->get_categories(), true ) ) {
+			if ( $ability->get_category() === $category ) {
 				$filtered[ $ability->get_name() ] = $ability;
 			}
 		}
