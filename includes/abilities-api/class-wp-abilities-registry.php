@@ -208,7 +208,11 @@ final class WP_Abilities_Registry {
 	/**
 	 * Retrieves abilities filtered by category.
 	 *
+	 * Do not use this method directly. Instead, use the `wp_get_abilities_by_category()` function.
+	 *
 	 * @since 0.3.0
+	 *
+	 * @see wp_get_abilities_by_category()
 	 *
 	 * @param string $category The category slug to filter by.
 	 * @return \WP_Ability[] The array of abilities in the specified category.
@@ -217,7 +221,7 @@ final class WP_Abilities_Registry {
 		$filtered = array();
 		foreach ( $this->registered_abilities as $ability ) {
 			if ( in_array( $category, $ability->get_categories(), true ) ) {
-				$filtered[] = $ability;
+				$filtered[ $ability->get_name() ] = $ability;
 			}
 		}
 		return $filtered;

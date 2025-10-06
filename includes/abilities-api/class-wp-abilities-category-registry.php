@@ -56,20 +56,20 @@ final class WP_Abilities_Category_Registry {
 	 * } $args
 	 */
 	public function register( string $slug, array $args ): ?WP_Ability_Category {
-		if ( ! preg_match( '/^[a-z0-9-]+$/', $slug ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				esc_html__( 'Category slug must contain only lowercase alphanumeric characters and dashes.' ),
-				'0.3.0'
-			);
-			return null;
-		}
-
 		if ( $this->is_registered( $slug ) ) {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: Category slug. */
 				esc_html( sprintf( __( 'Category "%s" is already registered.' ), $slug ) ),
+				'0.3.0'
+			);
+			return null;
+		}
+
+		if ( ! preg_match( '/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				esc_html__( 'Category slug must contain only lowercase alphanumeric characters and dashes.' ),
 				'0.3.0'
 			);
 			return null;

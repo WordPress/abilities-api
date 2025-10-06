@@ -59,28 +59,18 @@ class WP_Ability_Category {
 	 * @param array<string,mixed> $args An associative array of arguments for the category.
 	 */
 	public function __construct( string $slug, array $args ) {
-		$this->slug = $slug;
+		if ( empty( $slug ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The category slug cannot be empty.' )
+			);
+		}
+
+		$this->slug = sanitize_title( $slug );
 
 		$properties = $this->prepare_properties( $args );
 
-		foreach ( $properties as $property_name => $property_value ) {
-			if ( ! property_exists( $this, $property_name ) ) {
-				_doing_it_wrong(
-					__METHOD__,
-					sprintf(
-						/* translators: %s: Property name. */
-						esc_html__( 'Property "%1$s" is not a valid property for category "%2$s". Please check the %3$s class for allowed properties.' ),
-						'<code>' . esc_html( $property_name ) . '</code>',
-						'<code>' . esc_html( $this->slug ) . '</code>',
-						'<code>' . esc_html( self::class ) . '</code>'
-					),
-					'0.3.0'
-				);
-				continue;
-			}
-
-			$this->$property_name = $property_value;
-		}
+		$this->label       = $properties['label'];
+		$this->description = $properties['description'];
 	}
 
 	/**
@@ -112,7 +102,10 @@ class WP_Ability_Category {
 			);
 		}
 
-		return $args;
+		return array(
+			'label'       => $args['label'],
+			'description' => $args['description'],
+		);
 	}
 
 	/**

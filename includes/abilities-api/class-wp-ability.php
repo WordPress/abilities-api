@@ -226,7 +226,7 @@ class WP_Ability {
 				}
 
 				// Validate category slug format.
-				if ( ! preg_match( '/^[a-z0-9-]+$/', $category ) ) {
+				if ( ! preg_match( '/^[a-z0-9]+(-[a-z0-9]+)*$/', $category ) ) {
 					throw new \InvalidArgumentException(
 						esc_html__( 'Category slugs must contain only lowercase alphanumeric characters and dashes.' )
 					);
