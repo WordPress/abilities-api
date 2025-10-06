@@ -29,9 +29,24 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 
 		remove_all_filters( 'register_ability_args' );
 
+		// Fire the hook to allow category registration.
+		do_action( 'abilities_api_category_registry_init' );
+
+		// Register the math category for tests.
+		if ( ! WP_Abilities_Category_Registry::get_instance()->is_registered( 'math' ) ) {
+			wp_register_ability_category(
+				'math',
+				array(
+					'label'       => 'Math',
+					'description' => 'Mathematical operations and calculations.',
+				)
+			);
+		}
+
 		self::$test_ability_args = array(
 			'label'               => 'Add numbers',
 			'description'         => 'Calculates the result of adding two numbers.',
+			'category'            => 'math',
 			'input_schema'        => array(
 				'type'                 => 'object',
 				'properties'           => array(
@@ -60,7 +75,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 				return true;
 			},
 			'meta'                => array(
-				'category' => 'math',
+				'foo' => 'bar',
 			),
 		);
 	}
@@ -72,6 +87,12 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 		$this->registry = null;
 
 		remove_all_filters( 'register_ability_args' );
+
+		// Clean up registered categories.
+		$category_registry = WP_Abilities_Category_Registry::get_instance();
+		if ( $category_registry->is_registered( 'math' ) ) {
+			wp_unregister_ability_category( 'math' );
+		}
 
 		parent::tear_down();
 	}
