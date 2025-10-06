@@ -202,9 +202,9 @@ final class WP_Abilities_Category_Registry {
 			 *
 			 * @since 0.3.0
 			 *
-			 * @param \\WP_Abilities_Category_Registry $instance Categories registry object.
+			 * @param \WP_Abilities_Category_Registry $instance Categories registry object.
 			 */
-			do_action( 'abilities_category_registry_init', self::$instance );
+			do_action( 'abilities_api_category_registry_init', self::$instance );
 		}
 
 		return self::$instance;
