@@ -98,3 +98,96 @@ function wp_get_ability( string $name ): ?WP_Ability {
 function wp_get_abilities(): array {
 	return WP_Abilities_Registry::get_instance()->get_all_registered();
 }
+
+/**
+ * Retrieves abilities filtered by category.
+ *
+ * @since 0.3.0
+ *
+ * @see WP_Abilities_Registry::get_abilities_by_category()
+ *
+ * @param string $category The category slug to filter by.
+ * @return \WP_Ability[] The array of abilities in the specified category.
+ */
+function wp_get_abilities_by_category( string $category ): array {
+	return WP_Abilities_Registry::get_instance()->get_abilities_by_category( $category );
+}
+
+/**
+ * Registers a new ability category.
+ *
+ * @since 0.3.0
+ *
+ * @see WP_Abilities_Category_Registry::register()
+ *
+ * @param string              $slug The unique slug for the category. Must contain only lowercase
+ *                                  alphanumeric characters and dashes.
+ * @param array<string,mixed> $args An associative array of arguments for the category. This should
+ *                                  include `label` and `description`.
+ * @return ?\WP_Ability_Category The registered category instance on success, null on failure.
+ *
+ * @phpstan-param array{
+ *   label?: string,
+ *   description?: string,
+ *   ...<string, mixed>
+ * } $args
+ */
+function wp_register_ability_category( string $slug, array $args ): ?WP_Ability_Category {
+	if ( ! did_action( 'abilities_api_category_registry_init' ) && ! did_action( 'abilities_api_init' ) ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			sprintf(
+				/* translators: 1: abilities_api_category_registry_init, 2: abilities_api_init, 3: category slug. */
+				esc_html__( 'Categories must be registered on the %1$s or %2$s action. The category %3$s was not registered.' ),
+				'<code>abilities_api_category_registry_init</code>',
+				'<code>abilities_api_init</code>',
+				'<code>' . esc_html( $slug ) . '</code>'
+			),
+			'0.3.0'
+		);
+		return null;
+	}
+
+	return WP_Abilities_Category_Registry::get_instance()->register( $slug, $args );
+}
+
+/**
+ * Unregisters an ability category.
+ *
+ * @since 0.3.0
+ *
+ * @see WP_Abilities_Category_Registry::unregister()
+ *
+ * @param string $slug The slug of the registered category.
+ * @return ?\WP_Ability_Category The unregistered category instance on success, null on failure.
+ */
+function wp_unregister_ability_category( string $slug ): ?WP_Ability_Category {
+	return WP_Abilities_Category_Registry::get_instance()->unregister( $slug );
+}
+
+/**
+ * Retrieves a registered ability category.
+ *
+ * @since 0.3.0
+ *
+ * @see WP_Abilities_Category_Registry::get_registered()
+ *
+ * @param string $slug The slug of the registered category.
+ * @return ?\WP_Ability_Category The registered category instance, or null if it is not registered.
+ */
+function wp_get_ability_category( string $slug ): ?WP_Ability_Category {
+	return WP_Abilities_Category_Registry::get_instance()->get_registered( $slug );
+}
+
+/**
+ * Retrieves all registered ability categories.
+ *
+ * @since 0.3.0
+ *
+ * @see WP_Abilities_Category_Registry::get_all_registered()
+ *
+ * @return \WP_Ability_Category[] The array of registered categories.
+ */
+function wp_get_ability_categories(): array {
+	return WP_Abilities_Category_Registry::get_instance()->get_all_registered();
+}

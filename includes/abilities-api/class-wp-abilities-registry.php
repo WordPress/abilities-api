@@ -206,6 +206,24 @@ final class WP_Abilities_Registry {
 	}
 
 	/**
+	 * Retrieves abilities filtered by category.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $category The category slug to filter by.
+	 * @return \WP_Ability[] The array of abilities in the specified category.
+	 */
+	public function get_abilities_by_category( string $category ): array {
+		$filtered = array();
+		foreach ( $this->registered_abilities as $ability ) {
+			if ( in_array( $category, $ability->get_categories(), true ) ) {
+				$filtered[] = $ability;
+			}
+		}
+		return $filtered;
+	}
+
+	/**
 	 * Utility method to retrieve the main instance of the registry class.
 	 *
 	 * The instance will be created if it does not exist yet.

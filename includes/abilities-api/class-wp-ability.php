@@ -86,6 +86,14 @@ class WP_Ability {
 	protected $meta = array();
 
 	/**
+	 * The ability categories.
+	 *
+	 * @since 0.3.0
+	 * @var array<string>
+	 */
+	protected $categories = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * Do not use this constructor directly. Instead, use the `wp_register_ability()` function.
@@ -196,6 +204,36 @@ class WP_Ability {
 			);
 		}
 
+		if ( isset( $args['categories'] ) ) {
+			// 1. NORMALIZE: Convert single string to array.
+			if ( is_string( $args['categories'] ) ) {
+				$args['categories'] = array( $args['categories'] );
+			}
+
+			// 2. VALIDATE: Check type.
+			if ( ! is_array( $args['categories'] ) ) {
+				throw new \InvalidArgumentException(
+					esc_html__( 'The ability properties should provide a valid `categories` array or string.' )
+				);
+			}
+
+			// 3. VALIDATE: Check each item.
+			foreach ( $args['categories'] as $category ) {
+				if ( ! is_string( $category ) ) {
+					throw new \InvalidArgumentException(
+						esc_html__( 'All category values must be strings.' )
+					);
+				}
+
+				// Validate category slug format.
+				if ( ! preg_match( '/^[a-z0-9-]+$/', $category ) ) {
+					throw new \InvalidArgumentException(
+						esc_html__( 'Category slugs must contain only lowercase alphanumeric characters and dashes.' )
+					);
+				}
+			}
+		}
+
 		return $args;
 	}
 
@@ -264,6 +302,17 @@ class WP_Ability {
 	 */
 	public function get_meta(): array {
 		return $this->meta;
+	}
+
+	/**
+	 * Retrieves the categories for the ability.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return array<string> The categories for the ability.
+	 */
+	public function get_categories(): array {
+		return $this->categories;
 	}
 
 	/**
