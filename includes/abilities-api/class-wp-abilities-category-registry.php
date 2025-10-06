@@ -47,7 +47,7 @@ final class WP_Abilities_Category_Registry {
 	 *                                  alphanumeric characters and dashes.
 	 * @param array<string,mixed> $args An associative array of arguments for the category. See wp_register_ability_category() for
 	 *                                  details.
-	 * @return ?\\WP_Ability_Category The registered category instance on success, null on failure.
+	 * @return ?\WP_Ability_Category The registered category instance on success, null on failure.
 	 *
 	 * @phpstan-param array{
 	 *   label?: string,
@@ -111,7 +111,7 @@ final class WP_Abilities_Category_Registry {
 	 * @see wp_unregister_ability_category()
 	 *
 	 * @param string $slug The slug of the registered category.
-	 * @return ?\\WP_Ability_Category The unregistered category instance on success, null on failure.
+	 * @return ?\WP_Ability_Category The unregistered category instance on success, null on failure.
 	 */
 	public function unregister( string $slug ): ?WP_Ability_Category {
 		if ( ! $this->is_registered( $slug ) ) {
@@ -139,7 +139,7 @@ final class WP_Abilities_Category_Registry {
 	 *
 	 * @see wp_get_ability_categories()
 	 *
-	 * @return \\WP_Ability_Category[] The array of registered categories.
+	 * @return array<string,\WP_Ability_Category> The array of registered categories.
 	 */
 	public function get_all_registered(): array {
 		return $this->registered_categories;
@@ -167,7 +167,7 @@ final class WP_Abilities_Category_Registry {
 	 * @see wp_get_ability_category()
 	 *
 	 * @param string $slug The slug of the registered category.
-	 * @return ?\\WP_Ability_Category The registered category instance, or null if it is not registered.
+	 * @return ?\WP_Ability_Category The registered category instance, or null if it is not registered.
 	 */
 	public function get_registered( string $slug ): ?WP_Ability_Category {
 		if ( ! $this->is_registered( $slug ) ) {
@@ -189,7 +189,7 @@ final class WP_Abilities_Category_Registry {
 	 *
 	 * @since 0.3.0
 	 *
-	 * @return \\WP_Abilities_Category_Registry The main registry instance.
+	 * @return \WP_Abilities_Category_Registry The main registry instance.
 	 */
 	public static function get_instance(): self {
 		if ( null === self::$instance ) {
@@ -214,7 +214,7 @@ final class WP_Abilities_Category_Registry {
 	 * Wakeup magic method.
 	 *
 	 * @since 0.3.0
-	 * @throws \\UnexpectedValueException If any of the registered categories is not an instance of WP_Ability_Category.
+	 * @throws \UnexpectedValueException If any of the registered categories is not an instance of WP_Ability_Category.
 	 */
 	public function __wakeup(): void {
 		foreach ( $this->registered_categories as $category ) {
