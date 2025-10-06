@@ -60,6 +60,9 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$this->server   = $wp_rest_server;
 
 		do_action( 'rest_api_init' );
+		do_action( 'abilities_api_category_registry_init' );
+
+		$this->register_test_categories();
 
 		do_action( 'abilities_api_init' );
 
@@ -81,10 +84,47 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			wp_unregister_ability( $ability->get_name() );
 		}
 
+		// Clean up registered categories.
+		$category_registry = WP_Abilities_Category_Registry::get_instance();
+		foreach ( array( 'math', 'system', 'general' ) as $category ) {
+			if ( $category_registry->is_registered( $category ) ) {
+				wp_unregister_ability_category( $category );
+			}
+		}
+
 		global $wp_rest_server;
 		$wp_rest_server = null;
 
 		parent::tear_down();
+	}
+
+	/**
+	 * Register test categories for testing.
+	 */
+	private function register_test_categories(): void {
+		wp_register_ability_category(
+			'math',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations and calculations.',
+			)
+		);
+
+		wp_register_ability_category(
+			'system',
+			array(
+				'label'       => 'System',
+				'description' => 'System information and operations.',
+			)
+		);
+
+		wp_register_ability_category(
+			'general',
+			array(
+				'label'       => 'General',
+				'description' => 'General purpose abilities.',
+			)
+		);
 	}
 
 	/**
@@ -97,6 +137,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Calculator',
 				'description'         => 'Performs calculations',
+				'category'            => 'math',
 				'input_schema'        => array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -133,6 +174,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'User Info',
 				'description'         => 'Gets user information',
+				'category'            => 'system',
 				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(
@@ -175,6 +217,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Restricted Action',
 				'description'         => 'Requires specific input for permission',
+				'category'            => 'general',
 				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(
@@ -205,6 +248,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Null Return',
 				'description'         => 'Returns null',
+				'category'            => 'general',
 				'execute_callback'    => static function () {
 					return null;
 				},
@@ -221,6 +265,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Error Return',
 				'description'         => 'Returns error',
+				'category'            => 'general',
 				'execute_callback'    => static function () {
 					return new \WP_Error( 'test_error', 'This is a test error' );
 				},
@@ -237,6 +282,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Invalid Output',
 				'description'         => 'Returns invalid output',
+				'category'            => 'general',
 				'output_schema'       => array(
 					'type' => 'number',
 				),
@@ -256,6 +302,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Query Params Test',
 				'description'         => 'Tests query parameter handling',
+				'category'            => 'general',
 				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(
@@ -326,6 +373,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Open Tool',
 				'description'         => 'Tool with no permission requirements',
+				'category'            => 'general',
 				'execute_callback'    => static function () {
 					return 'success';
 				},
@@ -594,6 +642,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Strict Output',
 				'description'         => 'Ability with strict output schema',
+				'category'            => 'general',
 				'output_schema'       => array(
 					'type'       => 'object',
 					'properties' => array(
@@ -638,6 +687,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Strict Input',
 				'description'         => 'Ability with strict input schema',
+				'category'            => 'general',
 				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(
@@ -682,6 +732,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'No Type',
 				'description'         => 'Ability without type',
+				'category'            => 'general',
 				'execute_callback'    => static function () {
 					return array( 'executed' => true );
 				},
@@ -713,6 +764,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Resource Empty',
 				'description'         => 'Resource with empty input',
+				'category'            => 'general',
 				'execute_callback'    => static function () {
 					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
@@ -726,6 +778,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Tool Empty',
 				'description'         => 'Tool with empty input',
+				'category'            => 'general',
 				'execute_callback'    => static function () {
 					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
@@ -796,6 +849,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Echo',
 				'description'         => 'Echoes input',
+				'category'            => 'general',
 				'input_schema'        => array(
 					'type' => 'object',
 				),
@@ -840,6 +894,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Echo Encoding',
 				'description'         => 'Echoes input with encoding',
+				'category'            => 'general',
 				'input_schema'        => array(
 					'type' => 'object',
 				),
@@ -903,6 +958,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Method Test',
 				'description'         => 'Test ability for HTTP method validation',
+				'category'            => 'general',
 				'execute_callback'    => static function () {
 					return array( 'success' => true );
 				},

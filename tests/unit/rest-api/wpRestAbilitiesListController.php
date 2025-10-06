@@ -49,6 +49,10 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$this->server   = $wp_rest_server;
 
 		do_action( 'rest_api_init' );
+		do_action( 'abilities_api_category_registry_init' );
+
+		// Register test categories
+		$this->register_test_categories();
 
 		// Initialize abilities API
 		do_action( 'abilities_api_init' );
@@ -73,11 +77,47 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 			wp_unregister_ability( $ability->get_name() );
 		}
 
+		// Clean up test categories
+		foreach ( array( 'math', 'system', 'general' ) as $slug ) {
+			if ( WP_Abilities_Category_Registry::get_instance()->is_registered( $slug ) ) {
+				wp_unregister_ability_category( $slug );
+			}
+		}
+
 		// Reset REST server
 		global $wp_rest_server;
 		$wp_rest_server = null;
 
 		parent::tear_down();
+	}
+
+	/**
+	 * Register test categories for testing.
+	 */
+	private function register_test_categories(): void {
+		wp_register_ability_category(
+			'math',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations and calculations.',
+			)
+		);
+
+		wp_register_ability_category(
+			'system',
+			array(
+				'label'       => 'System',
+				'description' => 'System information and operations.',
+			)
+		);
+
+		wp_register_ability_category(
+			'general',
+			array(
+				'label'       => 'General',
+				'description' => 'General purpose abilities.',
+			)
+		);
 	}
 
 	/**
@@ -90,6 +130,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Calculator',
 				'description'         => 'Performs basic calculations',
+				'category'            => 'math',
 				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(
@@ -122,8 +163,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return current_user_can( 'read' );
 				},
 				'meta'                => array(
-					'type'     => 'tool',
-					'category' => 'math',
+					'type' => 'tool',
 				),
 			)
 		);
@@ -134,6 +174,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 			array(
 				'label'               => 'System Info',
 				'description'         => 'Returns system information',
+				'category'            => 'system',
 				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(
@@ -165,8 +206,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return current_user_can( 'read' );
 				},
 				'meta'                => array(
-					'type'     => 'resource',
-					'category' => 'system',
+					'type' => 'resource',
 				),
 			)
 		);
@@ -178,6 +218,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 				array(
 					'label'               => "Test Ability {$i}",
 					'description'         => "Test ability number {$i}",
+					'category'            => 'general',
 					'execute_callback'    => static function () use ( $i ) {
 						return "Result from ability {$i}";
 					},
@@ -437,6 +478,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Test Hyphen Ability',
 				'description'         => 'Test ability with hyphen',
+				'category'            => 'general',
 				'execute_callback'    => static function ( $input ) {
 					return array( 'success' => true );
 				},
