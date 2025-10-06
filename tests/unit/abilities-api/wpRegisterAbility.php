@@ -451,4 +451,27 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 		$result = wp_get_abilities();
 		$this->assertEquals( $expected, $result );
 	}
+
+	/**
+	 * Tests registering an ability with non-existent category.
+	 *
+	 * @expectedIncorrectUsage WP_Abilities_Registry::register
+	 */
+	public function test_register_ability_nonexistent_category(): void {
+		do_action( 'abilities_api_init' );
+
+		// Ensure category doesn't exist.
+		if ( WP_Abilities_Category_Registry::get_instance()->is_registered( 'nonexistent' ) ) {
+			wp_unregister_ability_category( 'nonexistent' );
+		}
+
+		$args = array_merge(
+			self::$test_ability_args,
+			array( 'category' => 'nonexistent' )
+		);
+
+		$result = wp_register_ability( self::$test_ability_name, $args );
+
+		$this->assertNull( $result, 'Should return null when category does not exist' );
+	}
 }
