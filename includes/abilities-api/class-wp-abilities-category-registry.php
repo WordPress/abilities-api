@@ -56,6 +56,20 @@ final class WP_Abilities_Category_Registry {
 	 * } $args
 	 */
 	public function register( string $slug, array $args ): ?WP_Ability_Category {
+		if ( ! doing_action( 'abilities_api_category_registry_init' ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: 1: abilities_api_category_registry_init, 2: category slug. */
+					esc_html__( 'Categories must be registered during the %1$s action. The category %2$s was not registered.' ),
+					'<code>abilities_api_category_registry_init</code>',
+					'<code>' . esc_html( $slug ) . '</code>'
+				),
+				'0.3.0'
+			);
+			return null;
+		}
+
 		if ( $this->is_registered( $slug ) ) {
 			_doing_it_wrong(
 				__METHOD__,

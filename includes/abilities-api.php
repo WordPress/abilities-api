@@ -134,21 +134,6 @@ function wp_get_abilities_by_category( string $category ): array {
  * } $args
  */
 function wp_register_ability_category( string $slug, array $args ): ?WP_Ability_Category {
-	if ( ! did_action( 'abilities_api_category_registry_init' ) && ! did_action( 'abilities_api_init' ) ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: abilities_api_category_registry_init, 2: abilities_api_init, 3: category slug. */
-				esc_html__( 'Categories must be registered on the %1$s or %2$s action. The category %3$s was not registered.' ),
-				'<code>abilities_api_category_registry_init</code>',
-				'<code>abilities_api_init</code>',
-				'<code>' . esc_html( $slug ) . '</code>'
-			),
-			'0.3.0'
-		);
-		return null;
-	}
-
 	return WP_Abilities_Category_Registry::get_instance()->register( $slug, $args );
 }
 
