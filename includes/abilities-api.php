@@ -101,20 +101,6 @@ function wp_get_abilities(): array {
 }
 
 /**
- * Retrieves abilities filtered by category.
- *
- * @since 0.3.0
- *
- * @see WP_Abilities_Registry::get_abilities_by_category()
- *
- * @param string $category The category slug to filter by.
- * @return \WP_Ability[] The array of abilities in the specified category.
- */
-function wp_get_abilities_by_category( string $category ): array {
-	return WP_Abilities_Registry::get_instance()->get_abilities_by_category( $category );
-}
-
-/**
  * Registers a new ability category.
  *
  * @since 0.3.0
