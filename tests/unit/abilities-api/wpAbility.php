@@ -98,6 +98,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		$this->assertSame( $annotations, $ability->get_annotations() );
 	}
+
 	/**
 	 * Tests that invalid annotations throw an exception.
 	 */
@@ -113,6 +114,30 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$this->expectExceptionMessage( 'The ability properties should provide a valid `annotations` array.' );
 
 		new WP_Ability( self::$test_ability_name, $args );
+	}
+
+	/**
+	 * Tests that `show_in_rest` defaults to false when not provided.
+	 */
+	public function test_show_in_rest_defaults_to_false() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$this->assertFalse( $ability->has_show_in_rest(), '`show_in_rest` should default to false.' );
+	}
+
+	/**
+	 * Tests that `show_in_rest` can be set to true.
+	 */
+	public function test_show_in_rest_can_be_set_to_true() {
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'show_in_rest' => true,
+			)
+		);
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+
+		$this->assertTrue( $ability->has_show_in_rest(), '`show_in_rest` should be true.' );
 	}
 
 	/**
