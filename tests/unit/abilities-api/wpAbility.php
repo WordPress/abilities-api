@@ -20,7 +20,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		// Register category during the hook.
 		add_action(
-			'abilities_api_category_registry_init',
+			'abilities_api_categories_init',
 			function () {
 				if ( ! WP_Abilities_Category_Registry::get_instance()->is_registered( 'math' ) ) {
 					wp_register_ability_category(
@@ -35,7 +35,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		);
 
 		// Fire the hook to allow category registration.
-		do_action( 'abilities_api_category_registry_init' );
+		do_action( 'abilities_api_categories_init' );
 
 		self::$test_ability_properties = array(
 			'label'               => 'Calculator',

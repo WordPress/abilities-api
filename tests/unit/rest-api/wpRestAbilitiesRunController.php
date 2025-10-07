@@ -63,10 +63,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		// Register test categories during the hook
 		add_action(
-			'abilities_api_category_registry_init',
+			'abilities_api_categories_init',
 			array( $this, 'register_test_categories' )
 		);
-		do_action( 'abilities_api_category_registry_init' );
+		do_action( 'abilities_api_categories_init' );
 
 		do_action( 'abilities_api_init' );
 
