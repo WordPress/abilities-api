@@ -60,9 +60,13 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$this->server   = $wp_rest_server;
 
 		do_action( 'rest_api_init' );
-		do_action( 'abilities_api_category_registry_init' );
 
-		$this->register_test_categories();
+		// Register test categories during the hook
+		add_action(
+			'abilities_api_category_registry_init',
+			array( $this, 'register_test_categories' )
+		);
+		do_action( 'abilities_api_category_registry_init' );
 
 		do_action( 'abilities_api_init' );
 
@@ -101,7 +105,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	/**
 	 * Register test categories for testing.
 	 */
-	private function register_test_categories(): void {
+	public function register_test_categories(): void {
 		wp_register_ability_category(
 			'math',
 			array(

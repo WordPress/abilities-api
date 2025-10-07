@@ -30,19 +30,24 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 
+		// Register category during the hook.
+		add_action(
+			'abilities_api_category_registry_init',
+			function () {
+				if ( ! WP_Abilities_Category_Registry::get_instance()->is_registered( 'math' ) ) {
+					wp_register_ability_category(
+						'math',
+						array(
+							'label'       => 'Math',
+							'description' => 'Mathematical operations and calculations.',
+						)
+					);
+				}
+			}
+		);
+
 		// Fire the hook to allow category registration.
 		do_action( 'abilities_api_category_registry_init' );
-
-		// Register the math category for tests.
-		if ( ! WP_Abilities_Category_Registry::get_instance()->is_registered( 'math' ) ) {
-			wp_register_ability_category(
-				'math',
-				array(
-					'label'       => 'Math',
-					'description' => 'Mathematical operations and calculations.',
-				)
-			);
-		}
 
 		self::$test_ability_args = array(
 			'label'               => 'Add numbers',
