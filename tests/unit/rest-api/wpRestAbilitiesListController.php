@@ -174,6 +174,19 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 			)
 		);
 
+		// Ability that does not show in REST.
+		wp_register_ability(
+			'test/not-show-in-rest',
+			array(
+				'label'               => 'Hidden from REST',
+				'description'         => 'It does not show in REST.',
+				'execute_callback'    => static function (): int {
+					return 0;
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+
 		// Register multiple abilities for pagination testing
 		for ( $i = 1; $i <= 60; $i++ ) {
 			wp_register_ability(
@@ -209,6 +222,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$ability_names = wp_list_pluck( $data, 'name' );
 		$this->assertContains( 'test/calculator', $ability_names );
 		$this->assertContains( 'test/system-info', $ability_names );
+		$this->assertNotContains( 'test/not-show-in-rest', $ability_names );
 	}
 
 	/**
@@ -246,6 +260,19 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test getting an ability that does not show in REST returns 404.
+	 */
+	public function test_get_item_not_show_in_rest(): void {
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/not-show-in-rest' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_ability_not_found', $data['code'] );
+	}
+
+	/**
 	 * Test permission check for listing abilities.
 	 */
 	public function test_get_items_permission_denied(): void {
@@ -272,7 +299,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'X-WP-Total', $headers );
 		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers );
 
-		$total_abilities = count( wp_get_abilities() );
+		$total_abilities = count( wp_get_abilities() ) - 1; // Exclude the one that doesn't show in REST.
 		$this->assertEquals( $total_abilities, (int) $headers['X-WP-Total'] );
 		$this->assertEquals( ceil( $total_abilities / 10 ), (int) $headers['X-WP-TotalPages'] );
 	}

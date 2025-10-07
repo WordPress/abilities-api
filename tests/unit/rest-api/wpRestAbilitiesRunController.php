@@ -196,6 +196,19 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
+		// Ability that does not show in REST.
+		wp_register_ability(
+			'test/not-show-in-rest',
+			array(
+				'label'               => 'Hidden from REST',
+				'description'         => 'It does not show in REST.',
+				'execute_callback'    => static function (): int {
+					return 0;
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+
 		// Ability that returns null
 		wp_register_ability(
 			'test/null-return',
@@ -434,6 +447,21 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'Success: test data', $response->get_data() );
+	}
+
+	/**
+	 * Test handling an ability that does not show in REST.
+	 */
+	public function test_do_not_show_in_rest(): void {
+		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/not-show-in-rest/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_ability_not_found', $data['code'] );
+		$this->assertEquals( 'Ability not found.', $data['message'] );
 	}
 
 	/**
