@@ -67,6 +67,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 			'meta'                => array(
 				'category' => 'math',
 			),
+			'show_in_rest'        => true,
 		);
 	}
 
@@ -147,6 +148,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 			$result->get_annotations()
 		);
 		$this->assertSame( self::$test_ability_args['meta'], $result->get_meta() );
+		$this->assertSame( self::$test_ability_args['show_in_rest'], $result->has_show_in_rest() );
 		$this->assertTrue(
 			$result->check_permissions(
 				array(

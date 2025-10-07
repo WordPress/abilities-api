@@ -36,9 +36,6 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				'readonly'    => true,
 				'destructive' => false,
 			),
-			'meta'                => array(
-				'category' => 'math',
-			),
 		);
 	}
 
