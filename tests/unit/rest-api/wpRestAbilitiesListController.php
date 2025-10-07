@@ -124,6 +124,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 				'meta'                => array(
 					'category' => 'math',
 				),
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -169,6 +170,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 				'meta'                => array(
 					'category' => 'system',
 				),
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -183,6 +185,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 						return "Result from ability {$i}";
 					},
 					'permission_callback' => '__return_true',
+					'show_in_rest'        => true,
 				)
 			);
 		}
@@ -442,6 +445,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return array( 'success' => true );
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
