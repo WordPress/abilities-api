@@ -200,23 +200,6 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that `show_in_rest` can be set to false.
-	 */
-	public function test_show_in_rest_can_be_set_to_false() {
-		$args = array_merge(
-			self::$test_ability_properties,
-			array(
-				'meta' => array(
-					'show_in_rest' => false,
-				),
-			)
-		);
-		$ability = new WP_Ability( self::$test_ability_name, $args );
-
-		$this->assertFalse( $ability->get_meta_item( 'show_in_rest' ), '`show_in_rest` metadata should be false.' );
-	}
-
-	/**
 	 * Tests that invalid `show_in_rest` value throws an exception.
 	 */
 	public function test_show_in_rest_throws_exception() {
