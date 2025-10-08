@@ -34,7 +34,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			},
 			'annotations'         => array(
 				'readonly'    => true,
-				'destructive'  => false,
+				'destructive' => false,
 			),
 			'meta'                => array(
 				'category' => 'math',
@@ -489,7 +489,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$this->assertSame(
 			array(
 				'instructions' => '',
-				'readonly'    => false,
+				'readonly'     => false,
 				'destructive'  => true,
 				'idempotent'   => false,
 			),
@@ -503,7 +503,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	public function test_get_all_annotations_overridden() {
 		$annotations = array(
 			'instructions' => 'Enjoy responsibly.',
-			'readonly'    => true,
+			'readonly'     => true,
 			'destructive'  => false,
 			'idempotent'   => false,
 		);

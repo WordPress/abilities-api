@@ -61,7 +61,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 				return true;
 			},
 			'annotations'         => array(
-				'readonly'   => true,
+				'readonly'    => true,
 				'destructive' => false,
 			),
 			'meta'                => array(
