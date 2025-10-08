@@ -74,7 +74,7 @@ export interface Ability {
 	 */
 	annotations?: {
 		instructions?: string;
-		read_only?: boolean;
+		readonly?: boolean;
 		destructive?: boolean;
 		idempotent?: boolean;
 	};

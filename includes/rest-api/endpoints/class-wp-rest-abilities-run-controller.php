@@ -55,7 +55,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 				),
 
 				// TODO: We register ALLMETHODS because at route registration time, we don't know which abilities
-				// exist or their annotations (`destructive`, `idempotent`, `read_only`). This is due to WordPress
+				// exist or their annotations (`destructive`, `idempotent`, `readonly`). This is due to WordPress
 				// load order - routes are registered early, before plugins have registered their abilities.
 				// This approach works but could be improved with lazy route registration or a different
 				// architecture that allows type-specific routes after abilities are registered.
@@ -91,19 +91,19 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		}
 
 		// Check if the HTTP method matches the ability annotations.
-		$annotations  = $ability->get_annotations();
-		$is_read_only = ! empty( $annotations['read_only'] );
-		$method       = $request->get_method();
+		$annotations = $ability->get_annotations();
+		$is_readonly = ! empty( $annotations['readonly'] );
+		$method      = $request->get_method();
 
-		if ( $is_read_only && 'GET' !== $method ) {
+		if ( $is_readonly && 'GET' !== $method ) {
 			return new \WP_Error(
 				'rest_ability_invalid_method',
-				__( 'Read only abilities require GET method.' ),
+				__( 'Read-only abilities require GET method.' ),
 				array( 'status' => 405 )
 			);
 		}
 
-		if ( ! $is_read_only && 'POST' !== $method ) {
+		if ( ! $is_readonly && 'POST' !== $method ) {
 			return new \WP_Error(
 				'rest_ability_invalid_method',
 				__( 'Abilities that perform updates require POST method.' ),

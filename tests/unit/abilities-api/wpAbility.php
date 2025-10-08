@@ -33,7 +33,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				return true;
 			},
 			'annotations'         => array(
-				'read_only'    => true,
+				'readonly'    => true,
 				'destructive'  => false,
 			),
 			'meta'                => array(
@@ -489,7 +489,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$this->assertSame(
 			array(
 				'instructions' => '',
-				'read_only'    => false,
+				'readonly'    => false,
 				'destructive'  => true,
 				'idempotent'   => false,
 			),
@@ -503,7 +503,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	public function test_get_all_annotations_overridden() {
 		$annotations = array(
 			'instructions' => 'Enjoy responsibly.',
-			'read_only'    => true,
+			'readonly'    => true,
 			'destructive'  => false,
 			'idempotent'   => false,
 		);

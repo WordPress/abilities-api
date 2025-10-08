@@ -124,7 +124,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		// Read only ability (GET method).
+		// Read-only ability (GET method).
 		wp_register_ability(
 			'test/user-info',
 			array(
@@ -161,7 +161,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return is_user_logged_in();
 				},
 				'annotations'         => array(
-					'read_only' => true,
+					'readonly' => true,
 				),
 			)
 		);
@@ -235,7 +235,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		// Read only ability for query params testing.
+		// Read-only ability for query params testing.
 		wp_register_ability(
 			'test/query-params',
 			array(
@@ -253,7 +253,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				},
 				'permission_callback' => '__return_true',
 				'annotations'         => array(
-					'read_only' => true,
+					'readonly' => true,
 				),
 			)
 		);
@@ -283,9 +283,9 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test executing a read only ability with GET.
+	 * Test executing a read-only ability with GET.
 	 */
-	public function test_execute_read_only_ability_get(): void {
+	public function test_execute_readonly_ability_get(): void {
 		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/user-info/run' );
 		$request->set_query_params(
 			array(
@@ -328,10 +328,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test HTTP method validation for read only abilities.
+	 * Test HTTP method validation for read-only abilities.
 	 */
-	public function test_read_only_ability_requires_get(): void {
-		// Try POST on a read only ability (should fail).
+	public function test_readonly_ability_requires_get(): void {
+		// Try POST on a read-only ability (should fail).
 		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/user-info/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body( wp_json_encode( array( 'user_id' => 1 ) ) );
@@ -341,7 +341,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$this->assertSame( 405, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertSame( 'rest_ability_invalid_method', $data['code'] );
-		$this->assertSame( 'Read only abilities require GET method.', $data['message'] );
+		$this->assertSame( 'Read-only abilities require GET method.', $data['message'] );
 	}
 
 
@@ -690,14 +690,14 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		wp_register_ability(
 			'test/read-only-empty',
 			array(
-				'label'               => 'Read Only Empty',
-				'description'         => 'Read only with empty input.',
+				'label'               => 'Read-only Empty',
+				'description'         => 'Read-only with empty input.',
 				'execute_callback'    => static function () {
 					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
 				'permission_callback' => '__return_true',
 				'annotations'         => array(
-					'read_only' => true,
+					'readonly' => true,
 				),
 			)
 		);

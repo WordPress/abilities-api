@@ -99,11 +99,11 @@ if ( ability ) {
 
 Executes an ability with optional input parameters. The HTTP method is automatically determined based on the ability's annotations:
 
-- `read_only` abilities use GET (read-only operations)
+- `readonly` abilities use GET (read-only operations)
 - regular abilities use POST (write operations)
 
 ```javascript
-// Execute a read only ability (GET)
+// Execute a read-only ability (GET)
 const data = await executeAbility( 'my-plugin/get-data', {
   id: 123,
 } );

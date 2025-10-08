@@ -30,7 +30,7 @@ class WP_Ability {
 		// Instructions on how to use the ability.
 		'instructions' => '',
 		// If true, the ability does not modify its environment.
-		'read_only'    => false,
+		'readonly'     => false,
 		/*
 		 * If true, the ability may perform destructive updates to its environment.
 		 * If false, the ability performs only additive updates.

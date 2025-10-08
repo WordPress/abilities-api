@@ -127,7 +127,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 			)
 		);
 
-		// Register a read only ability.
+		// Register a read-only ability.
 		wp_register_ability(
 			'test/system-info',
 			array(
@@ -164,7 +164,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return current_user_can( 'read' );
 				},
 				'annotations'         => array(
-					'read_only' => true,
+					'readonly' => true,
 				),
 				'meta'                => array(
 					'category' => 'system',

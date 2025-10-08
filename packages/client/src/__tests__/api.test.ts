@@ -259,12 +259,12 @@ describe( 'API functions', () => {
 			).rejects.toThrow( 'invalid input' );
 		} );
 
-		it( 'should execute a read only ability via GET', async () => {
+		it( 'should execute a read-only ability via GET', async () => {
 			const mockAbility: Ability = {
 				name: 'test/read-only',
-				label: 'Read only Ability',
-				description: 'Test read only ability.',
-				annotations: { read_only: true },
+				label: 'Read-only Ability',
+				description: 'Test read-only ability.',
+				annotations: { readonly: true },
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -280,7 +280,7 @@ describe( 'API functions', () => {
 				getAbility: mockGetAbility,
 			} );
 
-			const mockResponse = { data: 'read only data' };
+			const mockResponse = { data: 'read-only data' };
 			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
 				mockResponse
 			);
@@ -295,12 +295,12 @@ describe( 'API functions', () => {
 			expect( result ).toEqual( mockResponse );
 		} );
 
-		it( 'should execute a read only ability with empty input', async () => {
+		it( 'should execute a read-only ability with empty input', async () => {
 			const mockAbility: Ability = {
 				name: 'test/read-only',
-				label: 'Read only Ability',
-				description: 'Test read only ability.',
-				annotations: { read_only: true },
+				label: 'Read-only Ability',
+				description: 'Test read-only ability.',
+				annotations: { readonly: true },
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -310,7 +310,7 @@ describe( 'API functions', () => {
 				getAbility: mockGetAbility,
 			} );
 
-			const mockResponse = { data: 'read only data' };
+			const mockResponse = { data: 'read-only data' };
 			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
 				mockResponse
 			);
