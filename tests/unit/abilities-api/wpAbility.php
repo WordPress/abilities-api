@@ -73,8 +73,10 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		}
 
 		parent::tear_down();
+	}
 
-	 * Tests getting all annotations when selective overrides are applied.
+	 /*
+	  *  Tests getting all annotations when selective overrides are applied.
 	 */
 	public function test_get_all_annotations() {
 		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
