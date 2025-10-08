@@ -343,7 +343,7 @@ class WP_Ability {
 	 *
 	 * @return bool True if the ability should be shown in the REST API, false otherwise.
 	 */
-	public function has_show_in_rest(): bool {
+	public function show_in_rest(): bool {
 		return $this->show_in_rest;
 	}
 

@@ -100,7 +100,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that invalid annotations throw an exception.
+	 * Tests that invalid `annotations` value throws an exception.
 	 */
 	public function test_annotations_throws_exception() {
 		$args = array_merge(
@@ -122,7 +122,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	public function test_show_in_rest_defaults_to_false() {
 		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
 
-		$this->assertFalse( $ability->has_show_in_rest(), '`show_in_rest` should default to false.' );
+		$this->assertFalse( $ability->show_in_rest(), '`show_in_rest` should default to false.' );
 	}
 
 	/**
@@ -137,7 +137,24 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		);
 		$ability = new WP_Ability( self::$test_ability_name, $args );
 
-		$this->assertTrue( $ability->has_show_in_rest(), '`show_in_rest` should be true.' );
+		$this->assertTrue( $ability->show_in_rest(), '`show_in_rest` should be true.' );
+	}
+
+	/**
+	 * Tests that invalid `show_in_rest` value throws an exception.
+	 */
+	public function test_show_in_rest_throws_exception() {
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'show_in_rest' => 5,
+			)
+		);
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'The ability properties should provide a valid `show_in_rest` boolean.' );
+
+		new WP_Ability( self::$test_ability_name, $args );
 	}
 
 	/**
