@@ -19,6 +19,29 @@ declare( strict_types = 1 );
  * @see WP_Abilities_Registry
  */
 class WP_Ability {
+	/**
+	 * The default ability annotations.
+	 * They are not guaranteed to provide a faithful description of ability behavior.
+	 *
+	 * @since n.e.x.t
+	 * @var array<string,(bool|string)>
+	 */
+	protected static $default_annotations = array(
+		// Instructions on how to use the ability.
+		'instructions' => '',
+		// If true, the ability does not modify its environment.
+		'readonly'     => false,
+		/*
+		 * If true, the ability may perform destructive updates to its environment.
+		 * If false, the ability performs only additive updates.
+		 */
+		'destructive'  => true,
+		/*
+		 * If true, calling the ability repeatedly with the same arguments will have no additional effect
+		 * on its environment.
+		 */
+		'idempotent'   => false,
+	);
 
 	/**
 	 * The name of the ability, with its namespace.
@@ -78,6 +101,14 @@ class WP_Ability {
 	protected $permission_callback;
 
 	/**
+	 * The ability annotations.
+	 *
+	 * @since n.e.x.t
+	 * @var array<string,(bool|string)>
+	 */
+	protected $annotations = array();
+
+	/**
 	 * The optional ability metadata.
 	 *
 	 * @since 0.1.0
@@ -106,8 +137,8 @@ class WP_Ability {
 	 *
 	 * @param string              $name The name of the ability, with its namespace.
 	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should
-	 *                                  include `label`, `description`, `category`, `input_schema`,
-	 *                                  `output_schema`, `execute_callback`, `permission_callback`, and `meta`.
+	 *                                  include `label`, `description`, `category`, `input_schema`, `output_schema`,
+	 *                                  `execute_callback`, `permission_callback`, `annotations`, and `meta`.
 	 */
 	public function __construct( string $name, array $args ) {
 		$this->name = $name;
@@ -156,6 +187,7 @@ class WP_Ability {
 	 *   permission_callback: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
+	 *   annotations?: array<string,mixed>,
 	 *   meta?: array<string,mixed>,
 	 *   ...<string, mixed>,
 	 * } $args
@@ -199,6 +231,12 @@ class WP_Ability {
 			);
 		}
 
+		if ( isset( $args['annotations'] ) && ! is_array( $args['annotations'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties should provide a valid `annotations` array.' )
+			);
+		}
+
 		if ( isset( $args['meta'] ) && ! is_array( $args['meta'] ) ) {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties should provide a valid `meta` array.' )
@@ -218,6 +256,12 @@ class WP_Ability {
 				esc_html__( 'Category slug must contain only lowercase alphanumeric characters and dashes.' )
 			);
 		}
+		// Set defaults for optional args.
+		$args['annotations'] = wp_parse_args(
+			$args['annotations'] ?? array(),
+			static::$default_annotations
+		);
+
 
 		return $args;
 	}
@@ -276,6 +320,17 @@ class WP_Ability {
 	 */
 	public function get_output_schema(): array {
 		return $this->output_schema;
+	}
+
+	/**
+	 * Retrieves the annotations for the ability.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string,(bool|string)> The annotations for the ability.
+	 */
+	public function get_annotations(): array {
+		return $this->annotations;
 	}
 
 	/**

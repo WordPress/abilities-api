@@ -69,14 +69,21 @@ export interface Ability {
 	permissionCallback?: PermissionCallback;
 
 	/**
+	 * Annotations for the ability.
+	 * @see WP_Ability::get_annotations()
+	 */
+	annotations?: {
+		instructions?: string;
+		readonly?: boolean;
+		destructive?: boolean;
+		idempotent?: boolean;
+	};
+
+	/**
 	 * Metadata about the ability.
 	 * @see WP_Ability::get_meta()
 	 */
 	meta?: {
-		/**
-		 * The type of ability - 'resource' uses GET, 'tool' uses POST.
-		 */
-		type?: 'resource' | 'tool';
 		[ key: string ]: any;
 	};
 }

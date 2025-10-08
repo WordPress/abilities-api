@@ -118,46 +118,21 @@ describe( 'Store Reducer', () => {
 				).not.toHaveProperty( '_embedded' );
 			} );
 
-			it( 'should filter out location property', () => {
-				const abilities = [
-					{
-						name: 'test/ability',
-						label: 'Test Ability',
-						description: 'Test ability with location',
-						location: 'client',
-					},
-				];
-
-				const action = {
-					type: RECEIVE_ABILITIES,
-					abilities,
-				};
-
-				const state = reducer(
-					{ abilitiesByName: defaultState },
-					action
-				);
-
-				expect(
-					state.abilitiesByName[ 'test/ability' ]
-				).not.toHaveProperty( 'location' );
-			} );
-
 			it( 'should preserve all valid ability properties', () => {
 				const abilities = [
 					{
 						name: 'test/ability',
 						label: 'Test Ability',
-						description: 'Full test ability',
+						description: 'Full test ability.',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
-						meta: { type: 'resource' as const },
+						annotations: { readonly: true },
+						meta: { category: 'test' },
 						callback: () => Promise.resolve( {} ),
 						permissionCallback: () => true,
 						// Extra properties that should be filtered out
 						_links: { self: { href: '/test' } },
 						_embedded: { test: 'value' },
-						location: 'client',
 						extra_field: 'should be removed',
 					},
 				];
@@ -176,17 +151,17 @@ describe( 'Store Reducer', () => {
 				// Should have valid properties
 				expect( ability.name ).toBe( 'test/ability' );
 				expect( ability.label ).toBe( 'Test Ability' );
-				expect( ability.description ).toBe( 'Full test ability' );
+				expect( ability.description ).toBe( 'Full test ability.' );
 				expect( ability.input_schema ).toEqual( { type: 'object' } );
 				expect( ability.output_schema ).toEqual( { type: 'object' } );
-				expect( ability.meta ).toEqual( { type: 'resource' } );
+				expect( ability.annotations ).toEqual( { readonly: true } );
+				expect( ability.meta ).toEqual( { category: 'test' } );
 				expect( ability.callback ).toBeDefined();
 				expect( ability.permissionCallback ).toBeDefined();
 
 				// Should NOT have invalid properties
 				expect( ability ).not.toHaveProperty( '_links' );
 				expect( ability ).not.toHaveProperty( '_embedded' );
-				expect( ability ).not.toHaveProperty( 'location' );
 				expect( ability ).not.toHaveProperty( 'extra_field' );
 			} );
 		} );
@@ -225,7 +200,6 @@ describe( 'Store Reducer', () => {
 					description: 'Test ability',
 					callback: () => Promise.resolve( {} ),
 					// Extra properties that should be filtered out
-					location: 'client',
 					_links: { self: { href: '/test' } },
 					extra_field: 'should be removed',
 				};
@@ -249,7 +223,6 @@ describe( 'Store Reducer', () => {
 				expect( registeredAbility.callback ).toBeDefined();
 
 				// Should NOT have invalid properties
-				expect( registeredAbility ).not.toHaveProperty( 'location' );
 				expect( registeredAbility ).not.toHaveProperty( '_links' );
 				expect( registeredAbility ).not.toHaveProperty( 'extra_field' );
 			} );

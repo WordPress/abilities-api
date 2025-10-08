@@ -46,9 +46,16 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				'description' => 'The result of performing a math operation.',
 				'required'    => true,
 			),
+			'execute_callback'   => static function (): int {
+				return 0;
+			},
 			'permission_callback' => static function (): bool {
 				return true;
 			},
+			'annotations'         => array(
+				'readonly'    => true,
+				'destructive' => false,
+			),
 			'meta'                => array(
 				'foo' => 'bar',
 			),
@@ -66,6 +73,80 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		}
 
 		parent::tear_down();
+
+	 * Tests getting all annotations when selective overrides are applied.
+	 */
+	public function test_get_all_annotations() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$this->assertEquals(
+			array_merge(
+				self::$test_ability_properties['annotations'],
+				array(
+					'instructions' => '',
+					'idempotent'   => false,
+				),
+			),
+			$ability->get_annotations()
+		);
+	}
+
+	/**
+	 * Tests getting default annotations when not provided.
+	 */
+	public function test_get_default_annotations() {
+		$args = self::$test_ability_properties;
+		unset( $args['annotations'] );
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+
+		$this->assertSame(
+			array(
+				'instructions' => '',
+				'readonly'     => false,
+				'destructive'  => true,
+				'idempotent'   => false,
+			),
+			$ability->get_annotations()
+		);
+	}
+
+	/**
+	 * Tests getting all annotations when values overridden.
+	 */
+	public function test_get_all_annotations_overridden() {
+		$annotations = array(
+			'instructions' => 'Enjoy responsibly.',
+			'readonly'     => true,
+			'destructive'  => false,
+			'idempotent'   => false,
+		);
+		$args        = array_merge(
+			self::$test_ability_properties,
+			array(
+				'annotations' => $annotations,
+			)
+		);
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+
+		$this->assertSame( $annotations, $ability->get_annotations() );
+	}
+	/**
+	 * Tests that invalid annotations throw an exception.
+	 */
+	public function test_annotations_throws_exception() {
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'annotations' => 5,
+			)
+		);
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'The ability properties should provide a valid `annotations` array.' );
+
+		new WP_Ability( self::$test_ability_name, $args );
 	}
 
 	/**
@@ -378,9 +459,6 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			array(
 				'permission_callback' => static function (): bool {
 					return false;
-				},
-				'execute_callback'    => static function (): int {
-					return 42;
 				},
 			)
 		);

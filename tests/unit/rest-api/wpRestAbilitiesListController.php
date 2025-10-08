@@ -127,7 +127,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 	 * Register test abilities for testing.
 	 */
 	private function register_test_abilities(): void {
-		// Register a tool ability
+		// Register a regular ability.
 		wp_register_ability(
 			'test/calculator',
 			array(
@@ -166,12 +166,12 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return current_user_can( 'read' );
 				},
 				'meta'                => array(
-					'type' => 'tool',
+					'foo' => 'bar',
 				),
 			)
 		);
 
-		// Register a resource ability
+		// Register a read-only ability.
 		wp_register_ability(
 			'test/system-info',
 			array(
@@ -208,8 +208,11 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 				'permission_callback' => static function () {
 					return current_user_can( 'read' );
 				},
+				'annotations'         => array(
+					'readonly' => true,
+				),
 				'meta'                => array(
-					'type' => 'resource',
+					'foo' => 'bar',
 				),
 			)
 		);
@@ -267,7 +270,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'input_schema', $data );
 		$this->assertArrayHasKey( 'output_schema', $data );
 		$this->assertArrayHasKey( 'meta', $data );
-		$this->assertEquals( 'tool', $data['meta']['type'] );
+		$this->assertEquals( 'math', $data['meta']['category'] );
 	}
 
 	/**

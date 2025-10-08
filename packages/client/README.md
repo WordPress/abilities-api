@@ -28,13 +28,13 @@ const { getAbilities, getAbility, executeAbility } = wp.abilities;
 const abilities = await getAbilities();
 
 // Get a specific ability
-const ability = await getAbility('my-plugin/my-ability');
+const ability = await getAbility( 'my-plugin/my-ability' );
 
 // Execute an ability
-const result = await executeAbility('my-plugin/my-ability', {
+const result = await executeAbility( 'my-plugin/my-ability', {
   param1: 'value1',
   param2: 'value2',
-});
+} );
 ```
 
 ### Using with React and WordPress Data
@@ -47,12 +47,12 @@ import { store as abilitiesStore } from '@wordpress/abilities';
 
 function MyComponent() {
   const abilities = useSelect(
-    (select) => select(abilitiesStore).getAbilities(),
+    ( select ) => select( abilitiesStore ).getAbilities(),
     []
   );
 
   const specificAbility = useSelect(
-    (select) => select(abilitiesStore).getAbility('my-plugin/my-ability'),
+    ( select ) => select( abilitiesStore ).getAbility( 'my-plugin/my-ability' ),
     []
   );
 
@@ -60,11 +60,11 @@ function MyComponent() {
     <div>
       <h2>All Abilities</h2>
       <ul>
-        {abilities.map((ability) => (
-          <li key={ability.name}>
-            <strong>{ability.label}</strong>: {ability.description}
+        { abilities.map( ( ability ) => (
+          <li key={ ability.name }>
+            <strong>{ ability.label }</strong>: { ability.description }
           </li>
-        ))}
+        ) ) }
       </ul>
     </div>
   );
@@ -81,7 +81,7 @@ Returns all registered abilities. Automatically handles pagination to fetch all 
 
 ```javascript
 const abilities = await getAbilities();
-console.log(`Found ${abilities.length} abilities`);
+console.log( `Found ${ abilities.length } abilities` );
 ```
 
 #### `getAbility(name: string): Promise<Ability | null>`
@@ -89,30 +89,30 @@ console.log(`Found ${abilities.length} abilities`);
 Returns a specific ability by name, or null if not found.
 
 ```javascript
-const ability = await getAbility('my-plugin/create-post');
-if (ability) {
-  console.log(`Found ability: ${ability.label}`);
+const ability = await getAbility( 'my-plugin/create-post' );
+if ( ability ) {
+  console.log( `Found ability: ${ ability.label }` );
 }
 ```
 
 #### `executeAbility(name: string, input?: Record<string, any>): Promise<any>`
 
-Executes an ability with optional input parameters. The HTTP method is automatically determined based on the ability's type:
+Executes an ability with optional input parameters. The HTTP method is automatically determined based on the ability's annotations:
 
-- `resource` type abilities use GET (read-only operations)
-- `tool` type abilities use POST (write operations)
+- `readonly` abilities use GET (read-only operations)
+- regular abilities use POST (write operations)
 
 ```javascript
-// Execute a resource ability (GET)
-const data = await executeAbility('my-plugin/get-data', {
+// Execute a read-only ability (GET)
+const data = await executeAbility( 'my-plugin/get-data', {
   id: 123,
-});
+} );
 
-// Execute a tool ability (POST)
-const result = await executeAbility('my-plugin/create-item', {
+// Execute a regular ability (POST)
+const result = await executeAbility( 'my-plugin/create-item', {
   title: 'New Item',
   content: 'Item content',
-});
+} );
 ```
 
 ### Store Selectors

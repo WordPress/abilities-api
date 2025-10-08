@@ -292,6 +292,22 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 		$this->assertNull( $result );
 	}
 
+
+	/**
+	 * Should reject ability registration with invalid `annotations` type.
+	 *
+	 * @covers WP_Abilities_Registry::register
+	 * @covers WP_Ability::prepare_properties
+	 *
+	 * @expectedIncorrectUsage WP_Abilities_Registry::register
+	 */
+	public function test_register_invalid_annotations_type() {
+		self::$test_ability_args['annotations'] = false;
+
+		$result = $this->registry->register( self::$test_ability_name, self::$test_ability_args );
+		$this->assertNull( $result );
+	}
+
 	/**
 	 * Should reject ability registration with invalid meta type.
 	 *
