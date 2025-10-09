@@ -614,6 +614,12 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 	 * Test filtering by non-existent category returns empty results.
 	 */
 	public function test_filter_by_nonexistent_category(): void {
+		// Ensure category doesn't exist - test should fail if it does.
+		$this->assertFalse(
+			WP_Abilities_Category_Registry::get_instance()->is_registered( 'nonexistent' ),
+			'The nonexistent category should not be registered - test isolation may be broken'
+		);
+
 		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
 		$request->set_param( 'category', 'nonexistent' );
 		$response = $this->server->dispatch( $request );

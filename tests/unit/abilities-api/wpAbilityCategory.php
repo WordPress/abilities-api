@@ -392,6 +392,12 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	public function test_ability_requires_existing_category(): void {
 		do_action( 'abilities_api_init' );
 
+		// Ensure category doesn't exist - test should fail if it does.
+		$this->assertFalse(
+			WP_Abilities_Category_Registry::get_instance()->is_registered( 'test-nonexistent' ),
+			'The test-nonexistent category should not be registered - test isolation may be broken'
+		);
+
 		// Try to register ability with non-existent category.
 		$result = wp_register_ability(
 			'test/calculator',

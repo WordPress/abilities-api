@@ -500,10 +500,11 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	public function test_register_ability_nonexistent_category(): void {
 		do_action( 'abilities_api_init' );
 
-		// Ensure category doesn't exist.
-		if ( WP_Abilities_Category_Registry::get_instance()->is_registered( 'nonexistent' ) ) {
-			wp_unregister_ability_category( 'nonexistent' );
-		}
+		// Ensure category doesn't exist - test should fail if it does.
+		$this->assertFalse(
+			WP_Abilities_Category_Registry::get_instance()->is_registered( 'nonexistent' ),
+			'The nonexistent category should not be registered - test isolation may be broken'
+		);
 
 		$args = array_merge(
 			self::$test_ability_args,
