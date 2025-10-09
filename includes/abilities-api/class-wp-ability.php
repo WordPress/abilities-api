@@ -123,7 +123,11 @@ class WP_Ability {
 	 * @since 0.1.0
 	 * @var array<string,mixed>
 	 */
+<<<<<<< HEAD
 	protected $meta;
+=======
+	protected $meta = array();
+>>>>>>> 583da4c (Move `show_in_rest` to meta in the registration process)
 
 	/**
 	 * Constructor.
@@ -187,11 +191,16 @@ class WP_Ability {
 	 *   permission_callback: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
+<<<<<<< HEAD
 	 *   annotations?: array<string,(bool|string)>,
 	 *   meta?: array{
 	 *     show_in_rest?: bool,
 	 *     ...<string, mixed>
 	 *   },
+=======
+	 *   annotations?: array<string,mixed>,
+	 *   meta?: array<string,mixed>,
+>>>>>>> 583da4c (Move `show_in_rest` to meta in the registration process)
 	 *   ...<string, mixed>,
 	 * } $args
 	 */
@@ -354,8 +363,13 @@ class WP_Ability {
 	 * @param mixed  $default_value Optional. The default value to return if the metadata item is not found. Default `null`.
 	 * @return mixed The value of the metadata item, or the default value if not found.
 	 */
+<<<<<<< HEAD
 	public function get_meta_item( string $key, $default_value = null ) {
 		return array_key_exists( $key, $this->meta ) ? $this->meta[ $key ] : $default_value;
+=======
+	public function show_in_rest(): bool {
+		return $this->meta['show_in_rest'] ?? false;
+>>>>>>> 583da4c (Move `show_in_rest` to meta in the registration process)
 	}
 
 	/**
