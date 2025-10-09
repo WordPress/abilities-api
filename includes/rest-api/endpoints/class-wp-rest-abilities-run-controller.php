@@ -154,7 +154,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 */
 	public function run_ability_permissions_check( $request ) {
 		$ability = wp_get_ability( $request->get_param( 'name' ) );
-		if ( ! $ability ) {
+		if ( ! $ability || ! $ability->show_in_rest() ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
 				__( 'Ability not found.' ),

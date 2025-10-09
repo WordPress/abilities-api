@@ -124,6 +124,14 @@ class WP_Ability {
 	 */
 	protected $category;
 
+	 * Whether to show the ability in the REST API.
+	 *
+	 * @since n.e.x.t
+	 * @var bool
+	 */
+	protected $show_in_rest = false;
+
+
 	/**
 	 * Constructor.
 	 *
@@ -136,9 +144,10 @@ class WP_Ability {
 	 * @see wp_register_ability()
 	 *
 	 * @param string              $name The name of the ability, with its namespace.
-	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should
-	 *                                  include `label`, `description`, `category`, `input_schema`, `output_schema`,
-	 *                                  `execute_callback`, `permission_callback`, `annotations`, and `meta`.
+
+	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should include
+	 *                                  `label`, `description`, `category`, `input_schema`, `output_schema`, `execute_callback`,
+	 *                                  `permission_callback`, `annotations`, `meta`, and `show_in_rest`.
 	 */
 	public function __construct( string $name, array $args ) {
 		$this->name = $name;
@@ -189,6 +198,7 @@ class WP_Ability {
 	 *   output_schema?: array<string,mixed>,
 	 *   annotations?: array<string,mixed>,
 	 *   meta?: array<string,mixed>,
+	 *   show_in_rest?: bool,
 	 *   ...<string, mixed>,
 	 * } $args
 	 */
@@ -256,6 +266,13 @@ class WP_Ability {
 				esc_html__( 'Category slug must contain only lowercase alphanumeric characters and dashes.' )
 			);
 		}
+		if ( isset( $args['show_in_rest'] ) && ! is_bool( $args['show_in_rest'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties should provide a valid `show_in_rest` boolean.' )
+			);
+		}
+
+
 		// Set defaults for optional args.
 		$args['annotations'] = wp_parse_args(
 			$args['annotations'] ?? array(),
@@ -352,6 +369,16 @@ class WP_Ability {
 	 */
 	public function get_category(): string {
 		return $this->category;
+	}
+
+	 * Checks whether the ability should be shown in the REST API.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool True if the ability should be shown in the REST API, false otherwise.
+	 */
+	public function show_in_rest(): bool {
+		return $this->show_in_rest;
 	}
 
 	/**

@@ -94,7 +94,12 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @return \WP_REST_Response Response object on success.
 	 */
 	public function get_items( $request ) {
-		$abilities = wp_get_abilities();
+		$abilities = array_filter(
+			wp_get_abilities(),
+			static function ( $ability ) {
+				return $ability->show_in_rest();
+			}
+		);
 
 		// Filter by category if specified.
 		$category = $request->get_param( 'category' );
@@ -163,8 +168,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 */
 	public function get_item( $request ) {
 		$ability = wp_get_ability( $request->get_param( 'name' ) );
-
-		if ( ! $ability ) {
+		if ( ! $ability || ! $ability->show_in_rest() ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
 				__( 'Ability not found.' ),
