@@ -108,7 +108,7 @@ final class WP_Abilities_Registry {
 						esc_attr( $args['category'] ),
 						esc_attr( $name )
 					),
-					'0.3.0'
+					'n.e.x.t'
 				);
 				return null;
 			}

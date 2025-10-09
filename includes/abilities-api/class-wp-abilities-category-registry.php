@@ -65,7 +65,7 @@ final class WP_Abilities_Category_Registry {
 					'<code>abilities_api_categories_init</code>',
 					'<code>' . esc_html( $slug ) . '</code>'
 				),
-				'0.3.0'
+				'n.e.x.t'
 			);
 			return null;
 		}
@@ -75,7 +75,7 @@ final class WP_Abilities_Category_Registry {
 				__METHOD__,
 				/* translators: %s: Category slug. */
 				esc_html( sprintf( __( 'Category "%s" is already registered.' ), $slug ) ),
-				'0.3.0'
+				'n.e.x.t'
 			);
 			return null;
 		}
@@ -84,7 +84,7 @@ final class WP_Abilities_Category_Registry {
 			_doing_it_wrong(
 				__METHOD__,
 				esc_html__( 'Category slug must contain only lowercase alphanumeric characters and dashes.' ),
-				'0.3.0'
+				'n.e.x.t'
 			);
 			return null;
 		}
@@ -106,7 +106,7 @@ final class WP_Abilities_Category_Registry {
 			_doing_it_wrong(
 				__METHOD__,
 				esc_html( $e->getMessage() ),
-				'0.3.0'
+				'n.e.x.t'
 			);
 			return null;
 		}
@@ -133,7 +133,7 @@ final class WP_Abilities_Category_Registry {
 				__METHOD__,
 				/* translators: %s: Category slug. */
 				sprintf( esc_html__( 'Category "%s" not found.' ), esc_attr( $slug ) ),
-				'0.3.0'
+				'n.e.x.t'
 			);
 			return null;
 		}
@@ -189,7 +189,7 @@ final class WP_Abilities_Category_Registry {
 				__METHOD__,
 				/* translators: %s: Category slug. */
 				sprintf( esc_html__( 'Category "%s" not found.' ), esc_attr( $slug ) ),
-				'0.3.0'
+				'n.e.x.t'
 			);
 			return null;
 		}
