@@ -262,7 +262,6 @@ class WP_Ability {
 			static::$default_annotations
 		);
 
-
 		return $args;
 	}
 

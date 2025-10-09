@@ -65,7 +65,7 @@ class WP_Ability_Category {
 			);
 		}
 
-		$this->slug = sanitize_title( $slug );
+		$this->slug = $slug;
 
 		$properties = $this->prepare_properties( $args );
 
