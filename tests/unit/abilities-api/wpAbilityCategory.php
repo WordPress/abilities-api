@@ -38,7 +38,7 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		$this->doing_it_wrong_log = array();
 
 		add_action( 'doing_it_wrong_run', array( $this, 'record_doing_it_wrong' ), 10, 3 );
-}
+	}
 
 	/**
 	 * Tear down after each test.
@@ -667,5 +667,102 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		$this->expectException( \LogicException::class );
 		$serialized = serialize( $category );
 		unserialize( $serialized );
+	}
+
+	/**
+	 * Test registering a category with valid meta.
+	 */
+	public function test_register_category_with_valid_meta(): void {
+		$meta = array(
+			'icon'     => 'dashicons-calculator',
+			'priority' => 10,
+			'custom'   => array( 'key' => 'value' ),
+		);
+
+		$result = $this->register_category_during_hook(
+			'test-meta',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+				'meta'        => $meta,
+			)
+		);
+
+		$this->assertInstanceOf( WP_Ability_Category::class, $result );
+		$this->assertSame( 'test-meta', $result->get_slug() );
+		$this->assertSame( $meta, $result->get_meta() );
+	}
+
+	/**
+	 * Test registering a category with empty meta array.
+	 */
+	public function test_register_category_with_empty_meta(): void {
+		$result = $this->register_category_during_hook(
+			'test-empty-meta',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+				'meta'        => array(),
+			)
+		);
+
+		$this->assertInstanceOf( WP_Ability_Category::class, $result );
+		$this->assertSame( array(), $result->get_meta() );
+	}
+
+	/**
+	 * Test registering a category without meta returns empty array.
+	 */
+	public function test_register_category_without_meta_returns_empty_array(): void {
+		$result = $this->register_category_during_hook(
+			'test-no-meta',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+			)
+		);
+
+		$this->assertInstanceOf( WP_Ability_Category::class, $result );
+		$this->assertSame( array(), $result->get_meta() );
+	}
+
+	/**
+	 * Test registering a category with invalid meta (non-array).
+	 *
+	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 */
+	public function test_register_category_with_invalid_meta(): void {
+		$result = $this->register_category_during_hook(
+			'test-invalid-meta',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+				'meta'        => 'invalid-string',
+			)
+		);
+
+		$this->assertNull( $result );
+		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register', 'valid `meta` array' );
+	}
+
+	/**
+	 * Test registering a category with unknown property triggers _doing_it_wrong.
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Category::__construct
+	 */
+	public function test_register_category_with_unknown_property(): void {
+		$result = $this->register_category_during_hook(
+			'test-unknown-property',
+			array(
+				'label'            => 'Math',
+				'description'      => 'Mathematical operations.',
+				'unknown_property' => 'some value',
+			)
+		);
+
+		// Category should still be created.
+		$this->assertInstanceOf( WP_Ability_Category::class, $result );
+		// But _doing_it_wrong should be triggered.
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Category::__construct', 'not a valid property' );
 	}
 }

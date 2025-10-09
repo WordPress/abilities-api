@@ -45,6 +45,14 @@ class WP_Ability_Category {
 	protected $description;
 
 	/**
+	 * The optional category metadata.
+	 *
+	 * @since n.e.x.t
+	 * @var array<string,mixed>
+	 */
+	protected $meta = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * Do not use this constructor directly. Instead, use the `wp_register_ability_category()` function.
@@ -69,8 +77,24 @@ class WP_Ability_Category {
 
 		$properties = $this->prepare_properties( $args );
 
-		$this->label       = $properties['label'];
-		$this->description = $properties['description'];
+		foreach ( $properties as $property_name => $property_value ) {
+			if ( ! property_exists( $this, $property_name ) ) {
+				_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: Property name. */
+						esc_html__( 'Property "%1$s" is not a valid property for category "%2$s". Please check the %3$s class for allowed properties.' ),
+						'<code>' . esc_html( $property_name ) . '</code>',
+						'<code>' . esc_html( $this->slug ) . '</code>',
+						'<code>' . esc_html( self::class ) . '</code>'
+					),
+					'n.e.x.t'
+				);
+				continue;
+			}
+
+			$this->$property_name = $property_value;
+		}
 	}
 
 	/**
@@ -85,6 +109,7 @@ class WP_Ability_Category {
 	 * @phpstan-return array{
 	 *   label: string,
 	 *   description: string,
+	 *   meta?: array<string,mixed>,
 	 *   ...<string, mixed>,
 	 * }
 	 */
@@ -102,10 +127,14 @@ class WP_Ability_Category {
 			);
 		}
 
-		return array(
-			'label'       => $args['label'],
-			'description' => $args['description'],
-		);
+		// Optional args only need to be of the correct type if they are present.
+		if ( isset( $args['meta'] ) && ! is_array( $args['meta'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The category properties should provide a valid `meta` array.' )
+			);
+		}
+
+		return $args;
 	}
 
 	/**
@@ -139,6 +168,17 @@ class WP_Ability_Category {
 	 */
 	public function get_description(): string {
 		return $this->description;
+	}
+
+	/**
+	 * Retrieves the metadata for the category.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string,mixed> The metadata for the category.
+	 */
+	public function get_meta(): array {
+		return $this->meta;
 	}
 
 	/**
