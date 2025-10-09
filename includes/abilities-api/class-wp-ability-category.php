@@ -144,6 +144,10 @@ class WP_Ability_Category {
 	/**
 	 * Wakeup magic method.
 	 *
+	 * Prevents unserialization of this object as a security hardening measure.
+	 * Unserializing objects can lead to security vulnerabilities such as object
+	 * injection attacks and remote code execution.
+	 *
 	 * @since n.e.x.t
 	 */
 	public function __wakeup(): void {
