@@ -121,6 +121,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'permission_callback' => static function () {
 					return current_user_can( 'edit_posts' );
 				},
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -163,6 +164,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'annotations'         => array(
 					'readonly' => true,
 				),
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -190,6 +192,20 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					// Only allow if secret matches
 					return isset( $input['secret'] ) && 'valid_secret' === $input['secret'];
 				},
+				'show_in_rest'        => true,
+			)
+		);
+
+		// Ability that does not show in REST.
+		wp_register_ability(
+			'test/not-show-in-rest',
+			array(
+				'label'               => 'Hidden from REST',
+				'description'         => 'It does not show in REST.',
+				'execute_callback'    => static function (): int {
+					return 0;
+				},
+				'permission_callback' => '__return_true',
 			)
 		);
 
@@ -203,6 +219,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return null;
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -216,6 +233,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return new \WP_Error( 'test_error', 'This is a test error' );
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -232,6 +250,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return 'not a number'; // Invalid - schema expects number
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -255,6 +274,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'annotations'         => array(
 					'readonly' => true,
 				),
+				'show_in_rest'        => true,
 			)
 		);
 	}
@@ -315,6 +335,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return 'success';
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -426,6 +447,21 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'Success: test data', $response->get_data() );
+	}
+
+	/**
+	 * Test handling an ability that does not show in REST.
+	 */
+	public function test_do_not_show_in_rest(): void {
+		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/not-show-in-rest/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_ability_not_found', $data['code'] );
+		$this->assertEquals( 'Ability not found.', $data['message'] );
 	}
 
 	/**
@@ -591,6 +627,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'wrong_field' => 'value' );
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -632,6 +669,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'status' => 'success' );
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -666,6 +704,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'executed' => true );
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -699,6 +738,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'annotations'         => array(
 					'readonly' => true,
 				),
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -711,6 +751,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -783,6 +824,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'echo' => $input );
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -826,6 +868,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'echo' => $input );
 				},
 				'permission_callback' => '__return_true',
+				'show_in_rest'        => true,
 			)
 		);
 
@@ -885,6 +928,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'success' => true );
 				},
 				'permission_callback' => '__return_true', // No permission requirements
+				'show_in_rest'        => true,
 			)
 		);
 
