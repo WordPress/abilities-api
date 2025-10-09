@@ -225,6 +225,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 			array(
 				'label'               => 'Hidden from REST',
 				'description'         => 'It does not show in REST.',
+				'category'            => 'general',
 				'execute_callback'    => static function (): int {
 					return 0;
 				},

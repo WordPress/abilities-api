@@ -124,6 +124,7 @@ class WP_Ability {
 	 */
 	protected $category;
 
+	/**
 	 * Whether to show the ability in the REST API.
 	 *
 	 * @since n.e.x.t
@@ -272,7 +273,6 @@ class WP_Ability {
 			);
 		}
 
-
 		// Set defaults for optional args.
 		$args['annotations'] = wp_parse_args(
 			$args['annotations'] ?? array(),
@@ -371,6 +371,7 @@ class WP_Ability {
 		return $this->category;
 	}
 
+	/**
 	 * Checks whether the ability should be shown in the REST API.
 	 *
 	 * @since n.e.x.t
