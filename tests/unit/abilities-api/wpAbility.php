@@ -132,7 +132,9 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$args = array_merge(
 			self::$test_ability_properties,
 			array(
-				'show_in_rest' => true,
+				'meta' => array(
+					'show_in_rest' => true,
+				),
 			)
 		);
 		$ability = new WP_Ability( self::$test_ability_name, $args );
@@ -147,12 +149,14 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$args = array_merge(
 			self::$test_ability_properties,
 			array(
-				'show_in_rest' => 5,
+				'meta' => array(
+					'show_in_rest' => 5,
+				),
 			)
 		);
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'The ability properties should provide a valid `show_in_rest` boolean.' );
+		$this->expectExceptionMessage( 'The ability meta should provide a valid `show_in_rest` boolean.' );
 
 		new WP_Ability( self::$test_ability_name, $args );
 	}

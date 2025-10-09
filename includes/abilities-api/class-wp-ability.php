@@ -19,6 +19,15 @@ declare( strict_types = 1 );
  * @see WP_Abilities_Registry
  */
 class WP_Ability {
+
+	/**
+	 * The default value for the `show_in_rest` meta.
+	 *
+	 * @since n.e.x.t
+	 * @var bool
+	 */
+	protected const DEFAULT_SHOW_IN_REST = false;
+
 	/**
 	 * The default ability annotations.
 	 * They are not guaranteed to provide a faithful description of ability behavior.
@@ -117,14 +126,6 @@ class WP_Ability {
 	protected $meta = array();
 
 	/**
-	 * Whether to show the ability in the REST API.
-	 *
-	 * @since n.e.x.t
-	 * @var bool
-	 */
-	protected $show_in_rest = false;
-
-	/**
 	 * Constructor.
 	 *
 	 * Do not use this constructor directly. Instead, use the `wp_register_ability()` function.
@@ -138,7 +139,7 @@ class WP_Ability {
 	 * @param string              $name The name of the ability, with its namespace.
 	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should include
 	 *                                  `label`, `description`, `input_schema`, `output_schema`, `execute_callback`,
-	 *                                  `permission_callback`, `annotations`, `meta`, and `show_in_rest`.
+	 *                                  `permission_callback`, `annotations`, and `meta`.
 	 */
 	public function __construct( string $name, array $args ) {
 		$this->name = $name;
@@ -188,7 +189,6 @@ class WP_Ability {
 	 *   output_schema?: array<string,mixed>,
 	 *   annotations?: array<string,mixed>,
 	 *   meta?: array<string,mixed>,
-	 *   show_in_rest?: bool,
 	 *   ...<string, mixed>,
 	 * } $args
 	 */
@@ -243,16 +243,22 @@ class WP_Ability {
 			);
 		}
 
-		if ( isset( $args['show_in_rest'] ) && ! is_bool( $args['show_in_rest'] ) ) {
+		if ( isset( $args['meta']['show_in_rest'] ) && ! is_bool( $args['meta']['show_in_rest'] ) ) {
 			throw new \InvalidArgumentException(
-				esc_html__( 'The ability properties should provide a valid `show_in_rest` boolean.' )
+				esc_html__( 'The ability meta should provide a valid `show_in_rest` boolean.' )
 			);
 		}
 
-		// Set defaults for optional args.
+		// Set defaults for optional meta.
 		$args['annotations'] = wp_parse_args(
 			$args['annotations'] ?? array(),
 			static::$default_annotations
+		);
+		$args['meta']        = wp_parse_args(
+			$args['meta'] ?? array(),
+			array(
+				'show_in_rest' => self::DEFAULT_SHOW_IN_REST,
+			)
 		);
 
 		return $args;
@@ -344,7 +350,7 @@ class WP_Ability {
 	 * @return bool True if the ability should be shown in the REST API, false otherwise.
 	 */
 	public function show_in_rest(): bool {
-		return $this->show_in_rest;
+		return $this->meta['show_in_rest'] ?? false;
 	}
 
 	/**

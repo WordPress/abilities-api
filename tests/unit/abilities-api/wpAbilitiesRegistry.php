@@ -60,9 +60,9 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 				return true;
 			},
 			'meta'                => array(
-				'category' => 'math',
+				'category'     => 'math',
+				'show_in_rest' => true,
 			),
-			'show_in_rest'        => true,
 		);
 	}
 
@@ -307,7 +307,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
 	public function test_register_invalid_show_in_rest_type() {
-		self::$test_ability_args['show_in_rest'] = 5;
+		self::$test_ability_args['meta']['show_in_rest'] = 5;
 
 		$result = $this->registry->register( self::$test_ability_name, self::$test_ability_args );
 		$this->assertNull( $result );
