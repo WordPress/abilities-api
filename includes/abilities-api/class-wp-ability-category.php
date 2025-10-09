@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Abilities API
- * @since 0.3.0
+ * @since n.e.x.t
  */
 
 declare( strict_types = 1 );
@@ -14,7 +14,7 @@ declare( strict_types = 1 );
 /**
  * Encapsulates the properties and methods related to a specific ability category.
  *
- * @since 0.3.0
+ * @since n.e.x.t
  *
  * @see WP_Abilities_Category_Registry
  */
@@ -23,7 +23,7 @@ class WP_Ability_Category {
 	/**
 	 * The unique slug for the category.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 * @var string
 	 */
 	protected $slug;
@@ -31,7 +31,7 @@ class WP_Ability_Category {
 	/**
 	 * The human-readable category label.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 * @var string
 	 */
 	protected $label;
@@ -39,7 +39,7 @@ class WP_Ability_Category {
 	/**
 	 * The detailed category description.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 * @var string
 	 */
 	protected $description;
@@ -51,7 +51,7 @@ class WP_Ability_Category {
 	 *
 	 * @access private
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @see wp_register_ability_category()
 	 *
@@ -76,7 +76,7 @@ class WP_Ability_Category {
 	/**
 	 * Prepares and validates the properties used to instantiate the category.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @param array<string,mixed> $args An associative array of arguments used to instantiate the class.
 	 * @return array<string,mixed> The validated and prepared properties.
@@ -111,7 +111,7 @@ class WP_Ability_Category {
 	/**
 	 * Retrieves the slug of the category.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @return string The category slug.
 	 */
@@ -122,7 +122,7 @@ class WP_Ability_Category {
 	/**
 	 * Retrieves the human-readable label for the category.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @return string The human-readable category label.
 	 */
@@ -133,7 +133,7 @@ class WP_Ability_Category {
 	/**
 	 * Retrieves the detailed description for the category.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @return string The detailed description for the category.
 	 */
@@ -144,7 +144,7 @@ class WP_Ability_Category {
 	/**
 	 * Wakeup magic method.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 */
 	public function __wakeup(): void {
 		throw new \LogicException( self::class . ' should never be unserialized.' );

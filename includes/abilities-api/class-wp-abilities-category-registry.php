@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Abilities API
- * @since 0.3.0
+ * @since n.e.x.t
  */
 
 declare( strict_types = 1 );
@@ -14,14 +14,14 @@ declare( strict_types = 1 );
 /**
  * Manages the registration and lookup of ability categories.
  *
- * @since 0.3.0
+ * @since n.e.x.t
  * @access private
  */
 final class WP_Abilities_Category_Registry {
 	/**
 	 * The singleton instance of the registry.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 * @var ?self
 	 */
 	private static $instance = null;
@@ -29,7 +29,7 @@ final class WP_Abilities_Category_Registry {
 	/**
 	 * Holds the registered categories.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 * @var \WP_Ability_Category[]
 	 */
 	private $registered_categories = array();
@@ -39,7 +39,7 @@ final class WP_Abilities_Category_Registry {
 	 *
 	 * Do not use this method directly. Instead, use the `wp_register_ability_category()` function.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @see wp_register_ability_category()
 	 *
@@ -92,7 +92,7 @@ final class WP_Abilities_Category_Registry {
 		/**
 		 * Filters the category arguments before they are validated and used to instantiate the category.
 		 *
-		 * @since 0.3.0
+		 * @since n.e.x.t
 		 *
 		 * @param array<string,mixed> $args The arguments used to instantiate the category.
 		 * @param string              $slug The slug of the category.
@@ -120,7 +120,7 @@ final class WP_Abilities_Category_Registry {
 	 *
 	 * Do not use this method directly. Instead, use the `wp_unregister_ability_category()` function.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @see wp_unregister_ability_category()
 	 *
@@ -149,7 +149,7 @@ final class WP_Abilities_Category_Registry {
 	 *
 	 * Do not use this method directly. Instead, use the `wp_get_ability_categories()` function.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @see wp_get_ability_categories()
 	 *
@@ -162,7 +162,7 @@ final class WP_Abilities_Category_Registry {
 	/**
 	 * Checks if a category is registered.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @param string $slug The slug of the category.
 	 * @return bool True if the category is registered, false otherwise.
@@ -176,7 +176,7 @@ final class WP_Abilities_Category_Registry {
 	 *
 	 * Do not use this method directly. Instead, use the `wp_get_ability_category()` function.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @see wp_get_ability_category()
 	 *
@@ -201,7 +201,7 @@ final class WP_Abilities_Category_Registry {
 	 *
 	 * The instance will be created if it does not exist yet.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @return \WP_Abilities_Category_Registry The main registry instance.
 	 */
@@ -214,7 +214,7 @@ final class WP_Abilities_Category_Registry {
 			 *
 			 * Categories should be registered on this action to ensure they're available when needed.
 			 *
-			 * @since 0.3.0
+			 * @since n.e.x.t
 			 *
 			 * @param \WP_Abilities_Category_Registry $instance Categories registry object.
 			 */
@@ -227,7 +227,7 @@ final class WP_Abilities_Category_Registry {
 	/**
 	 * Wakeup magic method.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 * @throws \UnexpectedValueException If any of the registered categories is not an instance of WP_Ability_Category.
 	 */
 	public function __wakeup(): void {

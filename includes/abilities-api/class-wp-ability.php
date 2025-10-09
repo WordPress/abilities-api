@@ -119,7 +119,7 @@ class WP_Ability {
 	/**
 	 * The ability category (required).
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 * @var string
 	 */
 	protected $category;
@@ -347,7 +347,7 @@ class WP_Ability {
 	/**
 	 * Retrieves the category for the ability.
 	 *
-	 * @since 0.3.0
+	 * @since n.e.x.t
 	 *
 	 * @return string The category for the ability.
 	 */

@@ -104,7 +104,7 @@ function wp_get_abilities(): array {
 /**
  * Registers a new ability category.
  *
- * @since 0.3.0
+ * @since n.e.x.t
  *
  * @see WP_Abilities_Category_Registry::register()
  *
@@ -127,7 +127,7 @@ function wp_register_ability_category( string $slug, array $args ): ?WP_Ability_
 /**
  * Unregisters an ability category.
  *
- * @since 0.3.0
+ * @since n.e.x.t
  *
  * @see WP_Abilities_Category_Registry::unregister()
  *
@@ -141,7 +141,7 @@ function wp_unregister_ability_category( string $slug ): ?WP_Ability_Category {
 /**
  * Retrieves a registered ability category.
  *
- * @since 0.3.0
+ * @since n.e.x.t
  *
  * @see WP_Abilities_Category_Registry::get_registered()
  *
@@ -155,7 +155,7 @@ function wp_get_ability_category( string $slug ): ?WP_Ability_Category {
 /**
  * Retrieves all registered ability categories.
  *
- * @since 0.3.0
+ * @since n.e.x.t
  *
  * @see WP_Abilities_Category_Registry::get_all_registered()
  *
