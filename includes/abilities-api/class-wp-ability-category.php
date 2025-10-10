@@ -18,7 +18,7 @@ declare( strict_types = 1 );
  *
  * @see WP_Abilities_Category_Registry
  */
-class WP_Ability_Category {
+final class WP_Ability_Category {
 
 	/**
 	 * The unique slug for the category.
