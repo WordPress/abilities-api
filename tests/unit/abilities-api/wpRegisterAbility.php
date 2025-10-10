@@ -148,7 +148,6 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 			$result->get_annotations()
 		);
 		$this->assertEquals( self::$test_ability_args['meta'], $result->get_meta() );
-		$this->assertSame( self::$test_ability_args['meta']['show_in_rest'], $result->show_in_rest() );
 		$this->assertTrue(
 			$result->check_permissions(
 				array(

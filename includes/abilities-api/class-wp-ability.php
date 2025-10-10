@@ -346,14 +346,16 @@ class WP_Ability {
 	}
 
 	/**
-	 * Checks whether the ability should be shown in the REST API.
+	 * Retrieves a specific metadata item for the ability.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return bool True if the ability should be shown in the REST API, false otherwise.
+	 * @param string $key           The metadata key to retrieve.
+	 * @param mixed  $default_value Optional. The default value to return if the metadata item is not found. Default `null`.
+	 * @return mixed The value of the metadata item, or the default value if not found.
 	 */
-	public function show_in_rest(): bool {
-		return $this->meta['show_in_rest'];
+	public function get_meta_item( string $key, $default_value = null ) {
+		return array_key_exists( $key, $this->meta ) ? $this->meta[ $key ] : $default_value;
 	}
 
 	/**

@@ -117,18 +117,46 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that `show_in_rest` defaults to false when not provided.
+	 * Tests that getting non-existing metadata item returns default value.
 	 */
-	public function test_show_in_rest_defaults_to_false() {
+	public function test_meta_get_non_existing_item_returns_default() {
 		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
 
-		$this->assertFalse( $ability->show_in_rest(), '`show_in_rest` should default to false.' );
+		$this->assertNull(
+			$ability->get_meta_item( 'non_existing' ),
+			'Non-existing metadata item should return null.'
+		);
 	}
 
 	/**
-	 * Tests that `show_in_rest` can be set to true.
+	 * Tests that getting non-existing metadata item with custom default returns that default.
 	 */
-	public function test_show_in_rest_can_be_set_to_true() {
+	public function test_meta_get_non_existing_item_with_custom_default() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$this->assertSame(
+			'default_value',
+			$ability->get_meta_item( 'non_existing', 'default_value' ),
+			'Non-existing metadata item should return custom default value.'
+		);
+	}
+
+	/**
+	 * Tests that `show_in_rest` metadata defaults to false when not provided.
+	 */
+	public function test_meta_show_in_rest_defaults_to_false() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$this->assertFalse(
+			$ability->get_meta_item( 'show_in_rest' ),
+			'`show_in_rest` metadata should default to false.'
+		);
+	}
+
+	/**
+	 * Tests that `show_in_rest` metadata can be set to true.
+	 */
+	public function test_meta_show_in_rest_can_be_set_to_true() {
 		$args = array_merge(
 			self::$test_ability_properties,
 			array(
@@ -139,7 +167,30 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		);
 		$ability = new WP_Ability( self::$test_ability_name, $args );
 
-		$this->assertTrue( $ability->show_in_rest(), '`show_in_rest` should be true.' );
+		$this->assertTrue(
+			$ability->get_meta_item( 'show_in_rest' ),
+			'`show_in_rest` metadata should be true.'
+		);
+	}
+
+	/**
+	 * Tests that `show_in_rest` can be set to false.
+	 */
+	public function test_show_in_rest_can_be_set_to_false() {
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'meta' => array(
+					'show_in_rest' => false,
+				),
+			)
+		);
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+
+		$this->assertFalse(
+			$ability->get_meta_item( 'show_in_rest' ),
+			'`show_in_rest` metadata should be false.'
+		);
 	}
 
 	/**
