@@ -40,83 +40,6 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests getting all annotations when selective overrides are applied.
-	 */
-	public function test_get_all_annotations() {
-		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
-
-		$this->assertEquals(
-			array_merge(
-				self::$test_ability_properties['annotations'],
-				array(
-					'instructions' => '',
-					'idempotent'   => false,
-				),
-			),
-			$ability->get_annotations()
-		);
-	}
-
-	/**
-	 * Tests getting default annotations when not provided.
-	 */
-	public function test_get_default_annotations() {
-		$args = self::$test_ability_properties;
-		unset( $args['annotations'] );
-
-		$ability = new WP_Ability( self::$test_ability_name, $args );
-
-		$this->assertSame(
-			array(
-				'instructions' => '',
-				'readonly'     => false,
-				'destructive'  => true,
-				'idempotent'   => false,
-			),
-			$ability->get_annotations()
-		);
-	}
-
-	/**
-	 * Tests getting all annotations when values overridden.
-	 */
-	public function test_get_all_annotations_overridden() {
-		$annotations = array(
-			'instructions' => 'Enjoy responsibly.',
-			'readonly'     => true,
-			'destructive'  => false,
-			'idempotent'   => false,
-		);
-		$args        = array_merge(
-			self::$test_ability_properties,
-			array(
-				'annotations' => $annotations,
-			)
-		);
-
-		$ability = new WP_Ability( self::$test_ability_name, $args );
-
-		$this->assertSame( $annotations, $ability->get_annotations() );
-	}
-
-	/**
-	 * Tests that invalid `annotations` value throws an exception.
-	 */
-	public function test_annotations_throws_exception() {
-		$args = array_merge(
-			self::$test_ability_properties,
-			array(
-				'annotations' => 5,
-			)
-		);
-
-		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'The ability properties should provide a valid `annotations` array.' );
-
-		new WP_Ability( self::$test_ability_name, $args );
-	}
-
-	/**
 	 * Tests that getting non-existing metadata item returns default value.
 	 */
 	public function test_meta_get_non_existing_item_returns_default() {
@@ -139,6 +62,83 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			$ability->get_meta_item( 'non_existing', 'default_value' ),
 			'Non-existing metadata item should return custom default value.'
 		);
+	}
+
+	/**
+	 * Tests getting all annotations when selective overrides are applied.
+	 */
+	public function test_get_merged_annotations_from_meta() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$this->assertEquals(
+			array_merge(
+				self::$test_ability_properties['annotations'],
+				array(
+					'instructions' => '',
+					'idempotent'   => false,
+				),
+			),
+			$ability->get_annotations()
+		);
+	}
+
+	/**
+	 * Tests getting default annotations when not provided.
+	 */
+	public function test_get_default_annotations_from_meta() {
+		$args = self::$test_ability_properties;
+		unset( $args['annotations'] );
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+
+		$this->assertSame(
+			array(
+				'instructions' => '',
+				'readonly'     => false,
+				'destructive'  => true,
+				'idempotent'   => false,
+			),
+			$ability->get_annotations()
+		);
+	}
+
+	/**
+	 * Tests getting all annotations when values overridden.
+	 */
+	public function test_get_overridden_annotations_from_meta() {
+		$annotations = array(
+			'instructions' => 'Enjoy responsibly.',
+			'readonly'     => true,
+			'destructive'  => false,
+			'idempotent'   => false,
+		);
+		$args        = array_merge(
+			self::$test_ability_properties,
+			array(
+				'annotations' => $annotations,
+			)
+		);
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+
+		$this->assertSame( $annotations, $ability->get_annotations() );
+	}
+
+	/**
+	 * Tests that invalid `annotations` value throws an exception.
+	 */
+	public function test_annotations_from_meta_throws_exception() {
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'annotations' => 5,
+			)
+		);
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'The ability properties should provide a valid `annotations` array.' );
+
+		new WP_Ability( self::$test_ability_name, $args );
 	}
 
 	/**
