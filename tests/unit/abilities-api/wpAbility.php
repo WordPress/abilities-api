@@ -354,7 +354,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A instance method to be used as a callback in tests.
+	 * An instance method to be used as a callback in tests.
 	 *
 	 * @param string $input An input string.
 	 * @return int The length of the input string.
