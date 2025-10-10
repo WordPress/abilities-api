@@ -350,6 +350,74 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A static method to be used as a callback in tests.
+	 *
+	 * @param string $input An input string.
+	 * @return int The length of the input string.
+	 */
+	public static function my_static_execute_callback( string $input ): int {
+		return strlen( $input );
+	}
+
+	/**
+	 * An instance method to be used as a callback in tests.
+	 *
+	 * @param string $input An input string.
+	 * @return int The length of the input string.
+	 */
+	public function my_instance_execute_callback( string $input ): int {
+		return strlen( $input );
+	}
+
+	/**
+	 * Data provider for testing different types of execute callbacks.
+	 */
+	public function data_execute_callback() {
+		return array(
+			'function name string'      => array(
+				'strlen',
+			),
+			'closure'                    => array(
+				static function ( string $input ): int {
+					return strlen( $input );
+				},
+			),
+			'static class method string' => array(
+				'Tests_Abilities_API_WpAbility::my_static_execute_callback',
+			),
+			'static class method array'  => array(
+				array( 'Tests_Abilities_API_WpAbility', 'my_static_execute_callback' ),
+			),
+			'object method'              => array(
+				array( $this, 'my_instance_execute_callback' ),
+			),
+		);
+	}
+
+	/**
+	 * Tests the execution of the ability with different types of callbacks.
+	 *
+	 * @dataProvider data_execute_callback
+	 */
+	public function test_execute_with_different_callbacks( $execute_callback) {
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'input_schema'     => array(
+					'type'        => 'string',
+					'description' => 'Test input string.',
+					'required'    => true,
+				),
+				'execute_callback' => $execute_callback,
+			)
+		);
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+
+		$this->assertSame( 6, $ability->execute( 'hello!' ) );
+	}
+
+	/**
 	 * Tests the execution of the ability with no input.
 	 */
 	public function test_execute_no_input() {
