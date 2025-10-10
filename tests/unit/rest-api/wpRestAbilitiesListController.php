@@ -166,7 +166,8 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return current_user_can( 'read' );
 				},
 				'meta'                => array(
-					'show_in_rest' => true,				),
+					'show_in_rest' => true,
+				),
 			)
 		);
 
@@ -288,7 +289,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'input_schema', $data );
 		$this->assertArrayHasKey( 'output_schema', $data );
 		$this->assertArrayHasKey( 'meta', $data );
-		$this->assertEquals( 'bar', $data['meta']['foo'] );
+		$this->assertTrue( $data['meta']['show_in_rest'] );
 	}
 
 	/**
