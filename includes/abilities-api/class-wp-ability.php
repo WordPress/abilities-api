@@ -187,7 +187,7 @@ class WP_Ability {
 	 *   permission_callback: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
-	 *   annotations?: array<string,mixed>,
+	 *   annotations?: array<string,(bool|string)>,
 	 *   meta?: array<string,mixed>,
 	 *   ...<string, mixed>,
 	 * } $args
