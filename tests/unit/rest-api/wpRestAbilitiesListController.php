@@ -166,9 +166,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return current_user_can( 'read' );
 				},
 				'meta'                => array(
-					'foo' => 'bar',
-				),
-				'show_in_rest'        => true,
+					'show_in_rest' => true,				),
 			)
 		);
 
@@ -209,13 +207,13 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 				'permission_callback' => static function () {
 					return current_user_can( 'read' );
 				},
-				'annotations'         => array(
-					'readonly' => true,
-				),
 				'meta'                => array(
-					'foo' => 'bar',
+					'annotations'  => array(
+						'readonly' => true,
+					),
+					'category'     => 'system',
+					'show_in_rest' => true,
 				),
-				'show_in_rest'        => true,
 			)
 		);
 
@@ -245,7 +243,9 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 						return "Result from ability {$i}";
 					},
 					'permission_callback' => '__return_true',
-					'show_in_rest'        => true,
+					'meta'                => array(
+						'show_in_rest' => true,
+					),
 				)
 			);
 		}
@@ -520,7 +520,9 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return array( 'success' => true );
 				},
 				'permission_callback' => '__return_true',
-				'show_in_rest'        => true,
+				'meta'                => array(
+					'show_in_rest' => true,
+				),
 			)
 		);
 

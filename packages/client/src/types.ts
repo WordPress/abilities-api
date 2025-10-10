@@ -69,21 +69,16 @@ export interface Ability {
 	permissionCallback?: PermissionCallback;
 
 	/**
-	 * Annotations for the ability.
-	 * @see WP_Ability::get_annotations()
-	 */
-	annotations?: {
-		instructions?: string;
-		readonly?: boolean;
-		destructive?: boolean;
-		idempotent?: boolean;
-	};
-
-	/**
 	 * Metadata about the ability.
 	 * @see WP_Ability::get_meta()
 	 */
 	meta?: {
+		annotations?: {
+			instructions?: string;
+			readonly?: boolean;
+			destructive?: boolean;
+			idempotent?: boolean;
+		},
 		[ key: string ]: any;
 	};
 }

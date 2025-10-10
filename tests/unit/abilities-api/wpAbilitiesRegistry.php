@@ -82,7 +82,6 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 			'meta'                => array(
 				'foo' => 'bar',
 			),
-			'show_in_rest'        => true,
 		);
 	}
 
@@ -303,7 +302,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
 	public function test_register_invalid_annotations_type() {
-		self::$test_ability_args['annotations'] = false;
+		self::$test_ability_args['meta']['annotations'] = false;
 
 		$result = $this->registry->register( self::$test_ability_name, self::$test_ability_args );
 		$this->assertNull( $result );
@@ -333,7 +332,7 @@ class Tests_Abilities_API_WpAbilitiesRegistry extends WP_UnitTestCase {
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
 	public function test_register_invalid_show_in_rest_type() {
-		self::$test_ability_args['show_in_rest'] = 5;
+		self::$test_ability_args['meta']['show_in_rest'] = 5;
 
 		$result = $this->registry->register( self::$test_ability_name, self::$test_ability_args );
 		$this->assertNull( $result );

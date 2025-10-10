@@ -97,7 +97,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		$abilities = array_filter(
 			wp_get_abilities(),
 			static function ( $ability ) {
-				return $ability->show_in_rest();
+				return $ability->get_meta_item( 'show_in_rest' );
 			}
 		);
 
@@ -168,7 +168,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 */
 	public function get_item( $request ) {
 		$ability = wp_get_ability( $request->get_param( 'name' ) );
-		if ( ! $ability || ! $ability->show_in_rest() ) {
+		if ( ! $ability || ! $ability->get_meta_item( 'show_in_rest' ) ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
 				__( 'Ability not found.' ),
@@ -209,7 +209,6 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			'category'      => $ability->get_category(),
 			'input_schema'  => $ability->get_input_schema(),
 			'output_schema' => $ability->get_output_schema(),
-			'annotations'   => $ability->get_annotations(),
 			'meta'          => $ability->get_meta(),
 		);
 

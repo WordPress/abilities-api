@@ -91,7 +91,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		}
 
 		// Check if the HTTP method matches the ability annotations.
-		$annotations = $ability->get_annotations();
+		$annotations = $ability->get_meta_item( 'annotations' );
 		$is_readonly = ! empty( $annotations['readonly'] );
 		$method      = $request->get_method();
 
@@ -154,7 +154,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	 */
 	public function run_ability_permissions_check( $request ) {
 		$ability = wp_get_ability( $request->get_param( 'name' ) );
-		if ( ! $ability || ! $ability->show_in_rest() ) {
+		if ( ! $ability || ! $ability->get_meta_item( 'show_in_rest' ) ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
 				__( 'Ability not found.' ),

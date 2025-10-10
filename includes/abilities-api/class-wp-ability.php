@@ -19,6 +19,15 @@ declare( strict_types = 1 );
  * @see WP_Abilities_Registry
  */
 class WP_Ability {
+
+	/**
+	 * The default value for the `show_in_rest` meta.
+	 *
+	 * @since n.e.x.t
+	 * @var bool
+	 */
+	protected const DEFAULT_SHOW_IN_REST = false;
+
 	/**
 	 * The default ability annotations.
 	 * They are not guaranteed to provide a faithful description of ability behavior.
@@ -101,36 +110,20 @@ class WP_Ability {
 	protected $permission_callback;
 
 	/**
-	 * The ability annotations.
-	 *
-	 * @since n.e.x.t
-	 * @var array<string,(bool|string)>
-	 */
-	protected $annotations = array();
-
-	/**
 	 * The optional ability metadata.
 	 *
 	 * @since 0.1.0
 	 * @var array<string,mixed>
 	 */
-	protected $meta = array();
+  protected $meta;
 
-	/**
+  /**
 	 * The ability category (required).
 	 *
 	 * @since n.e.x.t
 	 * @var string
 	 */
 	protected $category;
-
-	/**
-	 * Whether to show the ability in the REST API.
-	 *
-	 * @since n.e.x.t
-	 * @var bool
-	 */
-	protected $show_in_rest = false;
 
 	/**
 	 * Constructor.
@@ -144,10 +137,9 @@ class WP_Ability {
 	 * @see wp_register_ability()
 	 *
 	 * @param string              $name The name of the ability, with its namespace.
-	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should
-	 *                                  include: `label`, `description`, `category`, `input_schema`,
-	 *                                  `output_schema`, `execute_callback`, `permission_callback`,
-	 *                                  `annotations`, `meta`, and `show_in_rest`.
+	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should include:
+	 *                                  `label`, `description`, `category`, `input_schema`, `output_schema`,
+	 *                                  `execute_callback`, `permission_callback` and `meta`
 	 */
 	public function __construct( string $name, array $args ) {
 		$this->name = $name;
@@ -196,9 +188,11 @@ class WP_Ability {
 	 *   permission_callback: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
-	 *   annotations?: array<string,mixed>,
-	 *   meta?: array<string,mixed>,
-	 *   show_in_rest?: bool,
+	 *   meta?: array{
+	 *     annotations?: array<string,(bool|string)>,
+	 *     show_in_rest?: bool,
+	 *     ...<string, mixed>
+	 *   },
 	 *   ...<string, mixed>,
 	 * } $args
 	 */
@@ -247,27 +241,34 @@ class WP_Ability {
 			);
 		}
 
-		if ( isset( $args['annotations'] ) && ! is_array( $args['annotations'] ) ) {
-			throw new \InvalidArgumentException(
-				esc_html__( 'The ability properties should provide a valid `annotations` array.' )
-			);
-		}
-
 		if ( isset( $args['meta'] ) && ! is_array( $args['meta'] ) ) {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties should provide a valid `meta` array.' )
 			);
 		}
 
-		if ( isset( $args['show_in_rest'] ) && ! is_bool( $args['show_in_rest'] ) ) {
+		if ( isset( $args['meta']['annotations'] ) && ! is_array( $args['meta']['annotations'] ) ) {
 			throw new \InvalidArgumentException(
-				esc_html__( 'The ability properties should provide a valid `show_in_rest` boolean.' )
+				esc_html__( 'The ability meta should provide a valid `annotations` array.' )
 			);
 		}
 
-		// Set defaults for optional args.
-		$args['annotations'] = wp_parse_args(
-			$args['annotations'] ?? array(),
+		if ( isset( $args['meta']['show_in_rest'] ) && ! is_bool( $args['meta']['show_in_rest'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability meta should provide a valid `show_in_rest` boolean.' )
+			);
+		}
+
+		// Set defaults for optional meta.
+		$args['meta']                = wp_parse_args(
+			$args['meta'] ?? array(),
+			array(
+				'annotations'  => static::$default_annotations,
+				'show_in_rest' => self::DEFAULT_SHOW_IN_REST,
+			)
+		);
+		$args['meta']['annotations'] = wp_parse_args(
+			$args['meta']['annotations'],
 			static::$default_annotations
 		);
 
@@ -331,17 +332,6 @@ class WP_Ability {
 	}
 
 	/**
-	 * Retrieves the annotations for the ability.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return array<string,(bool|string)> The annotations for the ability.
-	 */
-	public function get_annotations(): array {
-		return $this->annotations;
-	}
-
-	/**
 	 * Retrieves the metadata for the ability.
 	 *
 	 * @since 0.1.0
@@ -364,14 +354,16 @@ class WP_Ability {
 	}
 
 	/**
-	 * Checks whether the ability should be shown in the REST API.
+	 * Retrieves a specific metadata item for the ability.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return bool True if the ability should be shown in the REST API, false otherwise.
+	 * @param string $key           The metadata key to retrieve.
+	 * @param mixed  $default_value Optional. The default value to return if the metadata item is not found. Default `null`.
+	 * @return mixed The value of the metadata item, or the default value if not found.
 	 */
-	public function show_in_rest(): bool {
-		return $this->show_in_rest;
+	public function get_meta_item( string $key, $default_value = null ) {
+		return array_key_exists( $key, $this->meta ) ? $this->meta[ $key ] : $default_value;
 	}
 
 	/**
@@ -416,6 +408,24 @@ class WP_Ability {
 	}
 
 	/**
+	 * Invokes a callable, ensuring the input is passed through only if the input schema is defined.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param callable $callback The callable to invoke.
+	 * @param mixed    $input    Optional. The input data for the ability. Default `null`.
+	 * @return mixed The result of the callable execution.
+	 */
+	protected function invoke_callback( callable $callback, $input = null ) {
+		$args = array();
+		if ( ! empty( $this->get_input_schema() ) ) {
+			$args[] = $input;
+		}
+
+		return $callback( ...$args );
+	}
+
+	/**
 	 * Checks whether the ability has the necessary permissions.
 	 *
 	 * The input is validated against the input schema before it is passed to to permission callback.
@@ -431,11 +441,7 @@ class WP_Ability {
 			return $is_valid;
 		}
 
-		if ( empty( $this->get_input_schema() ) ) {
-			return call_user_func( $this->permission_callback );
-		}
-
-		return call_user_func( $this->permission_callback, $input );
+		return $this->invoke_callback( $this->permission_callback, $input );
 	}
 
 	/**
@@ -473,11 +479,7 @@ class WP_Ability {
 			);
 		}
 
-		if ( empty( $this->get_input_schema() ) ) {
-			return call_user_func( $this->execute_callback );
-		}
-
-		return call_user_func( $this->execute_callback, $input );
+		return $this->invoke_callback( $this->execute_callback, $input );
 	}
 
 	/**

@@ -80,14 +80,13 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 			'permission_callback' => static function (): bool {
 				return true;
 			},
-			'annotations'         => array(
-				'readonly'    => true,
-				'destructive' => false,
-			),
 			'meta'                => array(
-				'foo' => 'bar',
+				'annotations'  => array(
+					'readonly'    => true,
+					'destructive' => false,
+				),
+				'show_in_rest' => true,
 			),
-			'show_in_rest'        => true,
 		);
 	}
 
@@ -157,24 +156,28 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
+		$expected_annotations  = array_merge(
+			self::$test_ability_args['meta']['annotations'],
+			array(
+				'instructions' => '',
+				'idempotent'   => false,
+			),
+		);
+		$expected_meta         = array_merge(
+			self::$test_ability_args['meta'],
+			array(
+				'annotations'  => $expected_annotations,
+				'show_in_rest' => true,
+			)
+		);
+
 		$this->assertInstanceOf( WP_Ability::class, $result );
 		$this->assertSame( self::$test_ability_name, $result->get_name() );
 		$this->assertSame( self::$test_ability_args['label'], $result->get_label() );
 		$this->assertSame( self::$test_ability_args['description'], $result->get_description() );
 		$this->assertSame( self::$test_ability_args['input_schema'], $result->get_input_schema() );
 		$this->assertSame( self::$test_ability_args['output_schema'], $result->get_output_schema() );
-		$this->assertEquals(
-			array_merge(
-				array(
-					'instructions' => '',
-					'idempotent'   => false,
-				),
-				self::$test_ability_args['annotations'],
-			),
-			$result->get_annotations()
-		);
-		$this->assertSame( self::$test_ability_args['meta'], $result->get_meta() );
-		$this->assertSame( self::$test_ability_args['show_in_rest'], $result->show_in_rest() );
+		$this->assertEquals( $expected_meta, $result->get_meta() );
 		$this->assertTrue(
 			$result->check_permissions(
 				array(
