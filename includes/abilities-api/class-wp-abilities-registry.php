@@ -58,7 +58,10 @@ final class WP_Abilities_Registry {
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
 	 *   annotations?: array<string,mixed>,
-	 *   meta?: array<string,mixed>,
+	 *   meta?: array{
+	 *     show_in_rest?: bool,
+	 *     ...<string, mixed>
+	 *   },
 	 *   ability_class?: class-string<\WP_Ability>,
 	 *   ...<string, mixed>
 	 * } $args
