@@ -47,8 +47,8 @@ if ( ! class_exists( 'WP_Core_Abilities' ) ) {
 }
 
 // Register core abilities when requested via filter or when not in test environment.
-$is_test_env = defined( 'WP_RUN_CORE_TESTS' ) || defined( 'WP_TESTS_CONFIG_FILE_PATH' ) || ( function_exists( 'getenv' ) && false !== getenv( 'WP_PHPUNIT__DIR' ) );
-if ( ! $is_test_env || apply_filters( 'abilities_api_register_core_abilities', false ) ) {
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Plugin-specific hook for feature plugin context.
+if ( ! ( defined( 'WP_RUN_CORE_TESTS' ) || defined( 'WP_TESTS_CONFIG_FILE_PATH' ) || ( function_exists( 'getenv' ) && false !== getenv( 'WP_PHPUNIT__DIR' ) ) ) || apply_filters( 'abilities_api_register_core_abilities', false ) ) {
 	if ( function_exists( 'add_action' ) ) {
 		add_action( 'abilities_api_init', array( 'WP_Core_Abilities', 'register' ) );
 	}

@@ -14,6 +14,7 @@ declare( strict_types = 1 );
  *
  * @since n.e.x.t
  */
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound -- Core class intended for WordPress core.
 class WP_Core_Abilities {
 	/**
 	 * Registers the default core abilities.
@@ -51,15 +52,15 @@ class WP_Core_Abilities {
 		wp_register_ability(
 			'core/get-bloginfo',
 			array(
-				'label'               => __( 'Get Blog Information', 'abilities-api' ),
-				'description'         => __( 'Returns a single site information field from get_bloginfo().', 'abilities-api' ),
+				'label'               => __( 'Get Blog Information' ),
+				'description'         => __( 'Returns a single site information field from get_bloginfo().' ),
 				'input_schema'        => array(
 					'type'                 => 'object',
 					'properties'           => array(
 						'field' => array(
 							'type'        => 'string',
 							'enum'        => $fields,
-							'description' => __( 'The site information field to retrieve.', 'abilities-api' ),
+							'description' => __( 'The site information field to retrieve.' ),
 						),
 					),
 					'required'             => array( 'field' ),
@@ -71,16 +72,16 @@ class WP_Core_Abilities {
 					'properties'           => array(
 						'field' => array(
 							'type'        => 'string',
-							'description' => __( 'The requested site information field.', 'abilities-api' ),
+							'description' => __( 'The requested site information field.' ),
 						),
 						'value' => array(
 							'type'        => 'string',
-							'description' => __( 'The value returned by get_bloginfo().', 'abilities-api' ),
+							'description' => __( 'The value returned by get_bloginfo().' ),
 						),
 					),
 					'additionalProperties' => false,
 				),
-				'execute_callback'    => static function ( array $input ): array {
+				'execute_callback'    => static function ( $input = array() ): array {
 					$field = $input['field'];
 					$value = get_bloginfo( $field );
 
@@ -92,7 +93,7 @@ class WP_Core_Abilities {
 				'permission_callback' => '__return_true',
 				'meta'                => array(
 					'annotations'  => array(
-						'instructions' => __( 'Retrieves a single site property by passing an allowed field to get_bloginfo().', 'abilities-api' ),
+						'instructions' => __( 'Retrieves a single site property by passing an allowed field to get_bloginfo().' ),
 						'readonly'     => true,
 						'destructive'  => false,
 						'idempotent'   => true,
@@ -114,38 +115,38 @@ class WP_Core_Abilities {
 		wp_register_ability(
 			'core/get-current-user-info',
 			array(
-				'label'               => __( 'Get Current User Information', 'abilities-api' ),
-				'description'         => __( 'Returns basic information about the current authenticated user.', 'abilities-api' ),
+				'label'               => __( 'Get Current User Information' ),
+				'description'         => __( 'Returns basic information about the current authenticated user.' ),
 				'output_schema'       => array(
 					'type'                 => 'object',
 					'required'             => array( 'id', 'display_name', 'locale' ),
 					'properties'           => array(
-						'id'           => array(
+						'id'            => array(
 							'type'        => 'integer',
-							'description' => __( 'The user ID.', 'abilities-api' ),
+							'description' => __( 'The user ID.' ),
 						),
-						'display_name' => array(
+						'display_name'  => array(
 							'type'        => 'string',
-							'description' => __( 'The display name of the user.', 'abilities-api' ),
+							'description' => __( 'The display name of the user.' ),
 						),
 						'user_nicename' => array(
 							'type'        => 'string',
-							'description' => __( 'The URL-friendly name for the user.', 'abilities-api' ),
+							'description' => __( 'The URL-friendly name for the user.' ),
 						),
-						'user_login'   => array(
+						'user_login'    => array(
 							'type'        => 'string',
-							'description' => __( 'The login username for the user.', 'abilities-api' ),
+							'description' => __( 'The login username for the user.' ),
 						),
-						'roles'        => array(
+						'roles'         => array(
 							'type'        => 'array',
-							'description' => __( 'The roles assigned to the user.', 'abilities-api' ),
+							'description' => __( 'The roles assigned to the user.' ),
 							'items'       => array(
 								'type' => 'string',
 							),
 						),
-						'locale' => array(
+						'locale'        => array(
 							'type'        => 'string',
-							'description' => __( 'The locale string for the user, such as en_US.', 'abilities-api' ),
+							'description' => __( 'The locale string for the user, such as en_US.' ),
 						),
 					),
 					'additionalProperties' => false,
@@ -154,12 +155,12 @@ class WP_Core_Abilities {
 					$current_user = wp_get_current_user();
 
 					return array(
-						'id'           => $current_user->ID,
-						'display_name' => $current_user->display_name,
+						'id'            => $current_user->ID,
+						'display_name'  => $current_user->display_name,
 						'user_nicename' => $current_user->user_nicename,
-						'user_login'   => $current_user->user_login,
-						'roles'        => $current_user->roles,
-						'locale'       => get_user_locale( $current_user ),
+						'user_login'    => $current_user->user_login,
+						'roles'         => $current_user->roles,
+						'locale'        => get_user_locale( $current_user ),
 					);
 				},
 				'permission_callback' => static function (): bool {
@@ -167,7 +168,7 @@ class WP_Core_Abilities {
 				},
 				'meta'                => array(
 					'annotations'  => array(
-						'instructions' => __( 'Retrieves information about the current authenticated user.', 'abilities-api' ),
+						'instructions' => __( 'Retrieves information about the current authenticated user.' ),
 						'readonly'     => true,
 						'destructive'  => false,
 						'idempotent'   => true,
@@ -189,15 +190,15 @@ class WP_Core_Abilities {
 		wp_register_ability(
 			'core/get-environment-type',
 			array(
-				'label'               => __( 'Get Environment Type', 'abilities-api' ),
-				'description'         => __( 'Returns the current WordPress environment type (e.g. production or staging).', 'abilities-api' ),
+				'label'               => __( 'Get Environment Type' ),
+				'description'         => __( 'Returns the current WordPress environment type (e.g. production or staging).' ),
 				'output_schema'       => array(
 					'type'                 => 'object',
 					'required'             => array( 'environment' ),
 					'properties'           => array(
 						'environment' => array(
 							'type'        => 'string',
-							'description' => __( 'The environment type returned by wp_get_environment_type().', 'abilities-api' ),
+							'description' => __( 'The environment type returned by wp_get_environment_type().' ),
 						),
 					),
 					'additionalProperties' => false,
@@ -210,7 +211,7 @@ class WP_Core_Abilities {
 				'permission_callback' => '__return_true',
 				'meta'                => array(
 					'annotations'  => array(
-						'instructions' => __( 'Retrieves the current WordPress environment type.', 'abilities-api' ),
+						'instructions' => __( 'Retrieves the current WordPress environment type.' ),
 						'readonly'     => true,
 						'destructive'  => false,
 						'idempotent'   => true,
@@ -232,53 +233,53 @@ class WP_Core_Abilities {
 		wp_register_ability(
 			'core/find-abilities',
 			array(
-				'label'               => __( 'Find Abilities', 'abilities-api' ),
-				'description'         => __( 'Returns a list of abilities that are exposed through the registry.', 'abilities-api' ),
+				'label'               => __( 'Find Abilities' ),
+				'description'         => __( 'Returns a list of abilities that are exposed through the registry.' ),
 				'input_schema'        => array(
 					'type'                 => array( 'object', 'null' ),
 					'properties'           => array(
-						'namespace' => array(
+						'namespace'    => array(
 							'type'        => 'string',
-							'description' => __( 'Optional namespace prefix to filter abilities (e.g. "core/").', 'abilities-api' ),
+							'description' => __( 'Optional namespace prefix to filter abilities (e.g. "core/").' ),
 						),
 						'show_in_rest' => array(
 							'type'        => 'boolean',
-							'description' => __( 'Whether to limit results to abilities exposed in REST. Defaults to true.', 'abilities-api' ),
+							'description' => __( 'Whether to limit results to abilities exposed in REST. Defaults to true.' ),
 						),
 					),
 					'additionalProperties' => false,
 				),
 				'output_schema'       => array(
-					'type'       => 'object',
-					'properties' => array(
+					'type'                 => 'object',
+					'properties'           => array(
 						'abilities' => array(
 							'type'  => 'array',
 							'items' => array(
 								'type'       => 'object',
 								'properties' => array(
-									'name'        => array(
+									'name'         => array(
 										'type'        => 'string',
-										'description' => __( 'The ability name.', 'abilities-api' ),
+										'description' => __( 'The ability name.' ),
 									),
-									'label'       => array(
+									'label'        => array(
 										'type'        => 'string',
-										'description' => __( 'The human readable label.', 'abilities-api' ),
+										'description' => __( 'The human readable label.' ),
 									),
-									'description' => array(
+									'description'  => array(
 										'type'        => 'string',
-										'description' => __( 'The detailed description.', 'abilities-api' ),
+										'description' => __( 'The detailed description.' ),
 									),
-									'meta'        => array(
+									'meta'         => array(
 										'type'        => 'object',
-										'description' => __( 'Additional metadata associated with the ability.', 'abilities-api' ),
+										'description' => __( 'Additional metadata associated with the ability.' ),
 									),
-									'annotations' => array(
+									'annotations'  => array(
 										'type'        => 'object',
-										'description' => __( 'Annotations describing ability behavior.', 'abilities-api' ),
+										'description' => __( 'Annotations describing ability behavior.' ),
 									),
 									'show_in_rest' => array(
 										'type'        => 'boolean',
-										'description' => __( 'Whether the ability is exposed in REST.', 'abilities-api' ),
+										'description' => __( 'Whether the ability is exposed in REST.' ),
 									),
 								),
 								'required'   => array( 'name', 'label', 'description', 'meta', 'annotations', 'show_in_rest' ),
@@ -287,7 +288,7 @@ class WP_Core_Abilities {
 					),
 					'additionalProperties' => false,
 				),
-				'execute_callback'    => static function ( array $input = array() ): array {
+				'execute_callback'    => static function ( $input = array() ): array {
 					$namespace     = $input['namespace'] ?? null;
 					$filter_rest   = array_key_exists( 'show_in_rest', $input ) ? (bool) $input['show_in_rest'] : true;
 					$abilities     = wp_get_abilities();
@@ -299,7 +300,7 @@ class WP_Core_Abilities {
 							continue;
 						}
 
-						if ( $namespace && ! str_starts_with( $ability->get_name(), $namespace ) ) {
+						if ( $namespace && 0 !== strpos( $ability->get_name(), $namespace ) ) {
 							continue;
 						}
 
@@ -321,7 +322,8 @@ class WP_Core_Abilities {
 					 * @param array<string,mixed>[] $abilities An array of abilities exposed by the ability.
 					 * @param array<string,mixed>   $input      The input arguments passed to the ability.
 					 */
-					$filtered_list = apply_filters( 'abilities_api_core_find_abilities_results', $filtered_list, $input );
+					// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook intended for WordPress core.
+					$filtered_list = apply_filters( 'wp_find_abilities_results', $filtered_list, $input );
 
 					return array(
 						'abilities' => array_values( $filtered_list ),
@@ -332,7 +334,7 @@ class WP_Core_Abilities {
 				},
 				'meta'                => array(
 					'annotations'  => array(
-						'instructions' => __( 'Lists abilities from the registry. Optional namespace filter is supported.', 'abilities-api' ),
+						'instructions' => __( 'Lists abilities from the registry. Optional namespace filter is supported.' ),
 						'readonly'     => true,
 						'destructive'  => false,
 						'idempotent'   => true,
