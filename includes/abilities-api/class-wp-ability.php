@@ -115,9 +115,9 @@ class WP_Ability {
 	 * @since 0.1.0
 	 * @var array<string,mixed>
 	 */
-  protected $meta;
+	protected $meta;
 
-  /**
+	/**
 	 * The ability category (required).
 	 *
 	 * @since n.e.x.t
