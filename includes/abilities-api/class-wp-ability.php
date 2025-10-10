@@ -132,7 +132,6 @@ class WP_Ability {
 	 */
 	protected $show_in_rest = false;
 
-
 	/**
 	 * Constructor.
 	 *
@@ -145,10 +144,10 @@ class WP_Ability {
 	 * @see wp_register_ability()
 	 *
 	 * @param string              $name The name of the ability, with its namespace.
-
-	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should include
-	 *                                  `label`, `description`, `category`, `input_schema`, `output_schema`, `execute_callback`,
-	 *                                  `permission_callback`, `annotations`, `meta`, and `show_in_rest`.
+	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should
+	 *                                  include: `label`, `description`, `category`, `input_schema`,
+	 *                                  `output_schema`, `execute_callback`, `permission_callback`,
+	 *                                  `annotations`, `meta`, and `show_in_rest`.
 	 */
 	public function __construct( string $name, array $args ) {
 		$this->name = $name;
@@ -217,6 +216,12 @@ class WP_Ability {
 			);
 		}
 
+		if ( empty( $args['category'] ) || ! is_string( $args['category'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties must contain a `category` string.' )
+			);
+		}
+
 		if ( empty( $args['execute_callback'] ) || ! is_callable( $args['execute_callback'] ) ) {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties must contain a valid `execute_callback` function.' )
@@ -254,19 +259,6 @@ class WP_Ability {
 			);
 		}
 
-		// VALIDATE: Category is required and must be a string.
-		if ( empty( $args['category'] ) || ! is_string( $args['category'] ) ) {
-			throw new \InvalidArgumentException(
-				esc_html__( 'The ability properties must contain a `category` string.' )
-			);
-		}
-
-		// Validate category slug format.
-		if ( ! preg_match( '/^[a-z0-9]+(-[a-z0-9]+)*$/', $args['category'] ) ) {
-			throw new \InvalidArgumentException(
-				esc_html__( 'Category slug must contain only lowercase alphanumeric characters and dashes.' )
-			);
-		}
 		if ( isset( $args['show_in_rest'] ) && ! is_bool( $args['show_in_rest'] ) ) {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties should provide a valid `show_in_rest` boolean.' )
