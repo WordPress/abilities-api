@@ -41,6 +41,19 @@ if ( ! function_exists( 'wp_register_ability' ) ) {
 	require_once __DIR__ . '/abilities-api.php';
 }
 
+// Load core abilities class.
+if ( ! class_exists( 'WP_Core_Abilities' ) ) {
+	require_once __DIR__ . '/abilities/class-wp-core-abilities.php';
+}
+
+// Register core abilities when requested via filter or when not in test environment.
+$is_test_env = defined( 'WP_RUN_CORE_TESTS' ) || defined( 'WP_TESTS_CONFIG_FILE_PATH' ) || ( function_exists( 'getenv' ) && false !== getenv( 'WP_PHPUNIT__DIR' ) );
+if ( ! $is_test_env || apply_filters( 'abilities_api_register_core_abilities', false ) ) {
+	if ( function_exists( 'add_action' ) ) {
+		add_action( 'abilities_api_init', array( 'WP_Core_Abilities', 'register' ) );
+	}
+}
+
 // Load REST API init class for plugin bootstrap.
 if ( ! class_exists( 'WP_REST_Abilities_Init' ) ) {
 	require_once __DIR__ . '/rest-api/class-wp-rest-abilities-init.php';
