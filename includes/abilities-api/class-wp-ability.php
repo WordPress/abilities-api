@@ -408,7 +408,7 @@ class WP_Ability {
 	 * @param mixed    $input    Optional. The input data for the ability. Default `null`.
 	 * @return mixed The result of the callable execution.
 	 */
-	protected function invoke_callback( $callback, $input = null ) {
+	protected function invoke_callback( callable $callback, $input = null ) {
 		$args = array();
 		if ( ! empty( $this->get_input_schema() ) ) {
 			$args[] = $input;
