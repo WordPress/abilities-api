@@ -123,7 +123,7 @@ class WP_Ability {
 	 * @since 0.1.0
 	 * @var array<string,mixed>
 	 */
-	protected $meta = array();
+	protected $meta;
 
 	/**
 	 * Constructor.
@@ -188,7 +188,10 @@ class WP_Ability {
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
 	 *   annotations?: array<string,(bool|string)>,
-	 *   meta?: array<string,mixed>,
+	 *   meta?: array{
+	 *     show_in_rest?: bool,
+	 *     ...<string, mixed>
+	 *   },
 	 *   ...<string, mixed>,
 	 * } $args
 	 */
@@ -350,7 +353,7 @@ class WP_Ability {
 	 * @return bool True if the ability should be shown in the REST API, false otherwise.
 	 */
 	public function show_in_rest(): bool {
-		return $this->meta['show_in_rest'] ?? false;
+		return $this->meta['show_in_rest'];
 	}
 
 	/**
