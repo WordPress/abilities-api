@@ -110,14 +110,6 @@ class WP_Ability {
 	protected $permission_callback;
 
 	/**
-	 * The ability annotations.
-	 *
-	 * @since n.e.x.t
-	 * @var array<string,(bool|string)>
-	 */
-	protected $annotations = array();
-
-	/**
 	 * The optional ability metadata.
 	 *
 	 * @since 0.1.0
@@ -139,7 +131,7 @@ class WP_Ability {
 	 * @param string              $name The name of the ability, with its namespace.
 	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should include
 	 *                                  `label`, `description`, `input_schema`, `output_schema`, `execute_callback`,
-	 *                                  `permission_callback`, `annotations`, and `meta`.
+	 *                                  `permission_callback`, and `meta`.
 	 */
 	public function __construct( string $name, array $args ) {
 		$this->name = $name;
@@ -187,8 +179,8 @@ class WP_Ability {
 	 *   permission_callback: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
-	 *   annotations?: array<string,(bool|string)>,
 	 *   meta?: array{
+	 *     annotations?: array<string,(bool|string)>,
 	 *     show_in_rest?: bool,
 	 *     ...<string, mixed>
 	 *   },
@@ -234,15 +226,15 @@ class WP_Ability {
 			);
 		}
 
-		if ( isset( $args['annotations'] ) && ! is_array( $args['annotations'] ) ) {
-			throw new \InvalidArgumentException(
-				esc_html__( 'The ability properties should provide a valid `annotations` array.' )
-			);
-		}
-
 		if ( isset( $args['meta'] ) && ! is_array( $args['meta'] ) ) {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties should provide a valid `meta` array.' )
+			);
+		}
+
+		if ( isset( $args['meta']['annotations'] ) && ! is_array( $args['meta']['annotations'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability meta should provide a valid `annotations` array.' )
 			);
 		}
 
@@ -253,15 +245,16 @@ class WP_Ability {
 		}
 
 		// Set defaults for optional meta.
-		$args['annotations'] = wp_parse_args(
-			$args['annotations'] ?? array(),
-			static::$default_annotations
-		);
-		$args['meta']        = wp_parse_args(
+		$args['meta']                = wp_parse_args(
 			$args['meta'] ?? array(),
 			array(
+				'annotations'  => static::$default_annotations,
 				'show_in_rest' => self::DEFAULT_SHOW_IN_REST,
 			)
+		);
+		$args['meta']['annotations'] = wp_parse_args(
+			$args['meta']['annotations'],
+			static::$default_annotations
 		);
 
 		return $args;
@@ -321,17 +314,6 @@ class WP_Ability {
 	 */
 	public function get_output_schema(): array {
 		return $this->output_schema;
-	}
-
-	/**
-	 * Retrieves the annotations for the ability.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return array<string,(bool|string)> The annotations for the ability.
-	 */
-	public function get_annotations(): array {
-		return $this->annotations;
 	}
 
 	/**

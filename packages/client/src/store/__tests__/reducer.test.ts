@@ -126,8 +126,9 @@ describe( 'Store Reducer', () => {
 						description: 'Full test ability.',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
-						annotations: { readonly: true },
-						meta: { category: 'test' },
+						meta: {
+							category: 'test',
+						},
 						callback: () => Promise.resolve( {} ),
 						permissionCallback: () => true,
 						// Extra properties that should be filtered out
@@ -154,7 +155,6 @@ describe( 'Store Reducer', () => {
 				expect( ability.description ).toBe( 'Full test ability.' );
 				expect( ability.input_schema ).toEqual( { type: 'object' } );
 				expect( ability.output_schema ).toEqual( { type: 'object' } );
-				expect( ability.annotations ).toEqual( { readonly: true } );
 				expect( ability.meta ).toEqual( { category: 'test' } );
 				expect( ability.callback ).toBeDefined();
 				expect( ability.permissionCallback ).toBeDefined();

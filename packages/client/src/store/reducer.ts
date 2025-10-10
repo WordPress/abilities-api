@@ -23,7 +23,6 @@ const ABILITY_KEYS = [
 	'description',
 	'input_schema',
 	'output_schema',
-	'annotations',
 	'meta',
 	'callback',
 	'permissionCallback',

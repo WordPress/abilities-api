@@ -163,10 +163,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'permission_callback' => static function () {
 					return is_user_logged_in();
 				},
-				'annotations'         => array(
-					'readonly' => true,
-				),
 				'meta'                => array(
+					'annotations'  => array(
+						'readonly' => true,
+					),
 					'show_in_rest' => true,
 				),
 			)
@@ -283,10 +283,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return $input;
 				},
 				'permission_callback' => '__return_true',
-				'annotations'         => array(
-					'readonly' => true,
-				),
 				'meta'                => array(
+					'annotations'  => array(
+						'readonly' => true,
+					),
 					'show_in_rest' => true,
 				),
 			)
@@ -757,10 +757,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					return array( 'input_was_empty' => 0 === func_num_args() );
 				},
 				'permission_callback' => '__return_true',
-				'annotations'         => array(
-					'readonly' => true,
-				),
 				'meta'                => array(
+					'annotations'  => array(
+						'readonly' => true,
+					),
 					'show_in_rest' => true,
 				),
 			)

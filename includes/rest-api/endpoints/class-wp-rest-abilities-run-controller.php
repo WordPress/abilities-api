@@ -91,7 +91,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 		}
 
 		// Check if the HTTP method matches the ability annotations.
-		$annotations = $ability->get_annotations();
+		$annotations = $ability->get_meta_item( 'annotations' );
 		$is_readonly = ! empty( $annotations['readonly'] );
 		$method      = $request->get_method();
 
