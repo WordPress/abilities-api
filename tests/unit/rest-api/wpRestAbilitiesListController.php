@@ -164,10 +164,10 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 				'permission_callback' => static function () {
 					return current_user_can( 'read' );
 				},
-				'annotations'         => array(
-					'readonly' => true,
-				),
 				'meta'                => array(
+					'annotations'  => array(
+						'readonly' => true,
+					),
 					'category'     => 'system',
 					'show_in_rest' => true,
 				),

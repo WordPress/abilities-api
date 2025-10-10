@@ -264,7 +264,6 @@ describe( 'API functions', () => {
 				name: 'test/read-only',
 				label: 'Read-only Ability',
 				description: 'Test read-only ability.',
-				annotations: { readonly: true },
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -273,6 +272,9 @@ describe( 'API functions', () => {
 					},
 				},
 				output_schema: { type: 'object' },
+				meta: {
+					annotations: { readonly: true },
+				},
 			};
 
 			const mockGetAbility = jest.fn().mockResolvedValue( mockAbility );
@@ -300,9 +302,11 @@ describe( 'API functions', () => {
 				name: 'test/read-only',
 				label: 'Read-only Ability',
 				description: 'Test read-only ability.',
-				annotations: { readonly: true },
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
+				meta: {
+					annotations: { readonly: true },
+				}
 			};
 
 			const mockGetAbility = jest.fn().mockResolvedValue( mockAbility );
