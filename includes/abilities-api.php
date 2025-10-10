@@ -35,8 +35,11 @@ declare( strict_types = 1 );
  *   permission_callback?: callable( mixed $input= ): (bool|\WP_Error),
  *   input_schema?: array<string,mixed>,
  *   output_schema?: array<string,mixed>,
- *   annotations?: array<string,mixed>,
- *   meta?: array<string,mixed>,
+ *   annotations?: array<string,(bool|string)>,
+ *   meta?: array{
+ *     show_in_rest?: bool,
+ *     ...<string,mixed>,
+ *   },
  *   ability_class?: class-string<\WP_Ability>,
  *   ...<string, mixed>
  * } $args
