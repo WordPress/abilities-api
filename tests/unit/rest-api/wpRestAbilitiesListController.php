@@ -82,9 +82,11 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 
 		// Clean up test categories
 		foreach ( array( 'math', 'system', 'general' ) as $slug ) {
-			if ( WP_Abilities_Category_Registry::get_instance()->is_registered( $slug ) ) {
-				wp_unregister_ability_category( $slug );
+			if ( ! WP_Abilities_Category_Registry::get_instance()->is_registered( $slug ) ) {
+				continue;
 			}
+
+			wp_unregister_ability_category( $slug );
 		}
 
 		// Reset REST server
