@@ -372,7 +372,7 @@ class WP_Ability {
 	 * }
 	 */
 	public function to_array(): array {
-		return array(
+		$array = array(
 			'name'          => $this->get_name(),
 			'label'         => $this->get_label(),
 			'description'   => $this->get_description(),
@@ -380,6 +380,16 @@ class WP_Ability {
 			'output_schema' => $this->get_output_schema(),
 			'meta'          => $this->get_meta(),
 		);
+
+		/**
+		 * Filters the array representation of an ability.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param array<string,mixed> $array   The ability as an associative array.
+		 * @param \WP_Ability          $ability The ability instance.
+		 */
+		return apply_filters( "wp_ability_{$this->get_name()}_to_array", $array, $this );
 	}
 
 	/**
@@ -437,7 +447,15 @@ class WP_Ability {
 			$schema['required'][]                  = 'output_schema';
 		}
 
-		return $schema;
+		/**
+		 * Filters the JSON Schema representation of an ability.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param array<string,mixed> $schema  The JSON Schema representation.
+		 * @param \WP_Ability          $ability The ability instance.
+		 */
+		return apply_filters( "wp_ability_{$this->get_name()}_to_json_schema", $schema, $this );
 	}
 
 	/**

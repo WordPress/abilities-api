@@ -909,4 +909,90 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$this->assertSame( self::$test_ability_name, $schema['properties']['name']['const'], 'Name const should match ability name' );
 		$this->assertContains( 'name', $schema['required'], 'name should be in required array' );
 	}
+
+	/**
+	 * Tests that to_array() filter is applied.
+	 */
+	public function test_to_array_filter() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$filter_callback = static function ( $array, $ability_instance ) {
+			$array['custom_field'] = 'custom_value';
+			return $array;
+		};
+
+		add_filter( 'wp_ability_test/calculator_to_array', $filter_callback, 10, 2 );
+
+		$array = $ability->to_array();
+
+		remove_filter( 'wp_ability_test/calculator_to_array', $filter_callback );
+
+		$this->assertArrayHasKey( 'custom_field', $array, 'Filtered array should contain custom field' );
+		$this->assertSame( 'custom_value', $array['custom_field'], 'Custom field value should match' );
+	}
+
+	/**
+	 * Tests that to_json_schema() filter is applied.
+	 */
+	public function test_to_json_schema_filter() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$filter_callback = static function ( $schema, $ability_instance ) {
+			$schema['custom_property'] = 'custom_schema_value';
+			return $schema;
+		};
+
+		add_filter( 'wp_ability_test/calculator_to_json_schema', $filter_callback, 10, 2 );
+
+		$schema = $ability->to_json_schema();
+
+		remove_filter( 'wp_ability_test/calculator_to_json_schema', $filter_callback );
+
+		$this->assertArrayHasKey( 'custom_property', $schema, 'Filtered schema should contain custom property' );
+		$this->assertSame( 'custom_schema_value', $schema['custom_property'], 'Custom property value should match' );
+	}
+
+	/**
+	 * Tests that to_array() filter receives ability instance as second parameter.
+	 */
+	public function test_to_array_filter_receives_ability_instance() {
+		$ability          = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$received_ability = null;
+
+		$filter_callback = static function ( $array, $ability_instance ) use ( &$received_ability ) {
+			$received_ability = $ability_instance;
+			return $array;
+		};
+
+		add_filter( 'wp_ability_test/calculator_to_array', $filter_callback, 10, 2 );
+
+		$ability->to_array();
+
+		remove_filter( 'wp_ability_test/calculator_to_array', $filter_callback );
+
+		$this->assertInstanceOf( WP_Ability::class, $received_ability, 'Filter should receive WP_Ability instance' );
+		$this->assertSame( self::$test_ability_name, $received_ability->get_name(), 'Received ability should match' );
+	}
+
+	/**
+	 * Tests that to_json_schema() filter receives ability instance as second parameter.
+	 */
+	public function test_to_json_schema_filter_receives_ability_instance() {
+		$ability          = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$received_ability = null;
+
+		$filter_callback = static function ( $schema, $ability_instance ) use ( &$received_ability ) {
+			$received_ability = $ability_instance;
+			return $schema;
+		};
+
+		add_filter( 'wp_ability_test/calculator_to_json_schema', $filter_callback, 10, 2 );
+
+		$ability->to_json_schema();
+
+		remove_filter( 'wp_ability_test/calculator_to_json_schema', $filter_callback );
+
+		$this->assertInstanceOf( WP_Ability::class, $received_ability, 'Filter should receive WP_Ability instance' );
+		$this->assertSame( self::$test_ability_name, $received_ability->get_name(), 'Received ability should match' );
+	}
 }
