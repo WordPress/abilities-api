@@ -373,12 +373,12 @@ class WP_Ability {
 	 */
 	public function to_array(): array {
 		return array(
-			'name'          => $this->name,
-			'label'         => $this->label,
-			'description'   => $this->description,
-			'input_schema'  => $this->input_schema,
-			'output_schema' => $this->output_schema,
-			'meta'          => $this->meta,
+			'name'          => $this->get_name(),
+			'label'         => $this->get_label(),
+			'description'   => $this->get_description(),
+			'input_schema'  => $this->get_input_schema(),
+			'output_schema' => $this->get_output_schema(),
+			'meta'          => $this->get_meta(),
 		);
 	}
 
@@ -393,15 +393,18 @@ class WP_Ability {
 	 * @return array<string,mixed> A JSON Schema representation of the ability.
 	 */
 	public function to_json_schema(): array {
+		$input_schema  = $this->get_input_schema();
+		$output_schema = $this->get_output_schema();
+
 		$schema = array(
 			'$schema'     => 'http://json-schema.org/draft-07/schema#',
 			'type'        => 'object',
-			'title'       => $this->label,
-			'description' => $this->description,
+			'title'       => $this->get_label(),
+			'description' => $this->get_description(),
 			'properties'  => array(
 				'name' => array(
 					'type'  => 'string',
-					'const' => $this->name,
+					'const' => $this->get_name(),
 				),
 				'meta' => array(
 					'type'       => 'object',
@@ -424,13 +427,13 @@ class WP_Ability {
 			'required'    => array( 'name', 'meta' ),
 		);
 
-		if ( ! empty( $this->input_schema ) ) {
-			$schema['properties']['input_schema'] = $this->input_schema;
+		if ( ! empty( $input_schema ) ) {
+			$schema['properties']['input_schema'] = $input_schema;
 			$schema['required'][]                 = 'input_schema';
 		}
 
-		if ( ! empty( $this->output_schema ) ) {
-			$schema['properties']['output_schema'] = $this->output_schema;
+		if ( ! empty( $output_schema ) ) {
+			$schema['properties']['output_schema'] = $output_schema;
 			$schema['required'][]                  = 'output_schema';
 		}
 
