@@ -341,6 +341,103 @@ class WP_Ability {
 	}
 
 	/**
+	 * Converts the ability to an array representation.
+	 *
+	 * Returns a complete array representation of the ability including name, label,
+	 * description, schemas, and metadata. Callbacks are excluded as they are not serializable.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string,mixed> {
+	 *     The ability as an associative array.
+	 *
+	 *     @type string $name          The ability name with namespace.
+	 *     @type string $label         The human-readable label.
+	 *     @type string $description   The detailed description.
+	 *     @type array  $input_schema  The input validation schema.
+	 *     @type array  $output_schema The output validation schema.
+	 *     @type array  $meta {
+	 *         Metadata for the ability.
+	 *
+	 *         @type array $annotations {
+	 *             Behavior annotations.
+	 *
+	 *             @type string $instructions Usage instructions.
+	 *             @type bool   $readonly     Whether the ability is read-only.
+	 *             @type bool   $destructive  Whether the ability is destructive.
+	 *             @type bool   $idempotent   Whether the ability is idempotent.
+	 *         }
+	 *         @type bool $show_in_rest Whether the ability is exposed in REST API.
+	 *     }
+	 * }
+	 */
+	public function to_array(): array {
+		return array(
+			'name'          => $this->name,
+			'label'         => $this->label,
+			'description'   => $this->description,
+			'input_schema'  => $this->input_schema,
+			'output_schema' => $this->output_schema,
+			'meta'          => $this->meta,
+		);
+	}
+
+	/**
+	 * Converts the ability to a JSON Schema representation.
+	 *
+	 * Generates a JSON Schema Draft 7 compliant schema describing the ability's
+	 * structure, including input/output schemas and metadata.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string,mixed> A JSON Schema representation of the ability.
+	 */
+	public function to_json_schema(): array {
+		$schema = array(
+			'$schema'     => 'http://json-schema.org/draft-07/schema#',
+			'type'        => 'object',
+			'title'       => $this->label,
+			'description' => $this->description,
+			'properties'  => array(
+				'name' => array(
+					'type'  => 'string',
+					'const' => $this->name,
+				),
+				'meta' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'annotations'  => array(
+							'type'       => 'object',
+							'properties' => array(
+								'instructions' => array( 'type' => 'string' ),
+								'readonly'     => array( 'type' => 'boolean' ),
+								'destructive'  => array( 'type' => 'boolean' ),
+								'idempotent'   => array( 'type' => 'boolean' ),
+							),
+						),
+						'show_in_rest' => array(
+							'type' => 'boolean',
+						),
+					),
+				),
+			),
+			'required'    => array( 'name', 'meta' ),
+		);
+
+		if ( ! empty( $this->input_schema ) ) {
+			$schema['properties']['input_schema'] = $this->input_schema;
+			$schema['required'][]                 = 'input_schema';
+		}
+
+		if ( ! empty( $this->output_schema ) ) {
+			$schema['properties']['output_schema'] = $this->output_schema;
+			$schema['required'][]                  = 'output_schema';
+		}
+
+		return $schema;
+	}
+
+	/**
 	 * Validates input data against the input schema.
 	 *
 	 * @since 0.1.0
