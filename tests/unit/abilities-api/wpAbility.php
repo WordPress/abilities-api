@@ -995,4 +995,68 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$this->assertInstanceOf( WP_Ability::class, $received_ability, 'Filter should receive WP_Ability instance' );
 		$this->assertSame( self::$test_ability_name, $received_ability->get_name(), 'Received ability should match' );
 	}
+
+	/**
+	 * Tests that WP_Ability implements JsonSerializable.
+	 */
+	public function test_implements_json_serializable() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$this->assertInstanceOf( JsonSerializable::class, $ability, 'WP_Ability should implement JsonSerializable' );
+	}
+
+	/**
+	 * Tests that json_encode() works with WP_Ability.
+	 */
+	public function test_json_encode() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$json = json_encode( $ability );
+
+		$this->assertIsString( $json, 'json_encode should return a string' );
+		$this->assertNotFalse( $json, 'json_encode should not fail' );
+
+		$decoded = json_decode( $json, true );
+
+		$this->assertIsArray( $decoded, 'Decoded JSON should be an array' );
+		$this->assertArrayHasKey( 'name', $decoded, 'Decoded array should contain name' );
+		$this->assertSame( self::$test_ability_name, $decoded['name'], 'Name should match' );
+		$this->assertArrayHasKey( 'label', $decoded, 'Decoded array should contain label' );
+		$this->assertArrayHasKey( 'description', $decoded, 'Decoded array should contain description' );
+		$this->assertArrayHasKey( 'meta', $decoded, 'Decoded array should contain meta' );
+	}
+
+	/**
+	 * Tests that jsonSerialize() returns same data as to_array().
+	 */
+	public function test_json_serialize_matches_to_array() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$array          = $ability->to_array();
+		$json_serialize = $ability->jsonSerialize();
+
+		$this->assertSame( $array, $json_serialize, 'jsonSerialize() should return the same data as to_array()' );
+	}
+
+	/**
+	 * Tests that json_encode() applies to_array() filter.
+	 */
+	public function test_json_encode_applies_filter() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$filter_callback = static function ( $array, $ability_instance ) {
+			$array['filtered'] = true;
+			return $array;
+		};
+
+		add_filter( 'wp_ability_test/calculator_to_array', $filter_callback, 10, 2 );
+
+		$json = json_encode( $ability );
+		$decoded = json_decode( $json, true );
+
+		remove_filter( 'wp_ability_test/calculator_to_array', $filter_callback );
+
+		$this->assertArrayHasKey( 'filtered', $decoded, 'json_encode should apply to_array filter' );
+		$this->assertTrue( $decoded['filtered'], 'Filtered value should be present' );
+	}
 }

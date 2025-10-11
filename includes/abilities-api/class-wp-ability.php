@@ -18,7 +18,7 @@ declare( strict_types = 1 );
  *
  * @see WP_Abilities_Registry
  */
-class WP_Ability {
+class WP_Ability implements \JsonSerializable {
 
 	/**
 	 * The default value for the `show_in_rest` meta.
@@ -390,6 +390,20 @@ class WP_Ability {
 		 * @param \WP_Ability          $ability The ability instance.
 		 */
 		return apply_filters( "wp_ability_{$this->get_name()}_to_array", $array, $this );
+	}
+
+	/**
+	 * Serializes the ability to a value that can be serialized natively by json_encode().
+	 *
+	 * Implements the JsonSerializable interface to allow the ability to be passed
+	 * directly to json_encode() without manually calling to_array().
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string,mixed> The ability as an associative array.
+	 */
+	public function jsonSerialize(): array {
+		return $this->to_array();
 	}
 
 	/**
