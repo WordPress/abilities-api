@@ -57,7 +57,11 @@ final class WP_Abilities_Registry {
 	 *   permission_callback?: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
 	 *   output_schema?: array<string,mixed>,
-	 *   meta?: array<string,mixed>,
+	 *   meta?: array{
+	 *     annotations?: array<string,(bool|string)>,
+	 *     show_in_rest?: bool,
+	 *     ...<string, mixed>
+	 *   },
 	 *   ability_class?: class-string<\WP_Ability>,
 	 *   ...<string, mixed>
 	 * } $args
@@ -87,7 +91,7 @@ final class WP_Abilities_Registry {
 		/**
 		 * Filters the ability arguments before they are validated and used to instantiate the ability.
 		 *
-		 * @since n.e.x.t
+		 * @since 0.2.0
 		 *
 		 * @param array<string,mixed> $args The arguments used to instantiate the ability.
 		 * @param string              $name The name of the ability, with its namespace.

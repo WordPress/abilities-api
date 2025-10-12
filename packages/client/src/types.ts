@@ -73,10 +73,12 @@ export interface Ability {
 	 * @see WP_Ability::get_meta()
 	 */
 	meta?: {
-		/**
-		 * The type of ability - 'resource' uses GET, 'tool' uses POST.
-		 */
-		type?: 'resource' | 'tool';
+		annotations?: {
+			instructions?: string;
+			readonly?: boolean;
+			destructive?: boolean;
+			idempotent?: boolean;
+		},
 		[ key: string ]: any;
 	};
 }

@@ -84,7 +84,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 	 * Register test abilities for testing.
 	 */
 	private function register_test_abilities(): void {
-		// Register a tool ability
+		// Register a regular ability.
 		wp_register_ability(
 			'test/calculator',
 			array(
@@ -122,13 +122,13 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return current_user_can( 'read' );
 				},
 				'meta'                => array(
-					'type'     => 'tool',
-					'category' => 'math',
+					'category'     => 'math',
+					'show_in_rest' => true,
 				),
 			)
 		);
 
-		// Register a resource ability
+		// Register a read-only ability.
 		wp_register_ability(
 			'test/system-info',
 			array(
@@ -165,9 +165,25 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return current_user_can( 'read' );
 				},
 				'meta'                => array(
-					'type'     => 'resource',
-					'category' => 'system',
+					'annotations'  => array(
+						'readonly' => true,
+					),
+					'category'     => 'system',
+					'show_in_rest' => true,
 				),
+			)
+		);
+
+		// Ability that does not show in REST.
+		wp_register_ability(
+			'test/not-show-in-rest',
+			array(
+				'label'               => 'Hidden from REST',
+				'description'         => 'It does not show in REST.',
+				'execute_callback'    => static function (): int {
+					return 0;
+				},
+				'permission_callback' => '__return_true',
 			)
 		);
 
@@ -182,6 +198,9 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 						return "Result from ability {$i}";
 					},
 					'permission_callback' => '__return_true',
+					'meta'                => array(
+						'show_in_rest' => true,
+					),
 				)
 			);
 		}
@@ -205,6 +224,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$ability_names = wp_list_pluck( $data, 'name' );
 		$this->assertContains( 'test/calculator', $ability_names );
 		$this->assertContains( 'test/system-info', $ability_names );
+		$this->assertNotContains( 'test/not-show-in-rest', $ability_names );
 	}
 
 	/**
@@ -223,7 +243,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'input_schema', $data );
 		$this->assertArrayHasKey( 'output_schema', $data );
 		$this->assertArrayHasKey( 'meta', $data );
-		$this->assertEquals( 'tool', $data['meta']['type'] );
+		$this->assertEquals( 'math', $data['meta']['category'] );
 	}
 
 	/**
@@ -233,6 +253,19 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 	 */
 	public function test_get_item_not_found(): void {
 		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/non/existent' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_ability_not_found', $data['code'] );
+	}
+
+	/**
+	 * Test getting an ability that does not show in REST returns 404.
+	 */
+	public function test_get_item_not_show_in_rest(): void {
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/not-show-in-rest' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 404, $response->get_status() );
@@ -268,7 +301,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'X-WP-Total', $headers );
 		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers );
 
-		$total_abilities = count( wp_get_abilities() );
+		$total_abilities = count( wp_get_abilities() ) - 1; // Exclude the one that doesn't show in REST.
 		$this->assertEquals( $total_abilities, (int) $headers['X-WP-Total'] );
 		$this->assertEquals( ceil( $total_abilities / 10 ), (int) $headers['X-WP-TotalPages'] );
 	}
@@ -300,7 +333,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$request->set_param( 'page', 1 );
 		$response = $this->server->dispatch( $request );
 
-		$headers = $response->get_headers();
+		$headers     = $response->get_headers();
 		$link_header = $headers['Link'] ?? '';
 
 		// Parse Link header for rel="next" and rel="prev"
@@ -311,7 +344,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$request->set_param( 'page', 3 );
 		$response = $this->server->dispatch( $request );
 
-		$headers = $response->get_headers();
+		$headers     = $response->get_headers();
 		$link_header = $headers['Link'] ?? '';
 
 		$this->assertStringContainsString( 'rel="next"', $link_header );
@@ -323,7 +356,7 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$request->set_param( 'page', $last_page );
 		$response = $this->server->dispatch( $request );
 
-		$headers = $response->get_headers();
+		$headers     = $response->get_headers();
 		$link_header = $headers['Link'] ?? '';
 
 		$this->assertStringNotContainsString( 'rel="next"', $link_header );
@@ -441,6 +474,9 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 					return array( 'success' => true );
 				},
 				'permission_callback' => '__return_true',
+				'meta'                => array(
+					'show_in_rest' => true,
+				),
 			)
 		);
 

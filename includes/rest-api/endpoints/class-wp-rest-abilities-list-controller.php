@@ -94,7 +94,12 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @return \WP_REST_Response Response object on success.
 	 */
 	public function get_items( $request ) {
-		$abilities = wp_get_abilities();
+		$abilities = array_filter(
+			wp_get_abilities(),
+			static function ( $ability ) {
+				return $ability->get_meta_item( 'show_in_rest' );
+			}
+		);
 
 		// Handle pagination with explicit defaults.
 		$params   = $request->get_params();
@@ -105,7 +110,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		$total_abilities = count( $abilities );
 		$max_pages       = ceil( $total_abilities / $per_page );
 
-		if ( $request->is_method( 'HEAD' ) ) {
+		if ( $request->get_method() === 'HEAD' ) {
 			$response = new \WP_REST_Response( array() );
 		} else {
 			$abilities = array_slice( $abilities, $offset, $per_page );
@@ -150,8 +155,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 */
 	public function get_item( $request ) {
 		$ability = wp_get_ability( $request->get_param( 'name' ) );
-
-		if ( ! $ability ) {
+		if ( ! $ability || ! $ability->get_meta_item( 'show_in_rest' ) ) {
 			return new \WP_Error(
 				'rest_ability_not_found',
 				__( 'Ability not found.' ),
@@ -260,6 +264,12 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 				),
 				'output_schema' => array(
 					'description' => __( 'JSON Schema for the ability output.' ),
+					'type'        => 'object',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'annotations'   => array(
+					'description' => __( 'Annotations for the ability.' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

@@ -176,8 +176,7 @@ async function executeServerAbility(
 	ability: Ability,
 	input: AbilityInput
 ): Promise< AbilityOutput > {
-	const isResource = ability.meta?.type === 'resource';
-	const method = isResource ? 'GET' : 'POST';
+	const method = !! ability.meta?.annotations?.readonly ? 'GET' : 'POST';
 
 	let path = `/wp/v2/abilities/${ ability.name }/run`;
 	const options: {
