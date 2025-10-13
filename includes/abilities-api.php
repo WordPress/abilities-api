@@ -114,12 +114,13 @@ function wp_get_abilities(): array {
  * @param string              $slug The unique slug for the category. Must contain only lowercase
  *                                  alphanumeric characters and dashes.
  * @param array<string,mixed> $args An associative array of arguments for the category. This should
- *                                  include `label` and `description`.
+ *                                  include `label`, `description`, and optionally `meta`.
  * @return ?\WP_Ability_Category The registered category instance on success, null on failure.
  *
  * @phpstan-param array{
- *   label?: string,
- *   description?: string,
+ *   label: string,
+ *   description: string,
+ *   meta?: array<string,mixed>,
  *   ...<string, mixed>
  * } $args
  */
