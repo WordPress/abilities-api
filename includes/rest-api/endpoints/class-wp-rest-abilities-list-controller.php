@@ -295,7 +295,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 					'readonly'    => true,
 				),
 			),
-			'required'   => array( 'name', 'label', 'meta', 'description', 'category' ),
+			'required'   => array( 'name', 'label', 'meta', 'description', 'category', 'input_schema', 'output_schema' ),
 		);
 
 		return $this->add_additional_fields_schema( $schema );
