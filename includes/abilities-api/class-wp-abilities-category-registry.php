@@ -131,8 +131,8 @@ final class WP_Abilities_Category_Registry {
 		if ( ! $this->is_registered( $slug ) ) {
 			_doing_it_wrong(
 				__METHOD__,
-				/* translators: %s: Category slug. */
-				sprintf( esc_html__( 'Category "%s" not found.' ), esc_attr( $slug ) ),
+				/* translators: %s: Ability category slug. */
+				sprintf( esc_html__( 'Ability category "%s" not found.' ), esc_attr( $slug ) ),
 				'n.e.x.t'
 			);
 			return null;
