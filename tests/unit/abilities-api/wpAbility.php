@@ -856,7 +856,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		$this->assertIsArray( $schema, 'to_json_schema() should return an array' );
 		$this->assertArrayHasKey( '$schema', $schema, 'Schema should contain $schema key' );
-		$this->assertSame( 'http://json-schema.org/draft-07/schema#', $schema['$schema'], 'Schema version should be Draft 7' );
+		$this->assertSame( 'http://json-schema.org/draft-04/schema#', $schema['$schema'], 'Schema version should be Draft 4' );
 		$this->assertArrayHasKey( 'type', $schema, 'Schema should contain type key' );
 		$this->assertSame( 'object', $schema['type'], 'Schema type should be object' );
 		$this->assertArrayHasKey( 'title', $schema, 'Schema should contain title key' );
@@ -931,15 +931,17 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests to_json_schema() name property uses const.
+	 * Tests to_json_schema() name property uses enum for constant value.
 	 */
 	public function test_to_json_schema_name_is_constant() {
 		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
 		$schema  = $ability->to_json_schema();
 
 		$this->assertArrayHasKey( 'name', $schema['properties'], 'Properties should contain name' );
-		$this->assertArrayHasKey( 'const', $schema['properties']['name'], 'Name should have const keyword' );
-		$this->assertSame( self::$test_ability_name, $schema['properties']['name']['const'], 'Name const should match ability name' );
+		$this->assertArrayHasKey( 'enum', $schema['properties']['name'], 'Name should have enum keyword' );
+		$this->assertIsArray( $schema['properties']['name']['enum'], 'Name enum should be an array' );
+		$this->assertCount( 1, $schema['properties']['name']['enum'], 'Name enum should have exactly one value' );
+		$this->assertSame( self::$test_ability_name, $schema['properties']['name']['enum'][0], 'Name enum value should match ability name' );
 		$this->assertContains( 'name', $schema['required'], 'name should be in required array' );
 	}
 

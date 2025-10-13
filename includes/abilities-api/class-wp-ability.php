@@ -436,7 +436,7 @@ class WP_Ability implements \JsonSerializable {
 	/**
 	 * Converts the ability to a JSON Schema representation.
 	 *
-	 * Generates a JSON Schema Draft 7 compliant schema describing the ability's
+	 * Generates a JSON Schema Draft 4 compliant schema describing the ability's
 	 * structure, including input/output schemas and metadata.
 	 *
 	 * @since n.e.x.t
@@ -448,14 +448,14 @@ class WP_Ability implements \JsonSerializable {
 		$output_schema = $this->get_output_schema();
 
 		$schema = array(
-			'$schema'     => 'http://json-schema.org/draft-07/schema#',
+			'$schema'     => 'http://json-schema.org/draft-04/schema#',
 			'type'        => 'object',
 			'title'       => $this->get_label(),
 			'description' => $this->get_description(),
 			'properties'  => array(
 				'name' => array(
-					'type'  => 'string',
-					'const' => $this->get_name(),
+					'type' => 'string',
+					'enum' => array( $this->get_name() ),
 				),
 				'meta' => array(
 					'type'       => 'object',
