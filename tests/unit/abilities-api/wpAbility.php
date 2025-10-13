@@ -18,9 +18,29 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 
+		// Register category during the hook.
+		add_action(
+			'abilities_api_categories_init',
+			function () {
+				if ( ! WP_Abilities_Category_Registry::get_instance()->is_registered( 'math' ) ) {
+					wp_register_ability_category(
+						'math',
+						array(
+							'label'       => 'Math',
+							'description' => 'Mathematical operations and calculations.',
+						)
+					);
+				}
+			}
+		);
+
+		// Fire the hook to allow category registration.
+		do_action( 'abilities_api_categories_init' );
+
 		self::$test_ability_properties = array(
 			'label'               => 'Calculator',
 			'description'         => 'Calculates the result of math operations.',
+			'category'            => 'math',
 			'output_schema'       => array(
 				'type'        => 'number',
 				'description' => 'The result of performing a math operation.',
@@ -42,6 +62,19 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	}
 
 	/**
+   * Tear down after each test.
+	 */
+	public function tear_down(): void {
+		// Clean up registered categories.
+		$category_registry = WP_Abilities_Category_Registry::get_instance();
+		if ( $category_registry->is_registered( 'math' ) ) {
+			wp_unregister_ability_category( 'math' );
+		}
+
+		parent::tear_down();
+	}
+
+	 /*
 	 * Tests that getting non-existing metadata item returns default value.
 	 */
 	public function test_meta_get_non_existing_item_returns_default() {
@@ -66,7 +99,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		);
 	}
 
-		/**
+	/**
 	 * Tests getting all annotations when selective overrides are applied.
 	 */
 	public function test_get_merged_annotations_from_meta() {

@@ -101,6 +101,19 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			}
 		);
 
+		// Filter by category if specified.
+		$category = $request->get_param( 'category' );
+		if ( ! empty( $category ) ) {
+			$abilities = array_filter(
+				$abilities,
+				static function ( $ability ) use ( $category ) {
+					return $ability->get_category() === $category;
+				}
+			);
+			// Reset array keys after filtering.
+			$abilities = array_values( $abilities );
+		}
+
 		// Handle pagination with explicit defaults.
 		$params   = $request->get_params();
 		$page     = $params['page'] ?? 1;
@@ -193,6 +206,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 			'name'          => $ability->get_name(),
 			'label'         => $ability->get_label(),
 			'description'   => $ability->get_description(),
+			'category'      => $ability->get_category(),
 			'input_schema'  => $ability->get_input_schema(),
 			'output_schema' => $ability->get_output_schema(),
 			'meta'          => $ability->get_meta(),
@@ -256,6 +270,12 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'category'      => array(
+					'description' => __( 'Category this ability belongs to.' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
 				'input_schema'  => array(
 					'description' => __( 'JSON Schema for the ability input.' ),
 					'type'        => 'object',
@@ -268,12 +288,6 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'annotations'   => array(
-					'description' => __( 'Annotations for the ability.' ),
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
 				'meta'          => array(
 					'description' => __( 'Meta information about the ability.' ),
 					'type'        => 'object',
@@ -281,7 +295,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 					'readonly'    => true,
 				),
 			),
-			'required'   => array( 'name', 'label', 'description' ),
+			'required'   => array( 'name', 'label', 'meta', 'description', 'category', 'input_schema', 'output_schema' ),
 		);
 
 		return $this->add_additional_fields_schema( $schema );
@@ -312,6 +326,12 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 				'minimum'           => 1,
 				'maximum'           => 100,
 				'sanitize_callback' => 'absint',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'category' => array(
+				'description'       => __( 'Limit results to abilities in specific category.' ),
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 		);

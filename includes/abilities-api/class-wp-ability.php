@@ -118,6 +118,14 @@ class WP_Ability implements \JsonSerializable {
 	protected $meta;
 
 	/**
+	 * The ability category (required).
+	 *
+	 * @since n.e.x.t
+	 * @var string
+	 */
+	protected $category;
+
+	/**
 	 * Constructor.
 	 *
 	 * Do not use this constructor directly. Instead, use the `wp_register_ability()` function.
@@ -129,9 +137,9 @@ class WP_Ability implements \JsonSerializable {
 	 * @see wp_register_ability()
 	 *
 	 * @param string              $name The name of the ability, with its namespace.
-	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should include
-	 *                                  `label`, `description`, `input_schema`, `output_schema`, `execute_callback`,
-	 *                                  `permission_callback`, and `meta`.
+	 * @param array<string,mixed> $args An associative array of arguments for the ability. This should include:
+	 *                                  `label`, `description`, `category`, `input_schema`, `output_schema`,
+	 *                                  `execute_callback`, `permission_callback` and `meta`
 	 */
 	public function __construct( string $name, array $args ) {
 		$this->name = $name;
@@ -175,6 +183,7 @@ class WP_Ability implements \JsonSerializable {
 	 * @phpstan-return array{
 	 *   label: string,
 	 *   description: string,
+	 *   category: string,
 	 *   execute_callback: callable( mixed $input= ): (mixed|\WP_Error),
 	 *   permission_callback: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
@@ -198,6 +207,12 @@ class WP_Ability implements \JsonSerializable {
 		if ( empty( $args['description'] ) || ! is_string( $args['description'] ) ) {
 			throw new \InvalidArgumentException(
 				esc_html__( 'The ability properties must contain a `description` string.' )
+			);
+		}
+
+		if ( empty( $args['category'] ) || ! is_string( $args['category'] ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'The ability properties must contain a `category` string.' )
 			);
 		}
 
@@ -325,6 +340,17 @@ class WP_Ability implements \JsonSerializable {
 	 */
 	public function get_meta(): array {
 		return $this->meta;
+	}
+
+	/**
+	 * Retrieves the category for the ability.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return string The category for the ability.
+	 */
+	public function get_category(): string {
+		return $this->category;
 	}
 
 	/**

@@ -29,6 +29,12 @@ if ( ! class_exists( 'WP_Ability' ) ) {
 if ( ! class_exists( 'WP_Abilities_Registry' ) ) {
 	require_once __DIR__ . '/abilities-api/class-wp-abilities-registry.php';
 }
+if ( ! class_exists( 'WP_Ability_Category' ) ) {
+	require_once __DIR__ . '/abilities-api/class-wp-ability-category.php';
+}
+if ( ! class_exists( 'WP_Abilities_Category_Registry' ) ) {
+	require_once __DIR__ . '/abilities-api/class-wp-abilities-category-registry.php';
+}
 
 // Ensure procedural functions are available, too.
 if ( ! function_exists( 'wp_register_ability' ) ) {
