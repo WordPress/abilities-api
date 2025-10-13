@@ -43,6 +43,14 @@ export interface Ability {
 	description: string;
 
 	/**
+	 * The category this ability belongs to.
+	 * Must be a valid category slug (lowercase alphanumeric with dashes).
+	 * Example: 'data-retrieval', 'user-management'
+	 * @see WP_Ability::get_category()
+	 */
+	category: string;
+
+	/**
 	 * JSON Schema for the ability's input parameters.
 	 * @see WP_Ability::get_input_schema()
 	 */
@@ -78,7 +86,7 @@ export interface Ability {
 			readonly?: boolean;
 			destructive?: boolean;
 			idempotent?: boolean;
-		},
+		};
 		[ key: string ]: any;
 	};
 }

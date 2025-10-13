@@ -16,10 +16,11 @@ import { validateValueFromSchema } from './validation';
 /**
  * Get all available abilities.
  *
+ * @param category Optional category slug to filter abilities.
  * @return Promise resolving to array of abilities.
  */
-export async function getAbilities(): Promise< Ability[] > {
-	return await resolveSelect( store ).getAbilities();
+export async function getAbilities( category?: string ): Promise< Ability[] > {
+	return await resolveSelect( store ).getAbilities( category );
 }
 
 /**

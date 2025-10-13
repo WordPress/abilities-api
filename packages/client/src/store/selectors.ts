@@ -10,15 +10,26 @@ import type { Ability, AbilitiesState } from '../types';
 
 /**
  * Returns all registered abilities.
+ * Optionally filters by category.
  *
- * @param state Store state.
+ * @param state    Store state.
+ * @param category Optional category slug to filter by.
  * @return Array of abilities.
  */
 export const getAbilities = createSelector(
-	( state: AbilitiesState ): Ability[] => {
-		return Object.values( state.abilitiesByName );
+	( state: AbilitiesState, category?: string ): Ability[] => {
+		const abilities = Object.values( state.abilitiesByName );
+		if ( category ) {
+			return abilities.filter(
+				( ability ) => ability.category === category
+			);
+		}
+		return abilities;
 	},
-	( state: AbilitiesState ) => [ state.abilitiesByName ]
+	( state: AbilitiesState, category?: string ) => [
+		state.abilitiesByName,
+		category,
+	]
 );
 
 /**
