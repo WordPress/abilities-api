@@ -500,12 +500,27 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'properties', $schema );
 
 		$properties = $schema['properties'];
+
+		// Assert the count of properties to catch when new keys are added
+		$this->assertCount( 7, $properties, 'Schema should have exactly 7 properties. If this fails, update this test to include the new property.' );
+
+		// Check all expected properties exist
 		$this->assertArrayHasKey( 'name', $properties );
 		$this->assertArrayHasKey( 'label', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'input_schema', $properties );
 		$this->assertArrayHasKey( 'output_schema', $properties );
 		$this->assertArrayHasKey( 'meta', $properties );
+		$this->assertArrayHasKey( 'category', $properties );
+
+		// Test category property details
+		$category_property = $properties['category'];
+		$this->assertEquals( 'string', $category_property['type'] );
+		$this->assertTrue( $category_property['readonly'] );
+
+		// Check that category is in required fields
+		$this->assertArrayHasKey( 'required', $schema );
+		$this->assertContains( 'category', $schema['required'] );
 	}
 
 	/**
@@ -681,26 +696,5 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'category', $data );
 		$this->assertEquals( 'math', $data['category'] );
 		$this->assertIsString( $data['category'], 'Category should be a string' );
-	}
-
-	/**
-	 * Test that category is in schema and marked as required.
-	 */
-	public function test_category_in_schema(): void {
-		$request  = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities' );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$schema = $data['schema'];
-		$this->assertArrayHasKey( 'properties', $schema );
-		$this->assertArrayHasKey( 'category', $schema['properties'] );
-
-		$category_property = $schema['properties']['category'];
-		$this->assertEquals( 'string', $category_property['type'] );
-		$this->assertTrue( $category_property['readonly'] );
-
-		// Check that category is in required fields
-		$this->assertArrayHasKey( 'required', $schema );
-		$this->assertContains( 'category', $schema['required'] );
 	}
 }
