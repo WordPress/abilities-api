@@ -483,70 +483,71 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test category slug validation with valid formats.
+	 * Data provider for valid category slugs.
+	 *
+	 * @return array<int,array<string>>
 	 */
-	public function test_category_slug_valid_formats(): void {
-		$valid_slugs = array(
-			'test-simple',
-			'test-multiple-words',
-			'test-with-numbers-123',
-			'test-a',
-			'test-123',
+	public function valid_slug_provider(): array {
+		return array(
+			array( 'test-simple' ),
+			array( 'test-multiple-words' ),
+			array( 'test-with-numbers-123' ),
+			array( 'test-a' ),
+			array( 'test-123' ),
+		);
+	}
+
+	/**
+	 * Test category slug validation with valid formats.
+	 *
+	 * @dataProvider valid_slug_provider
+	 */
+	public function test_category_slug_valid_formats( string $slug ): void {
+		$result = $this->register_category_during_hook(
+			$slug,
+			array(
+				'label'       => 'Test',
+				'description' => 'Test description.',
+			)
 		);
 
-		$callback = function () use ( $valid_slugs ): void {
-			foreach ( $valid_slugs as $slug ) {
-				$result = wp_register_ability_category(
-					$slug,
-					array(
-						'label'       => 'Test',
-						'description' => 'Test description.',
-					)
-				);
+		$this->assertInstanceOf( WP_Ability_Category::class, $result, "Slug '{$slug}' should be valid" );
+	}
 
-				$this->assertInstanceOf( WP_Ability_Category::class, $result, "Slug '{$slug}' should be valid" );
-			}
-		};
-
-		add_action( 'abilities_api_categories_init', $callback );
-		do_action( 'abilities_api_categories_init', WP_Abilities_Category_Registry::get_instance() );
-		remove_action( 'abilities_api_categories_init', $callback );
+	/**
+	 * Data provider for invalid category slugs.
+	 *
+	 * @return array<int,array<string>>
+	 */
+	public function invalid_slug_provider(): array {
+		return array(
+			array( 'Test-Uppercase' ),
+			array( 'test_underscore' ),
+			array( 'test.dot' ),
+			array( 'test/slash' ),
+			array( 'test space' ),
+			array( '-test-start-dash' ),
+			array( 'test-end-dash-' ),
+			array( 'test--double-dash' ),
+		);
 	}
 
 	/**
 	 * Test category slug validation with invalid formats.
 	 *
+	 * @dataProvider invalid_slug_provider
 	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
 	 */
-	public function test_category_slug_invalid_formats(): void {
-		$invalid_slugs = array(
-			'Test-Uppercase',
-			'test_underscore',
-			'test.dot',
-			'test/slash',
-			'test space',
-			'-test-start-dash',
-			'test-end-dash-',
-			'test--double-dash',
+	public function test_category_slug_invalid_formats( string $slug ): void {
+		$result = $this->register_category_during_hook(
+			$slug,
+			array(
+				'label'       => 'Test',
+				'description' => 'Test description.',
+			)
 		);
 
-		$callback = function () use ( $invalid_slugs ): void {
-			foreach ( $invalid_slugs as $slug ) {
-				$result = wp_register_ability_category(
-					$slug,
-					array(
-						'label'       => 'Test',
-						'description' => 'Test description.',
-					)
-				);
-
-				$this->assertNull( $result, "Slug '{$slug}' should be invalid" );
-			}
-		};
-
-		add_action( 'abilities_api_categories_init', $callback );
-		do_action( 'abilities_api_categories_init', WP_Abilities_Category_Registry::get_instance() );
-		remove_action( 'abilities_api_categories_init', $callback );
+		$this->assertNull( $result, "Slug '{$slug}' should be invalid" );
 		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register' );
 	}
 
