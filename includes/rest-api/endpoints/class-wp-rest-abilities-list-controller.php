@@ -288,12 +288,6 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'annotations'   => array(
-					'description' => __( 'Annotations for the ability.' ),
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
 				'meta'          => array(
 					'description' => __( 'Meta information about the ability.' ),
 					'type'        => 'object',
@@ -301,7 +295,7 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 					'readonly'    => true,
 				),
 			),
-			'required'   => array( 'name', 'label', 'description', 'category' ),
+			'required'   => array( 'name', 'label', 'meta', 'description', 'category' ),
 		);
 
 		return $this->add_additional_fields_schema( $schema );
