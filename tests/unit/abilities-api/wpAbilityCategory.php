@@ -44,7 +44,7 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	 * Tear down after each test.
 	 */
 	public function tear_down(): void {
-		remove_action( 'doing_it_wrong_run', array( $this, 'record_doing_it_wrong' ), 10 );
+		remove_action( 'doing_it_wrong_run', array( $this, 'record_doing_it_wrong' ) );
 		$this->doing_it_wrong_log = array();
 
 		// Clean up all test categories.
