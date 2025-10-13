@@ -184,13 +184,20 @@ final class WP_Ability_Category {
 	/**
 	 * Wakeup magic method.
 	 *
-	 * Prevents unserialization of this object as a security hardening measure.
-	 * Unserializing objects can lead to security vulnerabilities such as object
-	 * injection attacks and remote code execution.
-	 *
 	 * @since n.e.x.t
+	 * @throws \LogicException If the category is unserialized. This is a security hardening measure to prevent unserialization of the category.
 	 */
 	public function __wakeup(): void {
-		throw new \LogicException( self::class . ' should never be unserialized.' );
+		throw new \LogicException( self::class . ' must not be unserialized.' );
+	}
+
+	/**
+	 * Serialization magic method.
+	 *
+	 * @since n.e.x.t
+	 * @throws \LogicException If the category is serialized. This is a security hardening measure to prevent serialization of the category.
+	 */
+	public function __sleep(): array {
+		throw new \LogicException( self::class . ' must not be serialized.' );
 	}
 }

@@ -228,13 +228,19 @@ final class WP_Abilities_Category_Registry {
 	 * Wakeup magic method.
 	 *
 	 * @since n.e.x.t
-	 * @throws \UnexpectedValueException If any of the registered categories is not an instance of WP_Ability_Category.
+	 * @throws \LogicException If the registry is unserialized. This is a security hardening measure to prevent unserialization of the registry.
 	 */
 	public function __wakeup(): void {
-		foreach ( $this->registered_categories as $category ) {
-			if ( ! $category instanceof WP_Ability_Category ) {
-				throw new \UnexpectedValueException();
-			}
-		}
+		throw new \LogicException( self::class . ' must not be unserialized.' );
+	}
+
+	/**
+	 * Serialization magic method.
+	 *
+	 * @since n.e.x.t
+	 * @throws \LogicException If the registry is serialized. This is a security hardening measure to prevent serialization of the registry.
+	 */
+	public function __sleep(): array {
+		throw new \LogicException( self::class . ' must not be serialized.' );
 	}
 }
