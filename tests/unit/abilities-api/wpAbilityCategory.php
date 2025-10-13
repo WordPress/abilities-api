@@ -760,4 +760,269 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		// But _doing_it_wrong should be triggered.
 		$this->assertDoingItWrongTriggered( 'WP_Ability_Category::__construct', 'not a valid property' );
 	}
+
+	/**
+	 * Test category to_array() returns correct structure.
+	 */
+	public function test_category_to_array_structure(): void {
+		$category = $this->register_category_during_hook(
+			'test-math',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+			)
+		);
+
+		$array = $category->to_array();
+
+		$this->assertIsArray( $array );
+		$this->assertArrayHasKey( 'slug', $array );
+		$this->assertArrayHasKey( 'label', $array );
+		$this->assertArrayHasKey( 'description', $array );
+		$this->assertArrayHasKey( 'meta', $array );
+
+		$this->assertSame( 'test-math', $array['slug'] );
+		$this->assertSame( 'Math', $array['label'] );
+		$this->assertSame( 'Mathematical operations.', $array['description'] );
+		$this->assertSame( array(), $array['meta'] );
+	}
+
+	/**
+	 * Test category to_array() includes meta.
+	 */
+	public function test_category_to_array_with_meta(): void {
+		$meta = array(
+			'icon'     => 'dashicons-calculator',
+			'priority' => 10,
+			'custom'   => array( 'key' => 'value' ),
+		);
+
+		$category = $this->register_category_during_hook(
+			'test-meta',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+				'meta'        => $meta,
+			)
+		);
+
+		$array = $category->to_array();
+
+		$this->assertIsArray( $array );
+		$this->assertArrayHasKey( 'meta', $array );
+		$this->assertSame( $meta, $array['meta'] );
+		$this->assertSame( 'dashicons-calculator', $array['meta']['icon'] );
+		$this->assertSame( 10, $array['meta']['priority'] );
+		$this->assertSame( array( 'key' => 'value' ), $array['meta']['custom'] );
+	}
+
+	/**
+	 * Test category to_array() filter is applied.
+	 */
+	public function test_category_to_array_filter(): void {
+		$category = $this->register_category_during_hook(
+			'test-filter',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+			)
+		);
+
+		add_filter(
+			'wp_ability_category_test-filter_to_array',
+			static function ( $array ) {
+				$array['custom_field'] = 'custom_value';
+				return $array;
+			}
+		);
+
+		$array = $category->to_array();
+
+		$this->assertArrayHasKey( 'custom_field', $array );
+		$this->assertSame( 'custom_value', $array['custom_field'] );
+	}
+
+	/**
+	 * Test category to_array() filter receives correct parameters.
+	 */
+	public function test_category_to_array_filter_parameters(): void {
+		$category = $this->register_category_during_hook(
+			'test-params',
+			array(
+				'label'       => 'System',
+				'description' => 'System operations.',
+			)
+		);
+
+		$filter_called   = false;
+		$received_array  = null;
+		$received_object = null;
+
+		add_filter(
+			'wp_ability_category_test-params_to_array',
+			static function ( $array, $cat ) use ( &$filter_called, &$received_array, &$received_object ) {
+				$filter_called   = true;
+				$received_array  = $array;
+				$received_object = $cat;
+				return $array;
+			},
+			10,
+			2
+		);
+
+		$category->to_array();
+
+		$this->assertTrue( $filter_called, 'Filter should have been called' );
+		$this->assertIsArray( $received_array, 'First parameter should be an array' );
+		$this->assertInstanceOf( WP_Ability_Category::class, $received_object, 'Second parameter should be WP_Ability_Category instance' );
+		$this->assertSame( $category, $received_object, 'Second parameter should be the same category instance' );
+	}
+
+	/**
+	 * Test category to_array() filter can modify all fields.
+	 */
+	public function test_category_to_array_filter_modify_fields(): void {
+		$category = $this->register_category_during_hook(
+			'test-modify',
+			array(
+				'label'       => 'Original',
+				'description' => 'Original description.',
+				'meta'        => array( 'foo' => 'bar' ),
+			)
+		);
+
+		add_filter(
+			'wp_ability_category_test-modify_to_array',
+			static function ( $array ) {
+				$array['label']             = 'Modified Label';
+				$array['description']       = 'Modified Description';
+				$array['meta']['new_field'] = 'new_value';
+				unset( $array['meta']['foo'] );
+				return $array;
+			}
+		);
+
+		$array = $category->to_array();
+
+		$this->assertSame( 'Modified Label', $array['label'] );
+		$this->assertSame( 'Modified Description', $array['description'] );
+		$this->assertArrayHasKey( 'new_field', $array['meta'] );
+		$this->assertSame( 'new_value', $array['meta']['new_field'] );
+		$this->assertArrayNotHasKey( 'foo', $array['meta'] );
+	}
+
+	/**
+	 * Test category implements JsonSerializable interface.
+	 */
+	public function test_category_implements_json_serializable(): void {
+		$category = $this->register_category_during_hook(
+			'test-json',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+			)
+		);
+
+		$this->assertInstanceOf( \JsonSerializable::class, $category );
+	}
+
+	/**
+	 * Test category can be json_encode()'d directly.
+	 */
+	public function test_category_json_encode(): void {
+		$category = $this->register_category_during_hook(
+			'test-encode',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+				'meta'        => array( 'icon' => 'dashicons-calculator' ),
+			)
+		);
+
+		$json = json_encode( $category );
+		$this->assertNotFalse( $json, 'json_encode should not fail' );
+
+		$decoded = json_decode( $json, true );
+		$this->assertIsArray( $decoded );
+		$this->assertSame( 'test-encode', $decoded['slug'] );
+		$this->assertSame( 'Math', $decoded['label'] );
+		$this->assertSame( 'Mathematical operations.', $decoded['description'] );
+		$this->assertSame( array( 'icon' => 'dashicons-calculator' ), $decoded['meta'] );
+	}
+
+	/**
+	 * Test category jsonSerialize() returns same as to_array().
+	 */
+	public function test_category_json_serialize_matches_to_array(): void {
+		$category = $this->register_category_during_hook(
+			'test-match',
+			array(
+				'label'       => 'System',
+				'description' => 'System operations.',
+				'meta'        => array( 'priority' => 5 ),
+			)
+		);
+
+		$to_array_result = $category->to_array();
+		$json_serialize  = $category->jsonSerialize();
+
+		$this->assertSame( $to_array_result, $json_serialize, 'jsonSerialize() should return same result as to_array()' );
+	}
+
+	/**
+	 * Test category jsonSerialize() respects filters.
+	 */
+	public function test_category_json_serialize_respects_filters(): void {
+		$category = $this->register_category_during_hook(
+			'test-json-filter',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+			)
+		);
+
+		add_filter(
+			'wp_ability_category_test-json-filter_to_array',
+			static function ( $array ) {
+				$array['filtered'] = true;
+				return $array;
+			}
+		);
+
+		$json    = json_encode( $category );
+		$decoded = json_decode( $json, true );
+
+		$this->assertArrayHasKey( 'filtered', $decoded );
+		$this->assertTrue( $decoded['filtered'] );
+	}
+
+	/**
+	 * Test category to_array() with complex nested meta.
+	 */
+	public function test_category_to_array_with_nested_meta(): void {
+		$meta = array(
+			'level1' => array(
+				'level2' => array(
+					'level3' => 'deep value',
+					'array'  => array( 1, 2, 3 ),
+				),
+			),
+			'simple' => 'value',
+		);
+
+		$category = $this->register_category_during_hook(
+			'test-nested',
+			array(
+				'label'       => 'Complex',
+				'description' => 'Complex meta structure.',
+				'meta'        => $meta,
+			)
+		);
+
+		$array = $category->to_array();
+
+		$this->assertSame( $meta, $array['meta'] );
+		$this->assertSame( 'deep value', $array['meta']['level1']['level2']['level3'] );
+		$this->assertSame( array( 1, 2, 3 ), $array['meta']['level1']['level2']['array'] );
+	}
 }
