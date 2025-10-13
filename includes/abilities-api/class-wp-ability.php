@@ -357,7 +357,7 @@ class WP_Ability implements \JsonSerializable {
 	 *     @type array  $input_schema  The input validation schema.
 	 *     @type array  $output_schema The output validation schema.
 	 *     @type array  $meta {
-	 *         Metadata for the ability.
+	 *         Metadata for the ability. May contain additional custom keys beyond those documented below.
 	 *
 	 *         @type array $annotations {
 	 *             Behavior annotations.
@@ -367,7 +367,8 @@ class WP_Ability implements \JsonSerializable {
 	 *             @type bool   $destructive  Whether the ability is destructive.
 	 *             @type bool   $idempotent   Whether the ability is idempotent.
 	 *         }
-	 *         @type bool $show_in_rest Whether the ability is exposed in REST API.
+	 *         @type bool  $show_in_rest Whether the ability is exposed in REST API.
+	 *         @type mixed ...$0          Additional custom metadata keys.
 	 *     }
 	 * }
 	 */
