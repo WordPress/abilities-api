@@ -337,27 +337,21 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	 * Test retrieving all registered categories.
 	 */
 	public function test_get_all_categories(): void {
-		$callback = static function (): void {
-			wp_register_ability_category(
-				'test-math',
-				array(
-					'label'       => 'Math',
-					'description' => 'Mathematical operations.',
-				)
-			);
+		$this->register_category_during_hook(
+			'test-math',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+			)
+		);
 
-			wp_register_ability_category(
-				'test-system',
-				array(
-					'label'       => 'System',
-					'description' => 'System operations.',
-				)
-			);
-		};
-
-		add_action( 'abilities_api_categories_init', $callback );
-		do_action( 'abilities_api_categories_init', WP_Abilities_Category_Registry::get_instance() );
-		remove_action( 'abilities_api_categories_init', $callback );
+		$this->register_category_during_hook(
+			'test-system',
+			array(
+				'label'       => 'System',
+				'description' => 'System operations.',
+			)
+		);
 
 		$categories = wp_get_ability_categories();
 
