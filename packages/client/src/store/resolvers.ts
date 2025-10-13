@@ -17,10 +17,8 @@ import { receiveAbilities } from './actions';
  * The resolver only fetches once (without category filter) and stores all abilities.
  * Category filtering handled client-side by the selector for better performance
  * and to avoid multiple API requests when filtering by different categories.
- *
- * @param _category Optional category slug
  */
-export function getAbilities( _category?: string ) {
+export function getAbilities() {
 	// @ts-expect-error - registry types are not yet available
 	return async ( { dispatch, registry, select } ) => {
 		const existingAbilities = select.getAbilities();
