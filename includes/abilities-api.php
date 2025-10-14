@@ -120,11 +120,6 @@ function wp_get_ability( string $name ): ?WP_Ability {
  * } $args
  */
 function wp_get_abilities( array $args = array() ): array {
-	if ( empty( $args ) ) {
-		// Backward compatibility: return all abilities if no args.
-		return WP_Abilities_Registry::get_instance()->get_all_registered();
-	}
-
 	$query = new WP_Abilities_Query( $args );
 	return $query->get_abilities();
 }
