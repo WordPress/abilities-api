@@ -95,13 +95,38 @@ function wp_get_ability( string $name ): ?WP_Ability {
  * Retrieves all registered abilities using Abilities API.
  *
  * @since 0.1.0
+ * @since n.e.x.t Added optional $args parameter for filtering abilities.
  *
  * @see WP_Abilities_Registry::get_all_registered()
+ * @see WP_Abilities_Query
  *
+ * @param array<string,mixed> $args Optional. Arguments to filter abilities. Default empty array.
+ *                                   Accepts 'category', 'namespace', 'search', 'meta', 'orderby',
+ *                                   'order', 'limit', and 'offset'.
+ *                                   'category' and 'namespace' accept string or array for multi-value filtering.
+ *                                   All filters use AND logic between different filter types and meta properties.
  * @return \WP_Ability[] The array of registered abilities.
+ *
+ * @phpstan-param array{
+ *   category?: string|string[],
+ *   namespace?: string|string[],
+ *   search?: string,
+ *   meta?: array<string,mixed>,
+ *   orderby?: string,
+ *   order?: string,
+ *   limit?: int,
+ *   offset?: int,
+ *   ...<string, mixed>
+ * } $args
  */
-function wp_get_abilities(): array {
-	return WP_Abilities_Registry::get_instance()->get_all_registered();
+function wp_get_abilities( array $args = array() ): array {
+	if ( empty( $args ) ) {
+		// Backward compatibility: return all abilities if no args.
+		return WP_Abilities_Registry::get_instance()->get_all_registered();
+	}
+
+	$query = new WP_Abilities_Query( $args );
+	return $query->get_abilities();
 }
 
 /**
