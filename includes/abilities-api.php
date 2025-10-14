@@ -94,10 +94,11 @@ function wp_get_ability( string $name ): ?WP_Ability {
 /**
  * Retrieves all registered abilities using Abilities API.
  *
+ * Uses WP_Abilities_Query to retrieve abilities from the registry with optional filtering.
+ *
  * @since 0.1.0
  * @since n.e.x.t Added optional $args parameter for filtering abilities.
  *
- * @see WP_Abilities_Registry::get_all_registered()
  * @see WP_Abilities_Query
  *
  * @param array<string,mixed> $args Optional. Arguments to filter abilities. Default empty array.
