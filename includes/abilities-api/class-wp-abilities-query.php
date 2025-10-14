@@ -172,9 +172,11 @@ class WP_Abilities_Query {
 		}
 
 		// Ensure limit is either -1 (no limit) or positive.
-		if ( $this->query_vars['limit'] < self::$no_limit ) {
-			$this->query_vars['limit'] = self::$no_limit;
+		if ( $this->query_vars['limit'] >= self::$no_limit ) {
+			return;
 		}
+
+		$this->query_vars['limit'] = self::$no_limit;
 	}
 
 	/**
