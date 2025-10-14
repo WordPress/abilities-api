@@ -62,7 +62,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	}
 
 	/**
-   * Tear down after each test.
+	 * Tear down after each test.
 	 */
 	public function tear_down(): void {
 		// Clean up registered categories.
@@ -74,7 +74,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
-	 /*
+	/*
 	 * Tests that getting non-existing metadata item returns default value.
 	 */
 	public function test_meta_get_non_existing_item_returns_default() {
@@ -111,7 +111,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 				array(
 					'instructions' => '',
 					'idempotent'   => false,
-				),
+				)
 			),
 			$ability->get_meta_item( 'annotations' )
 		);
@@ -196,7 +196,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 * Tests that `show_in_rest` metadata can be set to true.
 	 */
 	public function test_meta_show_in_rest_can_be_set_to_true() {
-		$args = array_merge(
+		$args    = array_merge(
 			self::$test_ability_properties,
 			array(
 				'meta' => array(
@@ -216,7 +216,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 * Tests that `show_in_rest` can be set to false.
 	 */
 	public function test_show_in_rest_can_be_set_to_false() {
-		$args = array_merge(
+		$args    = array_merge(
 			self::$test_ability_properties,
 			array(
 				'meta' => array(
@@ -407,7 +407,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 */
 	public function data_execute_callback() {
 		return array(
-			'function name string'      => array(
+			'function name string'       => array(
 				'strlen',
 			),
 			'closure'                    => array(
@@ -432,7 +432,7 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_execute_callback
 	 */
-	public function test_execute_with_different_callbacks( $execute_callback) {
+	public function test_execute_with_different_callbacks( $execute_callback ) {
 		$args = array_merge(
 			self::$test_ability_properties,
 			array(
