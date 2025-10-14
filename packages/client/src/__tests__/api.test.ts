@@ -101,10 +101,10 @@ describe( 'API functions', () => {
 				getAbilities: mockGetAbilities,
 			} );
 
-			const result = await getAbilities( 'data-retrieval' );
+			const result = await getAbilities( { category: 'data-retrieval' } );
 
 			expect( resolveSelect ).toHaveBeenCalledWith( store );
-			expect( mockGetAbilities ).toHaveBeenCalledWith( 'data-retrieval' );
+			expect( mockGetAbilities ).toHaveBeenCalledWith( { category: 'data-retrieval' } );
 			expect( result ).toEqual( mockAbilities );
 		} );
 	} );

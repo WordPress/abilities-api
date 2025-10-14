@@ -99,7 +99,7 @@ describe( 'Store Resolvers', () => {
 
 			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
 
-			const resolver = getAbilities( 'data-retrieval' );
+			const resolver = getAbilities( { category: 'data-retrieval' } );
 			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,

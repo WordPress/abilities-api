@@ -14,8 +14,8 @@ import { receiveAbilities } from './actions';
  * Resolver for getAbilities selector.
  * Fetches all abilities from the server.
  *
- * The resolver only fetches once (without category filter) and stores all abilities.
- * Category filtering handled client-side by the selector for better performance
+ * The resolver only fetches once (without query args filter) and stores all abilities.
+ * Query args filtering handled client-side by the selector for better performance
  * and to avoid multiple API requests when filtering by different categories.
  */
 export function getAbilities() {

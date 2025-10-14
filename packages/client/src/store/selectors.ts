@@ -6,18 +6,18 @@ import { createSelector } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import type { Ability, AbilitiesState } from '../types';
+import type { Ability, AbilitiesQueryArgs, AbilitiesState } from '../types';
 
 /**
  * Returns all registered abilities.
- * Optionally filters by category.
+ * Optionally filters by query arguments.
  *
- * @param state    Store state.
- * @param category Optional category slug to filter by.
+ * @param state Store state.
+ * @param args  Optional query arguments to filter. Defaults to empty object.
  * @return Array of abilities.
  */
 export const getAbilities = createSelector(
-	( state: AbilitiesState, category?: string ): Ability[] => {
+	( state: AbilitiesState, { category }: AbilitiesQueryArgs = {} ): Ability[] => {
 		const abilities = Object.values( state.abilitiesByName );
 		if ( category ) {
 			return abilities.filter(

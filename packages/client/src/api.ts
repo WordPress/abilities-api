@@ -10,17 +10,17 @@ import { sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { store } from './store';
-import type { Ability, AbilityInput, AbilityOutput } from './types';
+import type { Ability, AbilitiesQueryArgs, AbilityInput, AbilityOutput } from './types';
 import { validateValueFromSchema } from './validation';
 
 /**
- * Get all available abilities.
+ * Get all available abilities with optional filtering.
  *
- * @param category Optional category slug to filter abilities.
+ * @param args Optional query arguments to filter. Defaults to empty object.
  * @return Promise resolving to array of abilities.
  */
-export async function getAbilities( category?: string ): Promise< Ability[] > {
-	return await resolveSelect( store ).getAbilities( category );
+export async function getAbilities( args: AbilitiesQueryArgs = {}  ): Promise< Ability[] > {
+	return await resolveSelect( store ).getAbilities( args );
 }
 
 /**

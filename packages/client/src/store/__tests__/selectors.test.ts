@@ -142,7 +142,7 @@ describe( 'Store Selectors', () => {
 				},
 			};
 
-			const result = getAbilities( state, 'data-retrieval' );
+			const result = getAbilities( state, { category: 'data-retrieval' } );
 
 			expect( result ).toHaveLength( 2 );
 			expect( result ).toContainEqual(
@@ -170,7 +170,7 @@ describe( 'Store Selectors', () => {
 				},
 			};
 
-			const result = getAbilities( state, 'non-existent-category' );
+			const result = getAbilities( state, { category: 'non-existent-category' } );
 
 			expect( result ).toEqual( [] );
 		} );

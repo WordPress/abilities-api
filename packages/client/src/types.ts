@@ -92,6 +92,16 @@ export interface Ability {
 }
 
 /**
+ * The shape of the arguments for querying abilities.
+ */
+export interface AbilitiesQueryArgs {
+	/**
+	 * Optional category slug to filter abilities.
+	 */
+	category?: string;
+}
+
+/**
  * The state shape for the abilities store.
  */
 export interface AbilitiesState {

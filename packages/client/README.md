@@ -75,7 +75,7 @@ function MyComponent() {
 
 ### Functions
 
-#### `getAbilities(category?: string): Promise<Ability[]>`
+#### `getAbilities( args: AbilitiesQueryArgs = {} ): Promise<Ability[]>`
 
 Returns all registered abilities. Optionally filter by category slug. Automatically handles pagination to fetch all abilities across multiple pages if needed.
 
@@ -85,11 +85,11 @@ const abilities = await getAbilities();
 console.log( `Found ${ abilities.length } abilities` );
 
 // Get abilities in a specific category
-const dataAbilities = await getAbilities( 'data-retrieval' );
+const dataAbilities = await getAbilities( { category: 'data-retrieval' } );
 console.log( `Found ${ dataAbilities.length } data retrieval abilities` );
 ```
 
-#### `getAbility(name: string): Promise<Ability | null>`
+#### `getAbility( name: string ): Promise<Ability | null>`
 
 Returns a specific ability by name, or null if not found.
 
@@ -100,7 +100,7 @@ if ( ability ) {
 }
 ```
 
-#### `registerAbility(ability: Ability): void`
+#### `registerAbility( ability: Ability ): void`
 
 Registers a client-side ability. Client abilities are executed locally in the browser and must include a callback function and a valid category.
 
@@ -115,18 +115,18 @@ registerAbility( {
   input_schema: {
     type: 'object',
     properties: {
-      url: { type: 'string' }
+      url: { type: 'string' },
     },
-    required: [ 'url' ]
+    required: [ 'url' ],
   },
   callback: async ( { url } ) => {
     window.location.href = url;
     return { success: true };
-  }
+  },
 } );
 ```
 
-#### `executeAbility(name: string, input?: Record<string, any>): Promise<any>`
+#### `executeAbility( name: string, input?: Record<string, any> ): Promise<any>`
 
 Executes an ability with optional input parameters. The HTTP method is automatically determined based on the ability's annotations:
 
@@ -150,8 +150,8 @@ const result = await executeAbility( 'my-plugin/create-item', {
 
 When using with `@wordpress/data`:
 
-- `getAbilities(category?)` - Returns all abilities from the store, optionally filtered by category
-- `getAbility(name)` - Returns a specific ability from the store
+- `getAbilities( args: AbilitiesQueryArgs = {} )` - Returns all abilities from the store, optionally filtered by query arguments
+- `getAbility( name: string )` - Returns a specific ability from the store
 
 ```javascript
 import { useSelect } from '@wordpress/data';
@@ -166,7 +166,8 @@ function MyComponent() {
 
   // Get abilities in a specific category
   const dataAbilities = useSelect(
-    ( select ) => select( abilitiesStore ).getAbilities( 'data-retrieval' ),
+    ( select ) =>
+      select( abilitiesStore ).getAbilities( { category: 'data-retrieval' } ),
     []
   );
 
