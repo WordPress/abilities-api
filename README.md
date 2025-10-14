@@ -24,6 +24,7 @@
 - [Using Abilities](docs/4.using-abilities.md)
 - [REST API Reference](docs/5.rest-api.md)
 - [Hooks](docs/6.hooks.md)
+- [JavaScript/TypeScript Client](docs/7.javascript-client.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 
 ## Inspiration
