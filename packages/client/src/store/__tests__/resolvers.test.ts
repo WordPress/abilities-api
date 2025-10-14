@@ -41,6 +41,7 @@ describe( 'Store Resolvers', () => {
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -51,16 +52,16 @@ describe( 'Store Resolvers', () => {
 			};
 
 			const mockSelectInstance = {
-				getEntityRecordsTotalPages: jest.fn().mockReturnValue( 1 ),
+				getAbilities: jest.fn().mockReturnValue( [] ), // Store is empty
 			};
 
 			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
-			mockRegistry.select.mockReturnValue( mockSelectInstance );
 
 			const resolver = getAbilities();
 			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
+				select: mockSelectInstance,
 			} );
 
 			expect( mockRegistry.resolveSelect ).toHaveBeenCalledWith(
@@ -76,9 +77,47 @@ describe( 'Store Resolvers', () => {
 			);
 		} );
 
+		it( 'should not fetch if store already has abilities', async () => {
+			const existingAbilities: Ability[] = [
+				{
+					name: 'test/ability1',
+					label: 'Test Ability 1',
+					description: 'First test ability',
+					category: 'data-retrieval',
+					input_schema: { type: 'object' },
+					output_schema: { type: 'object' },
+				},
+			];
+
+			const mockResolveSelect = {
+				getEntityRecords: jest.fn(),
+			};
+
+			const mockSelectInstance = {
+				getAbilities: jest.fn().mockReturnValue( existingAbilities ), // Store has data
+			};
+
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+
+			const resolver = getAbilities( { category: 'data-retrieval' } );
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelectInstance,
+			} );
+
+			// Should not fetch since store already has abilities
+			expect( mockResolveSelect.getEntityRecords ).not.toHaveBeenCalled();
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
 		it( 'should handle empty abilities', async () => {
 			const mockResolveSelect = {
 				getEntityRecords: jest.fn().mockResolvedValue( [] ),
+			};
+
+			const mockSelectInstance = {
+				getAbilities: jest.fn().mockReturnValue( [] ), // Store is empty
 			};
 
 			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
@@ -87,6 +126,7 @@ describe( 'Store Resolvers', () => {
 			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
+				select: mockSelectInstance,
 			} );
 
 			expect( mockDispatch ).toHaveBeenCalledWith(
@@ -99,12 +139,17 @@ describe( 'Store Resolvers', () => {
 				getEntityRecords: jest.fn().mockResolvedValue( null ),
 			};
 
+			const mockSelectInstance = {
+				getAbilities: jest.fn().mockReturnValue( [] ), // Store is empty
+			};
+
 			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
 
 			const resolver = getAbilities();
 			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
+				select: mockSelectInstance,
 			} );
 
 			expect( mockDispatch ).toHaveBeenCalledWith(
@@ -118,6 +163,7 @@ describe( 'Store Resolvers', () => {
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -125,6 +171,7 @@ describe( 'Store Resolvers', () => {
 					name: 'test/ability2',
 					label: 'Test Ability 2',
 					description: 'Second test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -132,6 +179,7 @@ describe( 'Store Resolvers', () => {
 					name: 'test/ability3',
 					label: 'Test Ability 3',
 					description: 'Third test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -141,12 +189,17 @@ describe( 'Store Resolvers', () => {
 				getEntityRecords: jest.fn().mockResolvedValue( allAbilities ),
 			};
 
+			const mockSelectInstance = {
+				getAbilities: jest.fn().mockReturnValue( [] ), // Store is empty
+			};
+
 			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
 
 			const resolver = getAbilities();
 			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
+				select: mockSelectInstance,
 			} );
 
 			// Should fetch all abilities in one request with per_page: -1
@@ -172,6 +225,7 @@ describe( 'Store Resolvers', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Test ability description',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -211,6 +265,7 @@ describe( 'Store Resolvers', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Already in store',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: jest.fn(),
@@ -262,6 +317,7 @@ describe( 'Store Resolvers', () => {
 				name: 'my-plugin/feature-action',
 				label: 'Namespaced Action',
 				description: 'Namespaced ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};

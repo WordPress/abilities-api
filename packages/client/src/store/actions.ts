@@ -62,6 +62,25 @@ export function registerAbility( ability: Ability ) {
 			);
 		}
 
+		if ( ! ability.category ) {
+			throw new Error(
+				sprintf( 'Ability "%s" must have a category', ability.name )
+			);
+		}
+
+		// TODO: At the moment, only the format of an ability of a category is checked.
+		// We are not checking that the category is a valid registered category, as this
+		// would require a REST endpoint that does not exist at the moment.
+		if ( ! /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test( ability.category ) ) {
+			throw new Error(
+				sprintf(
+					'Ability "%1$s" has an invalid category. Category must be lowercase alphanumeric with dashes only Got: "%2$s"',
+					ability.name,
+					ability.category
+				)
+			);
+		}
+
 		// Client-side abilities must have a callback
 		if ( ability.callback && typeof ability.callback !== 'function' ) {
 			throw new Error(
