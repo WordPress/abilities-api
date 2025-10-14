@@ -165,6 +165,16 @@ class WP_Abilities_Query {
 	protected function sanitize_pagination_args(): void {
 		$this->query_vars['limit']  = (int) $this->query_vars['limit'];
 		$this->query_vars['offset'] = (int) $this->query_vars['offset'];
+
+		// Ensure offset is non-negative.
+		if ( $this->query_vars['offset'] < 0 ) {
+			$this->query_vars['offset'] = 0;
+		}
+
+		// Ensure limit is either -1 (no limit) or positive.
+		if ( $this->query_vars['limit'] < self::$no_limit ) {
+			$this->query_vars['limit'] = self::$no_limit;
+		}
 	}
 
 	/**
