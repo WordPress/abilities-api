@@ -85,7 +85,7 @@ class WP_Abilities_Query {
 	}
 
 	/**
-	 * Parses and validates query arguments.
+	 * Parses and sanitizes query arguments.
 	 *
 	 * @since n.e.x.t
 	 *
@@ -106,19 +106,19 @@ class WP_Abilities_Query {
 
 		$this->query_vars = wp_parse_args( $args, $defaults );
 
-		$this->validate_meta_arg();
-		$this->validate_orderby();
-		$this->validate_order();
-		$this->validate_pagination_args();
+		$this->sanitize_meta_arg();
+		$this->sanitize_orderby();
+		$this->sanitize_order();
+		$this->sanitize_pagination_args();
 	}
 
 	/**
-	 * Validates the meta query argument.
+	 * Sanitizes the meta query argument.
 	 *
 	 * @since n.e.x.t
 	 *
 	 */
-	protected function validate_meta_arg(): void {
+	protected function sanitize_meta_arg(): void {
 		if ( is_array( $this->query_vars['meta'] ) ) {
 			return;
 		}
@@ -126,12 +126,12 @@ class WP_Abilities_Query {
 	}
 
 	/**
-	 * Validates the orderby query argument.
+	 * Sanitizes the orderby query argument.
 	 *
 	 * @since n.e.x.t
 	 *
 	 */
-	protected function validate_orderby(): void {
+	protected function sanitize_orderby(): void {
 		if ( empty( $this->query_vars['orderby'] ) ) {
 			return;
 		}
@@ -143,12 +143,12 @@ class WP_Abilities_Query {
 	}
 
 	/**
-	 * Validates the order query argument.
+	 * Sanitizes the order query argument.
 	 *
 	 * @since n.e.x.t
 	 *
 	 */
-	protected function validate_order(): void {
+	protected function sanitize_order(): void {
 		$this->query_vars['order'] = strtoupper( $this->query_vars['order'] );
 		if ( in_array( $this->query_vars['order'], self::$valid_order_directions, true ) ) {
 			return;
@@ -157,12 +157,12 @@ class WP_Abilities_Query {
 	}
 
 	/**
-	 * Validates the pagination query arguments (limit and offset).
+	 * Sanitizes the pagination query arguments (limit and offset).
 	 *
 	 * @since n.e.x.t
 	 *
 	 */
-	protected function validate_pagination_args(): void {
+	protected function sanitize_pagination_args(): void {
 		$this->query_vars['limit']  = (int) $this->query_vars['limit'];
 		$this->query_vars['offset'] = (int) $this->query_vars['offset'];
 	}
