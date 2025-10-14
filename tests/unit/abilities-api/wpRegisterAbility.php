@@ -156,14 +156,14 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
-		$expected_annotations  = array_merge(
+		$expected_annotations = array_merge(
 			self::$test_ability_args['meta']['annotations'],
 			array(
 				'instructions' => '',
 				'idempotent'   => false,
-			),
+			)
 		);
-		$expected_meta         = array_merge(
+		$expected_meta        = array_merge(
 			self::$test_ability_args['meta'],
 			array(
 				'annotations'  => $expected_annotations,
