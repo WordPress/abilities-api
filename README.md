@@ -18,13 +18,12 @@
 
 ## Developer Documentation
 
-- [Introduction](docs/1.intro.md)
-- [Getting Started](docs/2.getting-started.md)
-- [Registering Abilities](docs/3.registering-abilities.md)
-- [Using Abilities](docs/4.using-abilities.md)
-- [REST API Reference](docs/5.rest-api.md)
-- [Hooks](docs/6.hooks.md)
-- [JavaScript/TypeScript Client](docs/7.javascript-client.md)
+- [Introduction](docs/intro.md)
+- [Getting Started](docs/getting-started.md)
+- [PHP API Reference](docs/php-api.md)
+- [REST API Reference](docs/rest-api.md)
+- [JavaScript Client](docs/javascript-client.md)
+- [Hooks](docs/hooks.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 
 ## Inspiration

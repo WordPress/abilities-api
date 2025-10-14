@@ -1,8 +1,73 @@
-# 3. Registering Abilities (`wp_register_ability`)
+# PHP API
+
+## Registering Categories
+
+Before registering abilities, you must register at least one category. Categories help organize abilities and make them easier to discover and filter.
+
+### Function Signature
+
+```php
+wp_register_ability_category( string $slug, array $args ): ?\WP_Ability_Category
+```
+
+**Parameters:**
+- `$slug` (`string`): A unique identifier for the category. Must contain only lowercase alphanumeric characters and dashes (no underscores, no uppercase).
+- `$args` (`array`): Category configuration with these keys:
+  - `label` (`string`, **Required**): Human-readable name for the category. Should be translatable.
+  - `description` (`string`, **Required**): Detailed description of the category's purpose. Should be translatable.
+  - `meta` (`array`, **Optional**): An associative array for storing arbitrary additional metadata about the category.
+
+**Return:** (`?\WP_Ability_Category`) An instance of the registered category if it was successfully registered, `null` on failure (e.g., invalid arguments, duplicate slug).
+
+**Note:** Categories must be registered during the `abilities_api_categories_init` action hook.
+
+### Code Example
+
+```php
+add_action( 'abilities_api_categories_init', 'my_plugin_register_categories' );
+function my_plugin_register_categories() {
+    wp_register_ability_category( 'data-retrieval', array(
+        'label' => __( 'Data Retrieval', 'my-plugin' ),
+        'description' => __( 'Abilities that retrieve and return data from the WordPress site.', 'my-plugin' ),
+    ));
+
+    wp_register_ability_category( 'data-modification', array(
+        'label' => __( 'Data Modification', 'my-plugin' ),
+        'description' => __( 'Abilities that modify data on the WordPress site.', 'my-plugin' ),
+    ));
+
+    wp_register_ability_category( 'communication', array(
+        'label' => __( 'Communication', 'my-plugin' ),
+        'description' => __( 'Abilities that send messages or notifications.', 'my-plugin' ),
+    ));
+}
+```
+
+### Category Slug Convention
+
+The `$slug` parameter must follow these rules:
+
+- **Format:** Must contain only lowercase alphanumeric characters (`a-z`, `0-9`) and hyphens (`-`).
+- **Valid examples:** `data-retrieval`, `ecommerce`, `site-information`, `user-management`, `category-123`
+- **Invalid examples:**
+  - Uppercase: `Data-Retrieval`, `MyCategory`
+  - Underscores: `data_retrieval`
+  - Special characters: `data.retrieval`, `data/retrieval`, `data retrieval`
+  - Leading/trailing dashes: `-data`, `data-`
+  - Double dashes: `data--retrieval`
+
+### Other Category Functions
+
+- `wp_unregister_ability_category( string $slug )` - Remove a registered category. Returns the unregistered category instance or `null` on failure.
+- `wp_get_ability_category( string $slug )` - Retrieve a specific category by slug. Returns the category instance or `null` if not found.
+- `wp_get_ability_categories()` - Get all registered categories as an associative array keyed by slug.
+
+
+## Registering Abilities (`wp_register_ability`)
 
 The primary way to add functionality to the Abilities API is by using the `wp_register_ability()` function, typically hooked into the `abilities_api_init` action.
 
-## Function Signature
+### Function Signature
 
 ```php
 wp_register_ability( string $id, array $args ): ?\WP_Ability
@@ -12,7 +77,7 @@ wp_register_ability( string $id, array $args ): ?\WP_Ability
 - `$args` (`array`): An array of arguments defining the ability configuration.
 - **Return:** (`?\WP_Ability`) An instance of the registered ability if it was successfully registered, `null` on failure (e.g., invalid arguments, duplicate ID).
 
-## Parameters Explained
+### Parameters Explained
 
 The `$args` array accepts the following keys:
 
@@ -38,7 +103,7 @@ The `$args` array accepts the following keys:
     - When `true`, the ability will be listed in REST API responses and can be executed via REST endpoints.
     - When `false`, the ability will be hidden from REST API listings and cannot be executed via REST endpoints, but remains available for internal PHP usage.
 
-## Ability ID Convention
+### Ability ID Convention
 
 The `$id` parameter must follow the pattern `namespace/ability-name`:
 
@@ -46,9 +111,9 @@ The `$id` parameter must follow the pattern `namespace/ability-name`:
 - **Convention:** Use your plugin slug as the namespace, like `my-plugin/ability-name`.
 - **Examples:** `my-plugin/update-settings`, `woocommerce/get-product`, `contact-form/send-message`, `analytics/track-event`
 
-## Code Examples
+### Code Examples
 
-### Registering a Simple Data Retrieval Ability
+#### Registering a Simple Data Retrieval Ability
 
 ```php
 add_action( 'abilities_api_init', 'my_plugin_register_site_info_ability' );
@@ -98,7 +163,7 @@ function my_plugin_register_site_info_ability() {
 }
 ```
 
-### Registering an Ability with Input Parameters
+#### Registering an Ability with Input Parameters
 
 ```php
 add_action( 'abilities_api_init', 'my_plugin_register_update_option_ability' );
@@ -159,7 +224,7 @@ function my_plugin_register_update_option_ability() {
 }
 ```
 
-### Registering an Ability with Plugin Dependencies
+#### Registering an Ability with Plugin Dependencies
 
 ```php
 add_action( 'abilities_api_init', 'my_plugin_register_woo_stats_ability' );
@@ -218,7 +283,7 @@ function my_plugin_register_woo_stats_ability() {
 }
 ```
 
-### Registering an Ability That May Fail
+#### Registering an Ability That May Fail
 
 ```php
 add_action( 'abilities_api_init', 'my_plugin_register_send_email_ability' );
@@ -280,3 +345,216 @@ function my_plugin_register_send_email_ability() {
     ));
 }
 ```
+
+## Using Abilities (`wp_get_ability`, `wp_get_abilities`)
+
+Once abilities are registered, they can be retrieved and executed using global functions from the Abilities API.
+
+### Getting a Specific Ability (`wp_get_ability`)
+
+To get a single ability object by its name (namespace/ability-name):
+
+```php
+/**
+ * Retrieves a registered ability using Abilities API.
+ *
+ * @param string $name The name of the registered ability, with its namespace.
+ * @return ?WP_Ability The registered ability instance, or null if it is not registered.
+ */
+function wp_get_ability( string $name ): ?WP_Ability
+
+// Example:
+$site_info_ability = wp_get_ability( 'my-plugin/get-site-info' );
+
+if ( $site_info_ability ) {
+	// Ability exists and is registered
+	$site_info = $site_info_ability->execute();
+	if ( is_wp_error( $site_info ) ) {
+		// Handle WP_Error
+		echo 'Error: ' . $site_info->get_error_message();
+	} else {
+		// Use $site_info array
+		echo 'Site Name: ' . $site_info['name'];
+	}
+} else {
+	// Ability not found or not registered
+}
+```
+
+### Getting All Registered Abilities (`wp_get_abilities`)
+
+To get an array of all registered abilities:
+
+```php
+/**
+ * Retrieves all registered abilities using Abilities API.
+ *
+ * @return WP_Ability[] The array of registered abilities.
+ */
+function wp_get_abilities(): array
+
+// Example: Get all registered abilities
+$all_abilities = wp_get_abilities();
+
+foreach ( $all_abilities as $name => $ability ) {
+    echo 'Ability Name: ' . esc_html( $ability->get_name() ) . "\n";
+    echo 'Label: ' . esc_html( $ability->get_label() ) . "\n";
+    echo 'Description: ' . esc_html( $ability->get_description() ) . "\n";
+    echo "---\n";
+}
+```
+
+### Executing an Ability (`$ability->execute()`)
+
+Once you have a `WP_Ability` object (usually from `wp_get_ability`), you execute it using the `execute()` method.
+
+```php
+/**
+ * Executes the ability after input validation and running a permission check.
+ *
+ * @param mixed $input Optional. The input data for the ability. Defaults to `null`.
+ * @return mixed|WP_Error The result of the ability execution, or WP_Error on failure.
+ */
+// public function execute( $input = null )
+
+// Example 1: Ability with no input parameters
+$ability = wp_get_ability( 'my-plugin/get-site-info' );
+if ( $ability ) {
+    $site_info = $ability->execute(); // No input required
+    if ( is_wp_error( $site_info ) ) {
+        // Handle WP_Error
+        echo 'Error: ' . $site_info->get_error_message();
+    } else {
+        // Use $site_info array
+        echo 'Site Name: ' . $site_info['name'];
+    }
+}
+
+// Example 2: Ability with input parameters
+$ability = wp_get_ability( 'my-plugin/update-option' );
+if ( $ability ) {
+    $input = array(
+        'option_name'  => 'blogname',
+        'option_value' => 'My Updated Site Name',
+    );
+
+    $result = $ability->execute( $input );
+    if ( is_wp_error( $result ) ) {
+        // Handle WP_Error
+        echo 'Error: ' . $result->get_error_message();
+    } else {
+        // Use $result
+        if ( $result['success'] ) {
+            echo 'Option updated successfully!';
+            echo 'Previous value: ' . $result['previous_value'];
+        }
+    }
+}
+
+// Example 3: Ability with complex input validation
+$ability = wp_get_ability( 'my-plugin/send-email' );
+if ( $ability ) {
+    $input = array(
+        'to'      => 'user@example.com',
+        'subject' => 'Hello from WordPress',
+        'message' => 'This is a test message from the Abilities API.',
+    );
+
+    $result = $ability->execute( $input );
+    if ( is_wp_error( $result ) ) {
+        // Handle WP_Error
+        echo 'Error: ' . $result->get_error_message();
+    } elseif ( $result['sent'] ) {
+        echo 'Email sent successfully!';
+    } else {
+        echo 'Email failed to send.';
+    }
+}
+```
+
+### Checking Permissions (`$ability->check_permissions()`)
+
+You can check if the current user has permissions to execute the ability, also without executing it. The `check_permissions()` method returns either `true`, `false`, or a `WP_Error` object. `true` means permission is granted, `false` means the user simply lacks permission, and a `WP_Error` return value typically indicates a failure in the permission check process (such as an internal error or misconfiguration). You must use `is_wp_error()` to handle errors properly and distinguish between permission denial and actual errors:
+
+```php
+$ability = wp_get_ability( 'my-plugin/update-option' );
+if ( $ability ) {
+    $input = array(
+        'option_name'  => 'blogname',
+        'option_value' => 'New Site Name',
+    );
+
+    // Check permission before execution - always use is_wp_error() first
+    $has_permissions = $ability->check_permissions( $input );
+    if ( true === $has_permissions ) {
+        // Permissions granted – safe to execute.
+        echo 'You have permissions to execute this ability.';
+    } else {
+        // Don't leak permission errors to unauthenticated users.
+        if ( is_wp_error( $has_permissions ) ) {
+            error_log( 'Permissions check failed: ' . $has_permissions->get_error_message() );
+        }
+
+        echo 'You do not have permissions to execute this ability.';
+    }
+}
+```
+
+### Inspecting Ability Properties
+
+The `WP_Ability` class provides several getter methods to inspect ability properties:
+
+```php
+$ability = wp_get_ability( 'my-plugin/get-site-info' );
+if ( $ability ) {
+    // Basic properties
+    echo 'Name: ' . $ability->get_name() . "\n";
+    echo 'Label: ' . $ability->get_label() . "\n";
+    echo 'Description: ' . $ability->get_description() . "\n";
+
+    // Schema information
+    $input_schema = $ability->get_input_schema();
+    $output_schema = $ability->get_output_schema();
+
+    echo 'Input Schema: ' . json_encode( $input_schema, JSON_PRETTY_PRINT ) . "\n";
+    echo 'Output Schema: ' . json_encode( $output_schema, JSON_PRETTY_PRINT ) . "\n";
+
+    // Metadata
+    $meta = $ability->get_meta();
+    if ( ! empty( $meta ) ) {
+        echo 'Metadata: ' . json_encode( $meta, JSON_PRETTY_PRINT ) . "\n";
+    }
+}
+```
+
+### Error Handling Patterns
+
+The Abilities API uses several error handling mechanisms:
+
+```php
+$ability = wp_get_ability( 'my-plugin/some-ability' );
+
+if ( ! $ability ) {
+    // Ability not registered
+    echo 'Ability not found';
+    return;
+}
+
+$result = $ability->execute( $input );
+
+// Check for WP_Error (validation, permission, or callback errors)
+if ( is_wp_error( $result ) ) {
+    echo 'WP_Error: ' . $result->get_error_message();
+    return;
+}
+
+// Check for null result (permission denied, invalid callback, or validation failure)
+if ( is_null( $result ) ) {
+    echo 'Execution returned null - check permissions and callback validity';
+    return;
+}
+
+// Success - use the result
+// Process $result based on the ability's output schema
+```
+
