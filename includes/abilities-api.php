@@ -108,8 +108,8 @@ function wp_get_ability( string $name ): ?WP_Ability {
  * @return \WP_Ability[] The array of registered abilities.
  *
  * @phpstan-param array{
- *   category?: string|string[],
- *   namespace?: string|string[],
+ *   category?: string|array<string>,
+ *   namespace?: string|array<string>,
  *   search?: string,
  *   meta?: array<string,mixed>,
  *   orderby?: string,
