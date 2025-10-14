@@ -53,6 +53,7 @@ final class WP_Abilities_Registry {
 	 * @phpstan-param array{
 	 *   label?: string,
 	 *   description?: string,
+	 *   category?: string,
 	 *   execute_callback?: callable( mixed $input= ): (mixed|\WP_Error),
 	 *   permission_callback?: callable( mixed $input= ): (bool|\WP_Error),
 	 *   input_schema?: array<string,mixed>,
@@ -97,6 +98,24 @@ final class WP_Abilities_Registry {
 		 * @param string              $name The name of the ability, with its namespace.
 		 */
 		$args = apply_filters( 'register_ability_args', $args, $name );
+
+		// Validate category exists if provided (will be validated as required in WP_Ability).
+		if ( isset( $args['category'] ) ) {
+			$category_registry = WP_Abilities_Category_Registry::get_instance();
+			if ( ! $category_registry->is_registered( $args['category'] ) ) {
+				_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %1$s: ability category slug, %2$s: ability name */
+						esc_html__( 'Ability category "%1$s" is not registered. Please register the category before assigning it to ability "%2$s".' ),
+						esc_attr( $args['category'] ),
+						esc_attr( $name )
+					),
+					'n.e.x.t'
+				);
+				return null;
+			}
+		}
 
 		// The class is only used to instantiate the ability, and is not a property of the ability itself.
 		if ( isset( $args['ability_class'] ) && ! is_a( $args['ability_class'], WP_Ability::class, true ) ) {
@@ -221,6 +240,10 @@ final class WP_Abilities_Registry {
 	public static function get_instance(): self {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
+
+			// Ensure category registry is initialized first to allow categories to be registered
+			// before abilities that depend on them.
+			WP_Abilities_Category_Registry::get_instance();
 
 			/**
 			 * Fires when preparing abilities registry.
