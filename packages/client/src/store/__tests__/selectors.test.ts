@@ -17,6 +17,7 @@ describe( 'Store Selectors', () => {
 						name: 'test/ability1',
 						label: 'Test Ability 1',
 						description: 'First test ability',
+						category: 'test-category',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},
@@ -24,6 +25,7 @@ describe( 'Store Selectors', () => {
 						name: 'test/ability2',
 						label: 'Test Ability 2',
 						description: 'Second test ability',
+						category: 'test-category',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 						callback: jest.fn(),
@@ -59,6 +61,7 @@ describe( 'Store Selectors', () => {
 						name: 'test/ability',
 						label: 'Test Ability',
 						description: 'Test ability',
+						category: 'test-category',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},
@@ -79,6 +82,7 @@ describe( 'Store Selectors', () => {
 						name: 'test/ability1',
 						label: 'Test Ability 1',
 						description: 'Test ability',
+						category: 'test-category',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},
@@ -92,6 +96,7 @@ describe( 'Store Selectors', () => {
 						name: 'test/ability2',
 						label: 'Test Ability 2',
 						description: 'Another test ability',
+						category: 'test-category',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},
@@ -106,6 +111,69 @@ describe( 'Store Selectors', () => {
 			expect( result1 ).toHaveLength( 1 );
 			expect( result2 ).toHaveLength( 2 );
 		} );
+
+		it( 'should filter abilities by category when category is provided', () => {
+			const state: AbilitiesState = {
+				abilitiesByName: {
+					'test/ability1': {
+						name: 'test/ability1',
+						label: 'Test Ability 1',
+						description: 'First test ability',
+						category: 'data-retrieval',
+						input_schema: { type: 'object' },
+						output_schema: { type: 'object' },
+					},
+					'test/ability2': {
+						name: 'test/ability2',
+						label: 'Test Ability 2',
+						description: 'Second test ability',
+						category: 'data-retrieval',
+						input_schema: { type: 'object' },
+						output_schema: { type: 'object' },
+					},
+					'test/ability3': {
+						name: 'test/ability3',
+						label: 'Test Ability 3',
+						description: 'Third test ability',
+						category: 'user-management',
+						input_schema: { type: 'object' },
+						output_schema: { type: 'object' },
+					},
+				},
+			};
+
+			const result = getAbilities( state, { category: 'data-retrieval' } );
+
+			expect( result ).toHaveLength( 2 );
+			expect( result ).toContainEqual(
+				expect.objectContaining( { name: 'test/ability1' } )
+			);
+			expect( result ).toContainEqual(
+				expect.objectContaining( { name: 'test/ability2' } )
+			);
+			expect( result ).not.toContainEqual(
+				expect.objectContaining( { name: 'test/ability3' } )
+			);
+		} );
+
+		it( 'should return empty array when no abilities match category', () => {
+			const state: AbilitiesState = {
+				abilitiesByName: {
+					'test/ability1': {
+						name: 'test/ability1',
+						label: 'Test Ability 1',
+						description: 'First test ability',
+						category: 'data-retrieval',
+						input_schema: { type: 'object' },
+						output_schema: { type: 'object' },
+					},
+				},
+			};
+
+			const result = getAbilities( state, { category: 'non-existent-category' } );
+
+			expect( result ).toEqual( [] );
+		} );
 	} );
 
 	describe( 'getAbility', () => {
@@ -115,6 +183,7 @@ describe( 'Store Selectors', () => {
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -122,6 +191,7 @@ describe( 'Store Selectors', () => {
 					name: 'test/ability2',
 					label: 'Test Ability 2',
 					description: 'Second test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 					callback: jest.fn(),
@@ -169,6 +239,7 @@ describe( 'Store Selectors', () => {
 						name: 'my-plugin/feature-action',
 						label: 'Namespaced Action',
 						description: 'Namespaced ability',
+						category: 'test-category',
 						input_schema: { type: 'object' },
 						output_schema: { type: 'object' },
 					},

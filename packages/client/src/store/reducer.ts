@@ -21,6 +21,7 @@ const ABILITY_KEYS = [
 	'name',
 	'label',
 	'description',
+	'category',
 	'input_schema',
 	'output_schema',
 	'meta',

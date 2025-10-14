@@ -6,16 +6,34 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
+import type { Ability } from '../types';
 import { ENTITY_KIND, ENTITY_NAME } from './constants';
 import { receiveAbilities } from './actions';
 
 /**
  * Resolver for getAbilities selector.
  * Fetches all abilities from the server.
+ *
+ * The resolver only fetches once (without query args filter) and stores all abilities.
+ * Query args filtering handled client-side by the selector for better performance
+ * and to avoid multiple API requests when filtering by different categories.
  */
 export function getAbilities() {
 	// @ts-expect-error - registry types are not yet available
-	return async ( { dispatch, registry } ) => {
+	return async ( { dispatch, registry, select } ) => {
+		const existingAbilities = select.getAbilities();
+
+		// Check if we have any server-side abilities (abilities without callbacks)
+		// Client abilities have callbacks and are registered immediately on page load
+		// We only want to skip fetching if we've already fetched server abilities
+		const hasServerAbilities = existingAbilities.some(
+			( ability: Ability ) => ! ability.callback
+		);
+
+		if ( hasServerAbilities ) {
+			return;
+		}
+
 		const abilities = await registry
 			.resolveSelect( coreStore )
 			.getEntityRecords( ENTITY_KIND, ENTITY_NAME, {

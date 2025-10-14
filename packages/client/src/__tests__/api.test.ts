@@ -46,6 +46,7 @@ describe( 'API functions', () => {
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -53,6 +54,7 @@ describe( 'API functions', () => {
 					name: 'test/ability2',
 					label: 'Test Ability 2',
 					description: 'Second test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -71,6 +73,40 @@ describe( 'API functions', () => {
 			expect( mockGetAbilities ).toHaveBeenCalled();
 			expect( result ).toEqual( mockAbilities );
 		} );
+
+		it( 'should pass category parameter to store when filtering', async () => {
+			const mockAbilities: Ability[] = [
+				{
+					name: 'test/ability1',
+					label: 'Test Ability 1',
+					description: 'First test ability',
+					category: 'data-retrieval',
+					input_schema: { type: 'object' },
+					output_schema: { type: 'object' },
+				},
+				{
+					name: 'test/ability2',
+					label: 'Test Ability 2',
+					description: 'Second test ability',
+					category: 'data-retrieval',
+					input_schema: { type: 'object' },
+					output_schema: { type: 'object' },
+				},
+			];
+
+			const mockGetAbilities = jest
+				.fn()
+				.mockResolvedValue( mockAbilities );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilities: mockGetAbilities,
+			} );
+
+			const result = await getAbilities( { category: 'data-retrieval' } );
+
+			expect( resolveSelect ).toHaveBeenCalledWith( store );
+			expect( mockGetAbilities ).toHaveBeenCalledWith( { category: 'data-retrieval' } );
+			expect( result ).toEqual( mockAbilities );
+		} );
 	} );
 
 	describe( 'getAbility', () => {
@@ -79,6 +115,7 @@ describe( 'API functions', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Test ability description',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -124,6 +161,7 @@ describe( 'API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: jest.fn(),
@@ -158,6 +196,7 @@ describe( 'API functions', () => {
 				name: 'test/server-ability',
 				label: 'Server Ability',
 				description: 'Test server ability',
+				category: 'test-category',
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -200,6 +239,7 @@ describe( 'API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: mockCallback,
@@ -238,6 +278,7 @@ describe( 'API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
+				category: 'test-category',
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -264,6 +305,7 @@ describe( 'API functions', () => {
 				name: 'test/read-only',
 				label: 'Read-only Ability',
 				description: 'Test read-only ability.',
+				category: 'test-category',
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -302,11 +344,12 @@ describe( 'API functions', () => {
 				name: 'test/read-only',
 				label: 'Read-only Ability',
 				description: 'Test read-only ability.',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				meta: {
 					annotations: { readonly: true },
-				}
+				},
 			};
 
 			const mockGetAbility = jest.fn().mockResolvedValue( mockAbility );
@@ -339,6 +382,7 @@ describe( 'API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: mockCallback,
@@ -371,6 +415,7 @@ describe( 'API functions', () => {
 				name: 'test/server-ability',
 				label: 'Server Ability',
 				description: 'Test server ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -399,6 +444,7 @@ describe( 'API functions', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Test ability without callback',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				// No callback - should execute as server ability
@@ -434,6 +480,7 @@ describe( 'API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: {
 					type: 'object',
