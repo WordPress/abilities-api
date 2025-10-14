@@ -23,7 +23,7 @@ class WP_Ability {
 	/**
 	 * The default value for the `show_in_rest` meta.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 * @var bool
 	 */
 	protected const DEFAULT_SHOW_IN_REST = false;
@@ -32,7 +32,7 @@ class WP_Ability {
 	 * The default ability annotations.
 	 * They are not guaranteed to provide a faithful description of ability behavior.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 * @var array<string,(bool|string)>
 	 */
 	protected static $default_annotations = array(
@@ -120,7 +120,7 @@ class WP_Ability {
 	/**
 	 * The ability category (required).
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 * @var string
 	 */
 	protected $category;
@@ -345,7 +345,7 @@ class WP_Ability {
 	/**
 	 * Retrieves the category for the ability.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @return string The category for the ability.
 	 */
@@ -356,7 +356,7 @@ class WP_Ability {
 	/**
 	 * Retrieves a specific metadata item for the ability.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param string $key           The metadata key to retrieve.
 	 * @param mixed  $default_value Optional. The default value to return if the metadata item is not found. Default `null`.
@@ -410,7 +410,7 @@ class WP_Ability {
 	/**
 	 * Invokes a callable, ensuring the input is passed through only if the input schema is defined.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param callable $callback The callable to invoke.
 	 * @param mixed    $input    Optional. The input data for the ability. Default `null`.
