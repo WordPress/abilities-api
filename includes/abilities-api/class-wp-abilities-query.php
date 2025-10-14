@@ -22,12 +22,20 @@ declare( strict_types=1 );
 class WP_Abilities_Query {
 
 	/**
+	 * Constant representing no limit on results.
+	 *
+	 * @since n.e.x.t
+	 * @var int
+	 */
+	private static $no_limit = -1;
+
+	/**
 	 * Valid orderby fields.
 	 *
 	 * @since n.e.x.t
 	 * @var array<string>
 	 */
-	public const VALID_ORDERBY_FIELDS = array( 'name', 'label', 'category' );
+	private static $valid_orderby_fields = array( 'name', 'label', 'category' );
 
 	/**
 	 * Valid order directions.
@@ -35,15 +43,7 @@ class WP_Abilities_Query {
 	 * @since n.e.x.t
 	 * @var array<string>
 	 */
-	public const VALID_ORDER_DIRECTIONS = array( 'ASC', 'DESC' );
-
-	/**
-	 * Constant representing no limit on results.
-	 *
-	 * @since n.e.x.t
-	 * @var int
-	 */
-	public const NO_LIMIT = -1;
+	private static $valid_order_directions = array( 'ASC', 'DESC' );
 
 	/**
 	 * Query arguments after parsing.
@@ -51,7 +51,7 @@ class WP_Abilities_Query {
 	 * @since n.e.x.t
 	 * @var array<string,mixed>
 	 */
-	protected array $query_vars = array();
+	protected $query_vars = array();
 
 	/**
 	 * The filtered abilities result.
@@ -59,7 +59,7 @@ class WP_Abilities_Query {
 	 * @since n.e.x.t
 	 * @var \WP_Ability[]|null
 	 */
-	protected ?array $abilities = null;
+	protected $abilities = null;
 
 	/**
 	 * Constructor.
@@ -100,7 +100,7 @@ class WP_Abilities_Query {
 			'meta'      => array(),
 			'orderby'   => '',
 			'order'     => 'ASC',
-			'limit'     => self::NO_LIMIT,
+			'limit'     => self::$no_limit,
 			'offset'    => 0,
 		);
 
@@ -119,9 +119,10 @@ class WP_Abilities_Query {
 	 *
 	 */
 	protected function validate_meta_arg(): void {
-		if ( ! is_array( $this->query_vars['meta'] ) ) {
-			$this->query_vars['meta'] = array();
+		if ( is_array( $this->query_vars['meta'] ) ) {
+			return;
 		}
+		$this->query_vars['meta'] = array();
 	}
 
 	/**
@@ -135,9 +136,10 @@ class WP_Abilities_Query {
 			return;
 		}
 
-		if ( ! in_array( $this->query_vars['orderby'], self::VALID_ORDERBY_FIELDS, true ) ) {
-			$this->query_vars['orderby'] = '';
+		if ( in_array( $this->query_vars['orderby'], self::$valid_orderby_fields, true ) ) {
+			return;
 		}
+		$this->query_vars['orderby'] = '';
 	}
 
 	/**
@@ -148,9 +150,10 @@ class WP_Abilities_Query {
 	 */
 	protected function validate_order(): void {
 		$this->query_vars['order'] = strtoupper( $this->query_vars['order'] );
-		if ( ! in_array( $this->query_vars['order'], self::VALID_ORDER_DIRECTIONS, true ) ) {
-			$this->query_vars['order'] = 'ASC';
+		if ( in_array( $this->query_vars['order'], self::$valid_order_directions, true ) ) {
+			return;
 		}
+		$this->query_vars['order'] = 'ASC';
 	}
 
 	/**
@@ -291,15 +294,8 @@ class WP_Abilities_Query {
 
 		[ $flat_filters, $nested_filters ] = $this->separate_meta_filters( $filters );
 
-		if ( ! $this->check_flat_meta_filters( $ability_meta, $flat_filters ) ) {
-			return false;
-		}
-
-		if ( ! $this->check_nested_meta_filters( $ability_meta, $nested_filters ) ) {
-			return false;
-		}
-
-		return true;
+		return $this->check_flat_meta_filters( $ability_meta, $flat_filters )
+			&& $this->check_nested_meta_filters( $ability_meta, $nested_filters );
 	}
 
 	/**
@@ -315,8 +311,8 @@ class WP_Abilities_Query {
 		$search = $this->query_vars['search'];
 
 		return stripos( $ability->get_name(), $search ) !== false
-		       || stripos( $ability->get_label(), $search ) !== false
-		       || stripos( $ability->get_description(), $search ) !== false;
+			|| stripos( $ability->get_label(), $search ) !== false
+			|| stripos( $ability->get_description(), $search ) !== false;
 	}
 
 	/**
@@ -487,7 +483,7 @@ class WP_Abilities_Query {
 		$offset = $this->query_vars['offset'];
 
 		// No pagination if limit is -1.
-		if ( self::NO_LIMIT === $limit ) {
+		if ( self::$no_limit === $limit ) {
 			// Apply offset only if specified.
 			if ( $offset > 0 ) {
 				return array_slice( $abilities, $offset );
