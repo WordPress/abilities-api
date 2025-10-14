@@ -56,12 +56,47 @@ The `$slug` parameter must follow these rules:
   - Leading/trailing dashes: `-data`, `data-`
   - Double dashes: `data--retrieval`
 
-### Other Category Functions
+## Unregister a Category
 
-- `wp_unregister_ability_category( string $slug )` - Remove a registered category. Returns the unregistered category instance or `null` on failure.
-- `wp_get_ability_category( string $slug )` - Retrieve a specific category by slug. Returns the category instance or `null` if not found.
-- `wp_get_ability_categories()` - Get all registered categories as an associative array keyed by slug.
+Remove a registered category.
 
+### Function Signature
+
+```php
+wp_unregister_ability_category( string $slug ) ?\WP_Ability_Category
+```
+
+**Parameters:**
+- `$slug` (`string`): The slug of the registered category.
+
+**Return:** (`?\WP_Ability_Category`) The unregistered category instance on success, `null` on failure.
+
+## Fetch a Category
+
+Retrieve a specific category by slug.
+
+### Function Signature
+
+```php
+wp_get_ability_category( string $slug ) ?\WP_Ability_Category
+```
+
+**Parameters:**
+- `$slug` (`string`): The slug of the registered category.
+
+**Return:** (`?\WP_Ability_Category`) The category instance on success, `null` on failure.
+
+## Fetch all Categories
+
+Get all registered categories as an associative array keyed by slug.
+
+### Function Signature
+
+```php
+wp_get_ability_categories() array
+```
+
+**Return:** (`array`) An associative array of all registered categories, keyed by slug. Each value is an instance of `WP_Ability_Category`.
 
 ## Registering Abilities (`wp_register_ability`)
 
