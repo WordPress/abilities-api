@@ -17,7 +17,12 @@ declare( strict_types=1 );
  * Provides a WordPress-standard query interface for filtering abilities by various criteria,
  * including category, namespace, search terms, meta properties, and annotations.
  *
+ * This class is not intended to be extended or consumed directly. Use the wp_get_abilities()
+ * function instead, which provides a stable public API for querying abilities.
+ *
  * @since n.e.x.t
+ *
+ * @internal
  *
  * @phpstan-type AbilityQueryArgs array{
  *   category?: string|array<string>,
@@ -31,7 +36,7 @@ declare( strict_types=1 );
  *   ...<string, mixed>
  * }
  */
-class WP_Abilities_Query {
+final class WP_Abilities_Query {
 
 	/**
 	 * Constant representing no limit on results.
