@@ -10,7 +10,13 @@ import { sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { store } from './store';
-import type { Ability, AbilitiesQueryArgs, AbilityInput, AbilityOutput } from './types';
+import type {
+	Ability,
+	AbilityCategory,
+	AbilitiesQueryArgs,
+	AbilityInput,
+	AbilityOutput,
+} from './types';
 import { validateValueFromSchema } from './validation';
 
 /**
@@ -19,7 +25,9 @@ import { validateValueFromSchema } from './validation';
  * @param args Optional query arguments to filter. Defaults to empty object.
  * @return Promise resolving to array of abilities.
  */
-export async function getAbilities( args: AbilitiesQueryArgs = {}  ): Promise< Ability[] > {
+export async function getAbilities(
+	args: AbilitiesQueryArgs = {}
+): Promise< Ability[] > {
 	return await resolveSelect( store ).getAbilities( args );
 }
 
@@ -34,21 +42,48 @@ export async function getAbility( name: string ): Promise< Ability | null > {
 }
 
 /**
+ * Get all available ability categories.
+ *
+ * @return Promise resolving to array of categories.
+ */
+export async function getAbilityCategories(): Promise< AbilityCategory[] > {
+	return await resolveSelect( store ).getAbilityCategories();
+}
+
+/**
+ * Get a specific ability category by slug.
+ *
+ * @param slug The category slug.
+ * @return Promise resolving to the category or null if not found.
+ */
+export async function getAbilityCategory(
+	slug: string
+): Promise< AbilityCategory | null > {
+	return await resolveSelect( store ).getAbilityCategory( slug );
+}
+
+/**
  * Register a client-side ability.
  *
  * Client abilities are executed locally in the browser and must include
  * a callback function. The ability will be validated by the store action,
  * and an error will be thrown if validation fails.
  *
+ * Categories will be automatically fetched from the REST API if they
+ * haven't been loaded yet, so you don't need to call getAbilityCategories()
+ * before registering abilities.
+ *
  * @param  ability The ability definition including callback.
+ * @return Promise that resolves when registration is complete.
  * @throws {Error} If the ability fails validation.
  *
  * @example
  * ```js
- * registerAbility({
+ * await registerAbility({
  *   name: 'my-plugin/navigate',
  *   label: 'Navigate to URL',
  *   description: 'Navigates to a URL within WordPress admin',
+ *   category: 'navigation',
  *   input_schema: {
  *     type: 'object',
  *     properties: {
@@ -63,8 +98,8 @@ export async function getAbility( name: string ): Promise< Ability | null > {
  * });
  * ```
  */
-export function registerAbility( ability: Ability ): void {
-	dispatch( store ).registerAbility( ability );
+export async function registerAbility( ability: Ability ): Promise< void > {
+	await dispatch( store ).registerAbility( ability );
 }
 
 /**

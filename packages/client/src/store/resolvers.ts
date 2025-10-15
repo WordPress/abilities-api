@@ -6,9 +6,9 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import type { Ability } from '../types';
-import { ENTITY_KIND, ENTITY_NAME } from './constants';
-import { receiveAbilities } from './actions';
+import type { Ability, AbilityCategory } from '../types';
+import { ENTITY_KIND, ENTITY_NAME, ENTITY_NAME_CATEGORIES } from './constants';
+import { receiveAbilities, receiveCategories } from './actions';
 
 /**
  * Resolver for getAbilities selector.
@@ -71,6 +71,59 @@ export function getAbility( name: string ) {
 			// If ability doesn't exist ore return, we'll return null from the selector
 			// eslint-disable-next-line no-console
 			console.debug( `Ability not found: ${ name }` );
+		}
+	};
+}
+
+/**
+ * Resolver for getAbilityCategories selector.
+ * Fetches all categories from the server.
+ *
+ * The resolver only fetches once and stores all categories.
+ */
+export function getAbilityCategories() {
+	// @ts-expect-error - registry types are not yet available
+	return async ( { dispatch, registry, select } ) => {
+		const existingCategories = select.getAbilityCategories();
+		if ( existingCategories && existingCategories.length > 0 ) {
+			return;
+		}
+
+		const categories = await registry
+			.resolveSelect( coreStore )
+			.getEntityRecords( ENTITY_KIND, ENTITY_NAME_CATEGORIES, {
+				per_page: -1,
+			} );
+
+		dispatch( receiveCategories( categories || [] ) );
+	};
+}
+
+/**
+ * Resolver for getAbilityCategory selector.
+ * Fetches a specific category from the server if not already in store.
+ *
+ * @param slug Category slug.
+ */
+export function getAbilityCategory( slug: string ) {
+	// @ts-expect-error - registry types are not yet available
+	return async ( { dispatch, registry, select } ) => {
+		const existingCategory = select.getAbilityCategory( slug );
+		if ( existingCategory ) {
+			return;
+		}
+
+		try {
+			const category = await registry
+				.resolveSelect( coreStore )
+				.getEntityRecord( ENTITY_KIND, ENTITY_NAME_CATEGORIES, slug );
+
+			if ( category ) {
+				dispatch( receiveCategories( [ category ] ) );
+			}
+		} catch ( error ) {
+			// eslint-disable-next-line no-console
+			console.debug( `Category not found: ${ slug }` );
 		}
 	};
 }

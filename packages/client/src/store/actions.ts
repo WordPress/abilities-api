@@ -2,15 +2,18 @@
  * WordPress dependencies
  */
 import { sprintf } from '@wordpress/i18n';
+import { resolveSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import type { Ability } from '../types';
+import type { Ability, AbilityCategory } from '../types';
 import {
 	RECEIVE_ABILITIES,
 	REGISTER_ABILITY,
 	UNREGISTER_ABILITY,
+	RECEIVE_CATEGORIES,
+	STORE_NAME,
 } from './constants';
 
 /**
@@ -27,10 +30,24 @@ export function receiveAbilities( abilities: Ability[] ) {
 }
 
 /**
+ * Returns an action object used to receive categories into the store.
+ *
+ * @param categories Array of categories to store.
+ * @return Action object.
+ */
+export function receiveCategories( categories: AbilityCategory[] ) {
+	return {
+		type: RECEIVE_CATEGORIES,
+		categories,
+	};
+}
+
+/**
  * Registers an ability in the store.
  *
  * This action validates the ability before registration. If validation fails,
- * an error will be thrown.
+ * an error will be thrown. Categories will be automatically fetched from the
+ * REST API if they haven't been loaded yet.
  *
  * @param  ability The ability to register.
  * @return Action object or function.
@@ -38,7 +55,7 @@ export function receiveAbilities( abilities: Ability[] ) {
  */
 export function registerAbility( ability: Ability ) {
 	// @ts-expect-error - registry types are not yet available
-	return ( { select, dispatch } ) => {
+	return async ( { select, dispatch } ) => {
 		if ( ! ability.name ) {
 			throw new Error( 'Ability name is required' );
 		}
@@ -68,13 +85,31 @@ export function registerAbility( ability: Ability ) {
 			);
 		}
 
-		// TODO: At the moment, only the format of an ability of a category is checked.
-		// We are not checking that the category is a valid registered category, as this
-		// would require a REST endpoint that does not exist at the moment.
+		// Validate category format
 		if ( ! /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test( ability.category ) ) {
 			throw new Error(
 				sprintf(
 					'Ability "%1$s" has an invalid category. Category must be lowercase alphanumeric with dashes only Got: "%2$s"',
+					ability.name,
+					ability.category
+				)
+			);
+		}
+
+		// Ensure categories are loaded before validating
+		const categories = select.getAbilityCategories();
+		if ( categories.length === 0 ) {
+			await resolveSelect( STORE_NAME ).getAbilityCategories();
+		}
+
+		// Validate that the category exists
+		const existingCategory = select.getAbilityCategory(
+			ability.category
+		);
+		if ( ! existingCategory ) {
+			throw new Error(
+				sprintf(
+					'Ability "%1$s" references non-existent category "%2$s". Please register the category first.',
 					ability.name,
 					ability.category
 				)

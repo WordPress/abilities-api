@@ -6,7 +6,12 @@ import { createSelector } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import type { Ability, AbilitiesQueryArgs, AbilitiesState } from '../types';
+import type {
+	Ability,
+	AbilityCategory,
+	AbilitiesQueryArgs,
+	AbilitiesState,
+} from '../types';
 
 /**
  * Returns all registered abilities.
@@ -17,7 +22,10 @@ import type { Ability, AbilitiesQueryArgs, AbilitiesState } from '../types';
  * @return Array of abilities.
  */
 export const getAbilities = createSelector(
-	( state: AbilitiesState, { category }: AbilitiesQueryArgs = {} ): Ability[] => {
+	(
+		state: AbilitiesState,
+		{ category }: AbilitiesQueryArgs = {}
+	): Ability[] => {
 		const abilities = Object.values( state.abilitiesByName );
 		if ( category ) {
 			return abilities.filter(
@@ -44,4 +52,30 @@ export function getAbility(
 	name: string
 ): Ability | null {
 	return state.abilitiesByName[ name ] || null;
+}
+
+/**
+ * Returns all registered ability categories.
+ *
+ * @param state Store state.
+ * @return Array of categories.
+ */
+export function getAbilityCategories(
+	state: AbilitiesState
+): AbilityCategory[] {
+	return Object.values( state.categoriesBySlug );
+}
+
+/**
+ * Returns a specific ability category by slug.
+ *
+ * @param state Store state.
+ * @param slug  Category slug.
+ * @return Category object or null if not found.
+ */
+export function getAbilityCategory(
+	state: AbilitiesState,
+	slug: string
+): AbilityCategory | null {
+	return state.categoriesBySlug[ slug ] || null;
 }

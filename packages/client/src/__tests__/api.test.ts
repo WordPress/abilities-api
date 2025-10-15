@@ -14,12 +14,14 @@ import apiFetch from '@wordpress/api-fetch';
 import {
 	getAbilities,
 	getAbility,
+	getAbilityCategories,
+	getAbilityCategory,
 	registerAbility,
 	unregisterAbility,
 	executeAbility,
 } from '../api';
 import { store } from '../store';
-import type { Ability } from '../types';
+import type { Ability, AbilityCategory } from '../types';
 
 // Mock WordPress dependencies
 jest.mock( '@wordpress/data', () => ( {
@@ -104,7 +106,9 @@ describe( 'API functions', () => {
 			const result = await getAbilities( { category: 'data-retrieval' } );
 
 			expect( resolveSelect ).toHaveBeenCalledWith( store );
-			expect( mockGetAbilities ).toHaveBeenCalledWith( { category: 'data-retrieval' } );
+			expect( mockGetAbilities ).toHaveBeenCalledWith( {
+				category: 'data-retrieval',
+			} );
 			expect( result ).toEqual( mockAbilities );
 		} );
 	} );
@@ -500,6 +504,114 @@ describe( 'API functions', () => {
 			await expect(
 				executeAbility( 'test/client-ability', {} )
 			).rejects.toThrow( 'invalid output' );
+		} );
+	} );
+
+	describe( 'getAbilityCategories', () => {
+		it( 'should resolve and return all categories from the store', async () => {
+			const mockCategories: AbilityCategory[] = [
+				{
+					slug: 'data-retrieval',
+					label: 'Data Retrieval',
+					description: 'Abilities that retrieve data',
+				},
+				{
+					slug: 'user-management',
+					label: 'User Management',
+					description: 'Abilities for managing users',
+				},
+			];
+
+			const mockGetAbilityCategories = jest
+				.fn()
+				.mockResolvedValue( mockCategories );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategories: mockGetAbilityCategories,
+			} );
+
+			const result = await getAbilityCategories();
+
+			expect( resolveSelect ).toHaveBeenCalledWith( store );
+			expect( mockGetAbilityCategories ).toHaveBeenCalled();
+			expect( result ).toEqual( mockCategories );
+		} );
+
+		it( 'should return empty array when no categories exist', async () => {
+			const mockGetAbilityCategories = jest
+				.fn()
+				.mockResolvedValue( [] );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategories: mockGetAbilityCategories,
+			} );
+
+			const result = await getAbilityCategories();
+
+			expect( result ).toEqual( [] );
+		} );
+	} );
+
+	describe( 'getAbilityCategory', () => {
+		it( 'should return a specific category by slug', async () => {
+			const mockCategory: AbilityCategory = {
+				slug: 'data-retrieval',
+				label: 'Data Retrieval',
+				description: 'Abilities that retrieve data',
+			};
+
+			const mockGetAbilityCategory = jest
+				.fn()
+				.mockResolvedValue( mockCategory );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategory: mockGetAbilityCategory,
+			} );
+
+			const result = await getAbilityCategory( 'data-retrieval' );
+
+			expect( resolveSelect ).toHaveBeenCalledWith( store );
+			expect( mockGetAbilityCategory ).toHaveBeenCalledWith(
+				'data-retrieval'
+			);
+			expect( result ).toEqual( mockCategory );
+		} );
+
+		it( 'should return null if category not found', async () => {
+			const mockGetAbilityCategory = jest
+				.fn()
+				.mockResolvedValue( null );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategory: mockGetAbilityCategory,
+			} );
+
+			const result = await getAbilityCategory( 'non-existent' );
+
+			expect( mockGetAbilityCategory ).toHaveBeenCalledWith(
+				'non-existent'
+			);
+			expect( result ).toBeNull();
+		} );
+
+		it( 'should handle categories with meta', async () => {
+			const mockCategory: AbilityCategory = {
+				slug: 'user-management',
+				label: 'User Management',
+				description: 'Abilities for managing users',
+				meta: {
+					priority: 'high',
+				},
+			};
+
+			const mockGetAbilityCategory = jest
+				.fn()
+				.mockResolvedValue( mockCategory );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategory: mockGetAbilityCategory,
+			} );
+
+			const result = await getAbilityCategory( 'user-management' );
+
+			expect( result ).toEqual( mockCategory );
+			expect( result?.meta ).toBeDefined();
+			expect( result?.meta?.priority ).toBe( 'high' );
 		} );
 	} );
 } );

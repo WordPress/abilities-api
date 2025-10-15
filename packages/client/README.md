@@ -100,14 +100,39 @@ if ( ability ) {
 }
 ```
 
-#### `registerAbility( ability: Ability ): void`
+#### `getAbilityCategories(): Promise<AbilityCategory[]>`
+
+Returns all registered ability categories. Categories are used to organize abilities into logical groups.
+
+```javascript
+const categories = await getAbilityCategories();
+console.log( `Found ${ categories.length } categories` );
+
+categories.forEach( ( category ) => {
+  console.log( `${ category.label }: ${ category.description }` );
+} );
+```
+
+#### `getAbilityCategory( slug: string ): Promise<AbilityCategory | null>`
+
+Returns a specific ability category by slug, or null if not found.
+
+```javascript
+const category = await getAbilityCategory( 'data-retrieval' );
+if ( category ) {
+  console.log( `Found category: ${ category.label }` );
+  console.log( `Description: ${ category.description }` );
+}
+```
+
+#### `registerAbility( ability: Ability ): Promise<void>`
 
 Registers a client-side ability. Client abilities are executed locally in the browser and must include a callback function and a valid category.
 
 ```javascript
 import { registerAbility } from '@wordpress/abilities';
 
-registerAbility( {
+await registerAbility( {
   name: 'my-plugin/navigate',
   label: 'Navigate to URL',
   description: 'Navigates to a URL within WordPress admin',
@@ -152,6 +177,8 @@ When using with `@wordpress/data`:
 
 - `getAbilities( args: AbilitiesQueryArgs = {} )` - Returns all abilities from the store, optionally filtered by query arguments
 - `getAbility( name: string )` - Returns a specific ability from the store
+- `getAbilityCategories()` - Returns all categories from the store
+- `getAbilityCategory( slug: string )` - Returns a specific category from the store
 
 ```javascript
 import { useSelect } from '@wordpress/data';
@@ -164,6 +191,12 @@ function MyComponent() {
     []
   );
 
+  // Get all categories
+  const categories = useSelect(
+    ( select ) => select( abilitiesStore ).getAbilityCategories(),
+    []
+  );
+
   // Get abilities in a specific category
   const dataAbilities = useSelect(
     ( select ) =>
@@ -171,10 +204,24 @@ function MyComponent() {
     []
   );
 
+  // Get a specific category
+  const dataCategory = useSelect(
+    ( select ) => select( abilitiesStore ).getAbilityCategory( 'data-retrieval' ),
+    []
+  );
+
   return (
     <div>
       <h2>All Abilities ({ allAbilities.length })</h2>
-      <h2>Data Retrieval Abilities</h2>
+      <h2>Categories ({ categories.length })</h2>
+      <ul>
+        { categories.map( ( category ) => (
+          <li key={ category.slug }>
+            <strong>{ category.label }</strong>: { category.description }
+          </li>
+        ) ) }
+      </ul>
+      <h2>{ dataCategory?.label } Abilities</h2>
       <ul>
         { dataAbilities.map( ( ability ) => (
           <li key={ ability.name }>{ ability.label }</li>

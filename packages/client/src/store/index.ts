@@ -12,7 +12,12 @@ import reducer from './reducer';
 import * as actions from './actions';
 import * as selectors from './selectors';
 import * as resolvers from './resolvers';
-import { STORE_NAME, ENTITY_KIND, ENTITY_NAME } from './constants';
+import {
+	STORE_NAME,
+	ENTITY_KIND,
+	ENTITY_NAME,
+	ENTITY_NAME_CATEGORIES,
+} from './constants';
 
 /**
  * The abilities store definition.
@@ -35,6 +40,16 @@ dispatch( coreStore ).addEntities( [
 		baseURLParams: { context: 'edit' },
 		plural: 'abilities',
 		label: __( 'Abilities' ),
+		supportsPagination: true,
+	},
+	{
+		name: ENTITY_NAME_CATEGORIES,
+		kind: ENTITY_KIND,
+		key: 'slug',
+		baseURL: '/wp/v2/abilities/categories',
+		baseURLParams: { context: 'edit' },
+		plural: 'ability-categories',
+		label: __( 'Ability Categories' ),
 		supportsPagination: true,
 	},
 ] );
