@@ -117,7 +117,7 @@ class WP_Core_Abilities {
 						'value' => (string) $value,
 					);
 				},
-				'permission_callback' => static function ( $input = array() ): bool {
+				'permission_callback' => static function (): bool {
 					// Site information can expose sensitive details; require admin capability.
 					return current_user_can( 'manage_options' );
 				},
