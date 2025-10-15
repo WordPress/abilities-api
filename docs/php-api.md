@@ -384,55 +384,18 @@ function my_plugin_register_send_email_ability() {
 
 #### Registering an Ability with a Custom Ability Class
 
-The `ability_class` parameter allows you to use a custom class that extends `WP_Ability`. This is useful when you need to add custom methods to your ability or override the default behavior of the base `WP_Ability` class.
-
-**When to use a custom ability class:**
-- You need to add custom helper methods specific to your ability
-- You want to override how the ability executes (e.g., add logging, caching, or custom validation)
-- You need to store additional state or configuration beyond what the standard metadata provides
-- You want to encapsulate complex business logic within the ability class itself
+The `ability_class` parameter allows you to use a custom class that extends `WP_Ability`. This is useful when you want to extend the default behavior of the base `WP_Ability` class.
 
 **Example: Creating a custom ability class with additional methods**
 
 ```php
 /**
- * Custom ability class that adds a validation helper method.
+ * Custom ability class that adds logging.
  *
  * This example shows how to extend WP_Ability to add custom behavior
  * while still leveraging all the standard ability functionality.
  */
 class My_Plugin_Post_Validator_Ability extends WP_Ability {
-
-    /**
-     * Custom method to check if a post ID is valid and accessible.
-     *
-     * This helper method can be called from the execute callback or permission callback
-     * to perform validation logic that's specific to this ability.
-     *
-     * @param int $post_id The post ID to validate.
-     * @return true|WP_Error True if valid, WP_Error if invalid.
-     */
-    public function validate_post_id( $post_id ) {
-        // Check if the post exists
-        $post = get_post( $post_id );
-        if ( ! $post ) {
-            return new WP_Error(
-                'invalid_post',
-                __( 'The specified post does not exist.', 'my-plugin' )
-            );
-        }
-
-        // Check if the post is published
-        if ( 'publish' !== $post->post_status ) {
-            return new WP_Error(
-                'post_not_published',
-                __( 'The specified post is not published.', 'my-plugin' )
-            );
-        }
-
-        return true;
-    }
-
     /**
      * Override the do_execute method to add custom logging.
      *
@@ -510,17 +473,22 @@ function my_plugin_register_post_validator_ability() {
             )
         ),
         'execute_callback' => function( $input ) {
-            // Get the ability instance to access the custom validation method
-            $ability = wp_get_ability( 'my-plugin/validate-post' );
-
-            // Use the custom validation method from our custom class
-            $is_valid = $ability->validate_post_id( $input['post_id'] );
-            if ( is_wp_error( $is_valid ) ) {
-                return $is_valid;
+            $post_id = $input['post_id'];   
+            $post = get_post( $post_id );
+            if ( ! $post ) {
+                return new WP_Error(
+                    'invalid_post',
+                    __( 'The specified post does not exist.', 'my-plugin' )
+                );
             }
-
+            // Check if the post is published
+            if ( 'publish' !== $post->post_status ) {
+                return new WP_Error(
+                    'post_not_published',
+                    __( 'The specified post is not published.', 'my-plugin' )
+                );
+            }
             // If validation passes, return post information
-            $post = get_post( $input['post_id'] );
             return array(
                 'valid' => true,
                 'post_title' => $post->post_title,
