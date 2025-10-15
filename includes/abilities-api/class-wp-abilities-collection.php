@@ -121,28 +121,33 @@ class WP_Abilities_Collection implements IteratorAggregate, Countable {
 	/**
 	 * Extract a single property from all abilities.
 	 *
+	 * Supports dot notation for nested properties:
+	 * - pluck('name') - Get all ability names
+	 * - pluck('meta.show_in_rest') - Get nested meta property
+	 * - pluck('label', 'name') - Get labels keyed by names
+	 * - pluck('meta.priority', 'name') - Get nested values keyed by names
+	 *
 	 * @since n.e.x.t
 	 *
-	 * @param string      $value Property to extract.
-	 * @param string|null $key   Optional property to use as array keys.
+	 * @param string      $value Property to extract (supports dot notation).
+	 * @param string|null $key   Optional property to use as array keys (supports dot notation).
 	 * @return array<int|string, mixed> Array of extracted values.
 	 */
 	public function pluck( string $value, ?string $key = null ): array {
-		// Convert WP_Ability objects to arrays for wp_list_pluck.
-		$abilities_array = array_map(
-			static function ( $ability ) {
-				return array(
-					'name'        => $ability->get_name(),
-					'label'       => $ability->get_label(),
-					'description' => $ability->get_description(),
-					'category'    => $ability->get_category(),
-					'meta'        => $ability->get_meta(),
-				);
-			},
-			$this->abilities
-		);
+		$result = array();
 
-		return wp_list_pluck( $abilities_array, $value, $key );
+		foreach ( $this->abilities as $ability ) {
+			$plucked_value = $this->data_get( $ability, $value );
+
+			if ( null === $key ) {
+				$result[] = $plucked_value;
+			} else {
+				$key_value            = $this->data_get( $ability, $key );
+				$result[ $key_value ] = $plucked_value;
+			}
+		}
+
+		return $result;
 	}
 
 	/**

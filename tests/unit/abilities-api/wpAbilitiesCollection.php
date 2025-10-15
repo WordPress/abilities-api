@@ -886,6 +886,83 @@ class Tests_Abilities_API_WpAbilitiesCollection extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test pluck with dot notation for nested properties.
+	 *
+	 * @covers WP_Abilities_Collection::pluck
+	 */
+	public function test_pluck_with_dot_notation(): void {
+		$collection = new WP_Abilities_Collection( $this->registry->get_all_registered() );
+		$show_in_rest_values = $collection->pluck( 'meta.show_in_rest' );
+
+		$this->assertIsArray( $show_in_rest_values );
+		$this->assertGreaterThan( 0, count( $show_in_rest_values ) );
+		$this->assertContains( true, $show_in_rest_values );
+		$this->assertContains( false, $show_in_rest_values );
+	}
+
+	/**
+	 * Test pluck with dot notation for deeply nested properties.
+	 *
+	 * @covers WP_Abilities_Collection::pluck
+	 */
+	public function test_pluck_with_deep_dot_notation(): void {
+		$collection = new WP_Abilities_Collection( $this->registry->get_all_registered() );
+		$readonly_values = $collection->pluck( 'meta.annotations.readonly' );
+
+		$this->assertIsArray( $readonly_values );
+		$this->assertGreaterThan( 0, count( $readonly_values ) );
+		$this->assertContains( true, $readonly_values );
+	}
+
+	/**
+	 * Test pluck with dot notation and key parameter.
+	 *
+	 * @covers WP_Abilities_Collection::pluck
+	 */
+	public function test_pluck_with_dot_notation_and_key(): void {
+		$collection = new WP_Abilities_Collection( $this->registry->get_all_registered() );
+		$result = $collection->pluck( 'meta.show_in_rest', 'name' );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'test/add-numbers', $result );
+		$this->assertTrue( $result['test/add-numbers'] );
+		$this->assertArrayHasKey( 'test/multiply-numbers', $result );
+		$this->assertFalse( $result['test/multiply-numbers'] );
+	}
+
+	/**
+	 * Test pluck with both parameters using dot notation.
+	 *
+	 * @covers WP_Abilities_Collection::pluck
+	 */
+	public function test_pluck_with_both_dot_notation(): void {
+		$collection = new WP_Abilities_Collection( $this->registry->get_all_registered() );
+		$result = $collection->pluck( 'meta.annotations.readonly', 'category' );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'math', $result );
+		// Since multiple abilities have the same category, the last one wins.
+		// We're mainly testing that dot notation works for both parameters.
+		$this->assertIsBool( $result['math'] );
+	}
+
+	/**
+	 * Test pluck with dot notation for nonexistent property.
+	 *
+	 * @covers WP_Abilities_Collection::pluck
+	 */
+	public function test_pluck_with_nonexistent_nested_property(): void {
+		$collection = new WP_Abilities_Collection( $this->registry->get_all_registered() );
+		$result = $collection->pluck( 'meta.nonexistent.property' );
+
+		$this->assertIsArray( $result );
+		// All values should be null since the property doesn't exist.
+		foreach ( $result as $value ) {
+			$this->assertNull( $value );
+		}
+	}
+
+	/**
 	 * Test filter method directly.
 	 *
 	 * @covers WP_Abilities_Collection::filter
