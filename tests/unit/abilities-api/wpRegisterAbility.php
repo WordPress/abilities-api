@@ -493,7 +493,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 			$ability_three_name => new WP_Ability( $ability_three_name, $ability_three_args ),
 		);
 
-		$result = wp_get_abilities();
+		$result = wp_get_abilities()->to_array();
 		$this->assertEquals( $expected, $result );
 	}
 

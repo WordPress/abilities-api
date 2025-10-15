@@ -94,24 +94,13 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 	 * @return \WP_REST_Response Response object on success.
 	 */
 	public function get_items( $request ) {
-		$abilities = array_filter(
-			wp_get_abilities(),
-			static function ( $ability ) {
-				return $ability->get_meta_item( 'show_in_rest' );
-			}
-		);
+		// Get all abilities and filter to only those shown in REST.
+		$abilities = wp_get_abilities()->where( 'meta.show_in_rest', true );
 
 		// Filter by category if specified.
 		$category = $request->get_param( 'category' );
 		if ( ! empty( $category ) ) {
-			$abilities = array_filter(
-				$abilities,
-				static function ( $ability ) use ( $category ) {
-					return $ability->get_category() === $category;
-				}
-			);
-			// Reset array keys after filtering.
-			$abilities = array_values( $abilities );
+			$abilities = $abilities->where_category( $category );
 		}
 
 		// Handle pagination with explicit defaults.
@@ -120,16 +109,17 @@ class WP_REST_Abilities_List_Controller extends WP_REST_Controller {
 		$per_page = $params['per_page'] ?? self::DEFAULT_PER_PAGE;
 		$offset   = ( $page - 1 ) * $per_page;
 
-		$total_abilities = count( $abilities );
+		$total_abilities = $abilities->count();
 		$max_pages       = ceil( $total_abilities / $per_page );
 
 		if ( $request->get_method() === 'HEAD' ) {
 			$response = new \WP_REST_Response( array() );
 		} else {
-			$abilities = array_slice( $abilities, $offset, $per_page );
+			// Paginate using array_slice on the array.
+			$abilities_array = array_slice( $abilities->to_array(), $offset, $per_page );
 
 			$data = array();
-			foreach ( $abilities as $ability ) {
+			foreach ( $abilities_array as $ability ) {
 				$item   = $this->prepare_item_for_response( $ability, $request );
 				$data[] = $this->prepare_response_for_collection( $item );
 			}
