@@ -13,17 +13,34 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 
-		// Unregister core abilities if they were already registered to avoid duplicate registration warnings.
-		$registry = WP_Abilities_Registry::get_instance();
-		if ( $registry->is_registered( 'core/get-bloginfo' ) ) {
-			$registry->unregister( 'core/get-bloginfo' );
-		}
-		if ( $registry->is_registered( 'core/get-current-user-info' ) ) {
-			$registry->unregister( 'core/get-current-user-info' );
-		}
-		if ( $registry->is_registered( 'core/get-environment-type' ) ) {
-			$registry->unregister( 'core/get-environment-type' );
-		}
+        // Unregister core abilities if they were already registered to avoid duplicate registration warnings.
+        $registry = WP_Abilities_Registry::get_instance();
+        if ( $registry->is_registered( 'wp/get-site-info' ) ) {
+            $registry->unregister( 'wp/get-site-info' );
+        }
+        if ( $registry->is_registered( 'wp/get-current-user-info' ) ) {
+            $registry->unregister( 'wp/get-current-user-info' );
+        }
+        if ( $registry->is_registered( 'wp/get-environment-info' ) ) {
+            $registry->unregister( 'wp/get-environment-info' );
+        }
+
+        // Unregister categories if they exist.
+        $category_registry = WP_Abilities_Category_Registry::get_instance();
+        if ( $category_registry->is_registered( 'site' ) ) {
+            wp_unregister_ability_category( 'site' );
+        }
+        if ( $category_registry->is_registered( 'user' ) ) {
+            wp_unregister_ability_category( 'user' );
+        }
+
+		// Register core abilities category during the proper hook.
+		$callback = static function (): void {
+			WP_Core_Abilities::register_category();
+		};
+		add_action( 'abilities_api_categories_init', $callback );
+		do_action( 'abilities_api_categories_init', WP_Abilities_Category_Registry::get_instance() );
+		remove_action( 'abilities_api_categories_init', $callback );
 
 		// Fire the init action if it hasn't been fired yet.
 		if ( ! did_action( 'abilities_api_init' ) ) {
@@ -35,10 +52,10 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that the `core/get-bloginfo` ability is registered with the expected schema.
-	 */
-	public function test_core_get_bloginfo_ability_is_registered(): void {
-		$ability = wp_get_ability( 'core/get-bloginfo' );
+     * Tests that the `wp/get-site-info` ability is registered with the expected schema.
+     */
+    public function test_core_get_bloginfo_ability_is_registered(): void {
+        $ability = wp_get_ability( 'wp/get-site-info' );
 
 		$this->assertInstanceOf( WP_Ability::class, $ability );
 		$this->assertTrue( $ability->get_meta_item( 'show_in_rest', false ) );
@@ -49,10 +66,14 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests executing the `core/get-bloginfo` ability.
-	 */
-	public function test_core_get_bloginfo_executes(): void {
-		$ability = wp_get_ability( 'core/get-bloginfo' );
+     * Tests executing the `wp/get-site-info` ability.
+     */
+    public function test_core_get_bloginfo_executes(): void {
+        // Requires manage_options.
+        $admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+        wp_set_current_user( $admin_id );
+
+        $ability = wp_get_ability( 'wp/get-site-info' );
 
 		$result = $ability->execute(
 			array(
@@ -60,20 +81,22 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 			)
 		);
 
-		$this->assertSame(
-			array(
-				'field' => 'name',
-				'value' => get_bloginfo( 'name' ),
-			),
-			$result
-		);
-	}
+        $this->assertSame(
+            array(
+                'field' => 'name',
+                'value' => get_bloginfo( 'name' ),
+            ),
+            $result
+        );
+
+        wp_set_current_user( 0 );
+    }
 
 	/**
-	 * Tests that executing the current user info ability requires authentication.
-	 */
-	public function test_core_get_current_user_info_requires_authentication(): void {
-		$ability = wp_get_ability( 'core/get-current-user-info' );
+     * Tests that executing the current user info ability requires authentication.
+     */
+    public function test_core_get_current_user_info_requires_authentication(): void {
+        $ability = wp_get_ability( 'wp/get-current-user-info' );
 
 		$this->assertFalse( $ability->check_permissions() );
 
@@ -83,9 +106,9 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests executing the current user info ability as an authenticated user.
-	 */
-	public function test_core_get_current_user_info_returns_user_data(): void {
+     * Tests executing the current user info ability as an authenticated user.
+     */
+    public function test_core_get_current_user_info_returns_user_data(): void {
 		$user_id = self::factory()->user->create(
 			array(
 				'role'   => 'subscriber',
@@ -95,7 +118,7 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 
 		wp_set_current_user( $user_id );
 
-		$ability = wp_get_ability( 'core/get-current-user-info' );
+        $ability = wp_get_ability( 'wp/get-current-user-info' );
 
 		$this->assertTrue( $ability->check_permissions() );
 
@@ -109,19 +132,26 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests executing the environment type ability.
-	 */
-	public function test_core_get_environment_type_executes(): void {
-		$ability      = wp_get_ability( 'core/get-environment-type' );
-		$environment  = wp_get_environment_type();
-		$ability_data = $ability->execute();
+     * Tests executing the environment info ability.
+     */
+    public function test_core_get_environment_type_executes(): void {
+        // Requires manage_options.
+        $admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+        wp_set_current_user( $admin_id );
 
-		$this->assertSame(
-			array(
-				'environment' => $environment,
-			),
-			$ability_data
-		);
-	}
+        $ability      = wp_get_ability( 'wp/get-environment-info' );
+        $environment  = wp_get_environment_type();
+        $ability_data = $ability->execute();
+
+        $this->assertIsArray( $ability_data );
+        $this->assertArrayHasKey( 'environment', $ability_data );
+        $this->assertArrayHasKey( 'php_version', $ability_data );
+        $this->assertArrayHasKey( 'mysql_version', $ability_data );
+        $this->assertArrayHasKey( 'wp_version', $ability_data );
+        $this->assertArrayHasKey( 'database_type', $ability_data );
+        $this->assertSame( $environment, $ability_data['environment'] );
+
+        wp_set_current_user( 0 );
+    }
 
 }

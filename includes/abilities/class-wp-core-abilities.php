@@ -4,7 +4,7 @@
  *
  * @package WordPress
  * @subpackage Abilities_API
- * @since n.e.x.t
+ * @since 0.3.0
  */
 
 declare( strict_types = 1 );
@@ -12,31 +12,58 @@ declare( strict_types = 1 );
 /**
  * Registers the default core abilities that ship with the Abilities API.
  *
- * @since n.e.x.t
+ * @since 0.3.0
  */
 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound -- Core class intended for WordPress core.
 class WP_Core_Abilities {
 	/**
+	 * Registers the core abilities categories.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return void
+	 */
+	public static function register_category(): void {
+		// Site-related capabilities
+		wp_register_ability_category(
+			'site',
+			array(
+				'label'       => __( 'Site' ),
+				'description' => __( 'Abilities that retrieve or modify site information and settings.' ),
+			)
+		);
+
+		// User-related capabilities
+		wp_register_ability_category(
+			'user',
+			array(
+				'label'       => __( 'User' ),
+				'description' => __( 'Abilities that retrieve or modify user information and settings.' ),
+			)
+		);
+	}
+
+	/**
 	 * Registers the default core abilities.
 	 *
-	 * @since n.e.x.t
+ * @since 0.3.0
 	 *
 	 * @return void
 	 */
 	public static function register(): void {
-		self::register_get_bloginfo();
+		self::register_get_site_info();
 		self::register_get_current_user_info();
-		self::register_get_environment_type();
+		self::register_get_environment_info();
 	}
 
 	/**
-	 * Registers the `core/get-bloginfo` ability.
+	 * Registers the `wp/get-site-info` ability.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @return void
 	 */
-	protected static function register_get_bloginfo(): void {
+	protected static function register_get_site_info(): void {
 		$fields = array(
 			'name',
 			'description',
@@ -49,10 +76,11 @@ class WP_Core_Abilities {
 		);
 
 		wp_register_ability(
-			'core/get-bloginfo',
+			'wp/get-site-info',
 			array(
-				'label'               => __( 'Get Blog Information' ),
+				'label'               => __( 'Get Site Information' ),
 				'description'         => __( 'Returns a single site information field from get_bloginfo().' ),
+				'category'            => 'site',
 				'input_schema'        => array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -89,7 +117,10 @@ class WP_Core_Abilities {
 						'value' => (string) $value,
 					);
 				},
-				'permission_callback' => '__return_true',
+				'permission_callback' => static function ( $input = array() ): bool {
+					// Site information can expose sensitive details; require admin capability.
+					return current_user_can( 'manage_options' );
+				},
 				'meta'                => array(
 					'annotations'  => array(
 						'instructions' => __( 'Retrieves a single site property by passing an allowed field to get_bloginfo().' ),
@@ -104,18 +135,19 @@ class WP_Core_Abilities {
 	}
 
 	/**
-	 * Registers the `core/get-current-user-info` ability.
+	 * Registers the `wp/get-current-user-info` ability.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @return void
 	 */
 	protected static function register_get_current_user_info(): void {
 		wp_register_ability(
-			'core/get-current-user-info',
+			'wp/get-current-user-info',
 			array(
 				'label'               => __( 'Get Current User Information' ),
 				'description'         => __( 'Returns basic information about the current authenticated user.' ),
+				'category'            => 'user',
 				'output_schema'       => array(
 					'type'                 => 'object',
 					'required'             => array( 'id', 'display_name', 'locale' ),
@@ -179,38 +211,77 @@ class WP_Core_Abilities {
 	}
 
 	/**
-	 * Registers the `core/get-environment-type` ability.
+	 * Registers the `wp/get-environment-info` ability.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @return void
 	 */
-	protected static function register_get_environment_type(): void {
+	protected static function register_get_environment_info(): void {
 		wp_register_ability(
-			'core/get-environment-type',
+			'wp/get-environment-info',
 			array(
-				'label'               => __( 'Get Environment Type' ),
-				'description'         => __( 'Returns the current WordPress environment type (e.g. production or staging).' ),
+				'label'               => __( 'Get Environment Info' ),
+				'description'         => __( 'Returns basic information about the WordPress runtime environment.' ),
+				'category'            => 'site',
 				'output_schema'       => array(
 					'type'                 => 'object',
-					'required'             => array( 'environment' ),
+					'required'             => array( 'environment', 'php_version', 'mysql_version', 'wp_version', 'database_type' ),
 					'properties'           => array(
-						'environment' => array(
+						'environment'   => array(
 							'type'        => 'string',
 							'description' => __( 'The environment type returned by wp_get_environment_type().' ),
+						),
+						'php_version'   => array(
+							'type'        => 'string',
+							'description' => __( 'The PHP version.' ),
+						),
+						'mysql_version' => array(
+							'type'        => 'string',
+							'description' => __( 'The database server version (MySQL or MariaDB).' ),
+						),
+						'wp_version'    => array(
+							'type'        => 'string',
+							'description' => __( 'The WordPress version.' ),
+						),
+						'database_type' => array(
+							'type'        => 'string',
+							'description' => __( 'The database server type (e.g., mysql or mariadb).' ),
 						),
 					),
 					'additionalProperties' => false,
 				),
 				'execute_callback'    => static function (): array {
+					global $wpdb;
+
+					$env          = wp_get_environment_type();
+					$php_version  = phpversion();
+					$db_version   = '';
+					if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'db_version' ) ) {
+						$db_version = (string) $wpdb->db_version();
+					}
+					$wp_version   = (string) get_bloginfo( 'version' );
+
+					$type = 'mysql';
+					if ( stripos( $db_version, 'mariadb' ) !== false ) {
+						$type = 'mariadb';
+					}
+
 					return array(
-						'environment' => wp_get_environment_type(),
+						'environment'   => (string) $env,
+						'php_version'   => (string) $php_version,
+						'mysql_version' => (string) $db_version,
+						'wp_version'    => (string) $wp_version,
+						'database_type' => (string) $type,
 					);
 				},
-				'permission_callback' => '__return_true',
+				'permission_callback' => static function (): bool {
+					// Environment information is restricted to administrators.
+					return current_user_can( 'manage_options' );
+				},
 				'meta'                => array(
 					'annotations'  => array(
-						'instructions' => __( 'Retrieves the current WordPress environment type.' ),
+						'instructions' => __( 'Retrieves environment information such as environment type, PHP, database, and WordPress versions.' ),
 						'readonly'     => true,
 						'destructive'  => false,
 						'idempotent'   => true,
