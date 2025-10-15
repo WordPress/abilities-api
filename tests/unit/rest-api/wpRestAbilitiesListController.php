@@ -29,10 +29,10 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 	public static function set_up_before_class(): void {
 		parent::set_up_before_class();
 
-		// Create a test user with read capabilities
+		// Create a test user with admin capabilities
 		self::$user_id = self::factory()->user->create(
 			array(
-				'role' => 'subscriber',
+				'role' => 'administrator',
 			)
 		);
 	}
@@ -323,9 +323,9 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test permission check for listing abilities.
+	 * Test permission check for listing abilities requires authentication.
 	 */
-	public function test_get_items_permission_denied(): void {
+	public function test_get_items_permission_denied_unauthenticated(): void {
 		// Test with non-logged-in user
 		wp_set_current_user( 0 );
 
@@ -333,6 +333,20 @@ class Tests_REST_API_WpRestAbilitiesListController extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test permission check for listing abilities requires admin.
+	 */
+	public function test_get_items_permission_denied_non_admin(): void {
+		// Create and use a subscriber user (non-admin)
+		$subscriber_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $subscriber_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status() );
 	}
 
 	/**
