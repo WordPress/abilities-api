@@ -150,7 +150,7 @@ class WP_Core_Abilities {
 				'category'            => 'user',
 				'output_schema'       => array(
 					'type'                 => 'object',
-					'required'             => array( 'id', 'display_name', 'locale' ),
+					'required'             => array( 'id', 'display_name', 'user_nicename', 'user_login', 'roles', 'locale' ),
 					'properties'           => array(
 						'id'            => array(
 							'type'        => 'integer',
