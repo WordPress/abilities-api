@@ -92,37 +92,41 @@ function wp_get_ability( string $name ): ?WP_Ability {
 }
 
 /**
- * Retrieves all registered abilities using Abilities API.
+ * Retrieves a collection of registered abilities.
  *
- * Uses WP_Abilities_Query to retrieve abilities from the registry with optional filtering.
+ * Returns a WP_Abilities_Collection instance that provides a fluent, chainable
+ * API for filtering, sorting, and manipulating abilities.
  *
  * @since 0.1.0
- * @since n.e.x.t Added optional $args parameter for filtering abilities.
+ * @since n.e.x.t Returns WP_Abilities_Collection instead of array.
  *
- * @see WP_Abilities_Query
+ * @see WP_Abilities_Collection
  *
- * @param array<string,mixed> $args Optional. Arguments to filter abilities. Default empty array.
- *                                   Accepts 'category', 'namespace', 'search', 'meta', 'orderby',
- *                                   'order', 'limit', and 'offset'.
- *                                   'category' and 'namespace' accept string or array for multi-value filtering.
- *                                   All filters use AND logic between different filter types and meta properties.
- * @return \WP_Ability[] The array of registered abilities.
+ * @return \WP_Abilities_Collection Collection of WP_Ability instances.
  *
- * @phpstan-param array{
- *   category?: string|array<string>,
- *   namespace?: string|array<string>,
- *   search?: string,
- *   meta?: array<string,mixed>,
- *   orderby?: string,
- *   order?: string,
- *   limit?: int,
- *   offset?: int,
- *   ...<string, mixed>
- * } $args
+ * @example
+ * // Get all abilities as collection
+ * $abilities = wp_get_abilities();
+ *
+ * @example
+ * // Filter by category
+ * $math_abilities = wp_get_abilities()->where_category('math');
+ *
+ * @example
+ * // Chain multiple filters
+ * $abilities = wp_get_abilities()
+ *     ->where_namespace(['WordPress', 'woocommerce'])
+ *     ->where_meta(['show_in_rest' => true])
+ *     ->search('product')
+ *     ->sort_by_desc('name');
+ *
+ * @example
+ * // Convert to array if needed
+ * $abilities_array = wp_get_abilities()->to_array();
  */
-function wp_get_abilities( array $args = array() ): array {
-	$query = new WP_Abilities_Query( $args );
-	return $query->get_abilities();
+function wp_get_abilities(): WP_Abilities_Collection {
+	$registry = WP_Abilities_Registry::get_instance();
+	return new WP_Abilities_Collection( $registry->get_all_registered() );
 }
 
 /**
