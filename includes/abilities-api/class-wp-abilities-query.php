@@ -95,7 +95,6 @@ final class WP_Abilities_Query {
 	 * @since n.e.x.t
 	 *
 	 * @param array<string,mixed> $args Query arguments.
-	 *
 	 */
 	protected function parse_query( array $args ): void {
 		$defaults = array(
