@@ -16,15 +16,9 @@
 3. **Security‑first** - explicit permissions determine who/what may invoke an ability.
 4. **Gradual adoption** - ships first as a Composer package, migrates smoothly to core.
 
-## Developer Documentation
+## Documentation
 
-- [Introduction](docs/intro.md)
-- [Getting Started](docs/getting-started.md)
-- [PHP API Reference](docs/php-api.md)
-- [REST API Reference](docs/rest-api.md)
-- [JavaScript Client](docs/javascript-client.md)
-- [Hooks](docs/hooks.md)
-- [Contributing Guidelines](CONTRIBUTING.md)
+- **[Developer docs](docs/README.md)**.
 
 ## Inspiration
 
