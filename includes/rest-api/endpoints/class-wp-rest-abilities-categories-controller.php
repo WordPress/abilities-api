@@ -170,7 +170,7 @@ class WP_REST_Abilities_Categories_Controller extends WP_REST_Controller {
 	 * @return bool True if the request has read access.
 	 */
 	public function get_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return current_user_can( 'read' );
 	}
 
 	/**

@@ -207,22 +207,9 @@ class Tests_REST_API_WpRestAbilityCategoriesController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test permission check for listing categories requires admin.
+	 * Test permission check for listing categories.
 	 */
-	public function test_get_items_permission_denied_for_non_admin(): void {
-		// Test with subscriber user
-		wp_set_current_user( self::$subscriber_user_id );
-
-		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/categories' );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 403, $response->get_status() );
-	}
-
-	/**
-	 * Test permission check for listing categories requires authentication.
-	 */
-	public function test_get_items_permission_denied_for_unauthenticated(): void {
+	public function test_get_items_permission_denied(): void {
 		wp_set_current_user( 0 );
 
 		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/categories' );
