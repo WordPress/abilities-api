@@ -24,9 +24,6 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 		if ( $registry->is_registered( 'core/get-environment-type' ) ) {
 			$registry->unregister( 'core/get-environment-type' );
 		}
-		if ( $registry->is_registered( 'core/find-abilities' ) ) {
-			$registry->unregister( 'core/find-abilities' );
-		}
 
 		// Fire the init action if it hasn't been fired yet.
 		if ( ! did_action( 'abilities_api_init' ) ) {
@@ -127,45 +124,4 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 		);
 	}
 
-	/**
-	 * Tests executing the find abilities ability and filtering results.
-	 */
-	public function test_core_find_abilities_executes(): void {
-		$user_id = self::factory()->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-
-		wp_set_current_user( $user_id );
-
-		// Verify user has 'read' capability.
-		$this->assertTrue( current_user_can( 'read' ), 'Administrator should have read capability' );
-
-		$ability = wp_get_ability( 'core/find-abilities' );
-
-		$this->assertTrue( $ability->check_permissions() );
-
-		// Test with namespace filter to get all abilities.
-		$result = $ability->execute(
-			array(
-				'namespace' => '',
-			)
-		);
-		$this->assertNotWPError( $result );
-		$this->assertArrayHasKey( 'abilities', $result );
-		$this->assertNotEmpty( $result['abilities'] );
-
-		// Test with namespace filter.
-		$result_filtered = $ability->execute(
-			array(
-				'namespace' => 'core/',
-			)
-		);
-		foreach ( $result_filtered['abilities'] as $item ) {
-			$this->assertStringStartsWith( 'core/', $item['name'] );
-		}
-
-		wp_set_current_user( 0 );
-	}
 }

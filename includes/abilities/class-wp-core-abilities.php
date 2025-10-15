@@ -27,7 +27,6 @@ class WP_Core_Abilities {
 		self::register_get_bloginfo();
 		self::register_get_current_user_info();
 		self::register_get_environment_type();
-		self::register_find_abilities();
 	}
 
 	/**
@@ -212,129 +211,6 @@ class WP_Core_Abilities {
 				'meta'                => array(
 					'annotations'  => array(
 						'instructions' => __( 'Retrieves the current WordPress environment type.' ),
-						'readonly'     => true,
-						'destructive'  => false,
-						'idempotent'   => true,
-					),
-					'show_in_rest' => true,
-				),
-			)
-		);
-	}
-
-	/**
-	 * Registers the `core/find-abilities` ability.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return void
-	 */
-	protected static function register_find_abilities(): void {
-		wp_register_ability(
-			'core/find-abilities',
-			array(
-				'label'               => __( 'Find Abilities' ),
-				'description'         => __( 'Returns a list of abilities that are exposed through the registry.' ),
-				'input_schema'        => array(
-					'type'                 => array( 'object', 'null' ),
-					'properties'           => array(
-						'namespace'    => array(
-							'type'        => 'string',
-							'description' => __( 'Optional namespace prefix to filter abilities (e.g. "core/").' ),
-						),
-						'show_in_rest' => array(
-							'type'        => 'boolean',
-							'description' => __( 'Whether to limit results to abilities exposed in REST. Defaults to true.' ),
-						),
-					),
-					'additionalProperties' => false,
-				),
-				'output_schema'       => array(
-					'type'                 => 'object',
-					'properties'           => array(
-						'abilities' => array(
-							'type'  => 'array',
-							'items' => array(
-								'type'       => 'object',
-								'properties' => array(
-									'name'         => array(
-										'type'        => 'string',
-										'description' => __( 'The ability name.' ),
-									),
-									'label'        => array(
-										'type'        => 'string',
-										'description' => __( 'The human readable label.' ),
-									),
-									'description'  => array(
-										'type'        => 'string',
-										'description' => __( 'The detailed description.' ),
-									),
-									'meta'         => array(
-										'type'        => 'object',
-										'description' => __( 'Additional metadata associated with the ability.' ),
-									),
-									'annotations'  => array(
-										'type'        => 'object',
-										'description' => __( 'Annotations describing ability behavior.' ),
-									),
-									'show_in_rest' => array(
-										'type'        => 'boolean',
-										'description' => __( 'Whether the ability is exposed in REST.' ),
-									),
-								),
-								'required'   => array( 'name', 'label', 'description', 'meta', 'annotations', 'show_in_rest' ),
-							),
-						),
-					),
-					'additionalProperties' => false,
-				),
-				'execute_callback'    => static function ( $input = array() ): array {
-					$namespace     = $input['namespace'] ?? null;
-					$filter_rest   = array_key_exists( 'show_in_rest', $input ) ? (bool) $input['show_in_rest'] : true;
-					$abilities     = wp_get_abilities();
-					$filtered_list = array();
-
-					foreach ( $abilities as $ability ) {
-						$show_in_rest = $ability->get_meta_item( 'show_in_rest', false );
-						if ( $filter_rest && ! $show_in_rest ) {
-							continue;
-						}
-
-						if ( $namespace && 0 !== strpos( $ability->get_name(), $namespace ) ) {
-							continue;
-						}
-
-						$filtered_list[] = array(
-							'name'         => $ability->get_name(),
-							'label'        => $ability->get_label(),
-							'description'  => $ability->get_description(),
-							'meta'         => $ability->get_meta(),
-							'annotations'  => $ability->get_meta_item( 'annotations', array() ),
-							'show_in_rest' => $show_in_rest,
-						);
-					}
-
-					/**
-					 * Filters the abilities returned by the `core/find-abilities` ability.
-					 *
-					 * @since n.e.x.t
-					 *
-					 * @param array<string,mixed>[] $abilities An array of abilities exposed by the ability.
-					 * @param array<string,mixed>   $input      The input arguments passed to the ability.
-					 */
-					// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook intended for WordPress core.
-					$filtered_list = apply_filters( 'wp_find_abilities_results', $filtered_list, $input );
-
-					return array(
-						'abilities' => array_values( $filtered_list ),
-					);
-				},
-				'permission_callback' => static function (): bool {
-					return current_user_can( 'read' );
-				},
-				'meta'                => array(
-					'annotations'  => array(
-						'instructions' => __( 'Lists abilities from the registry. Optional namespace filter is supported.' ),
 						'readonly'     => true,
 						'destructive'  => false,
 						'idempotent'   => true,
