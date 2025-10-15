@@ -137,6 +137,7 @@ The `$args` array accepts the following keys:
   - `show_in_rest` (`boolean`, **Optional**): Whether to expose this ability via the REST API. Default: `false`.
     - When `true`, the ability will be listed in REST API responses and can be executed via REST endpoints.
     - When `false`, the ability will be hidden from REST API listings and cannot be executed via REST endpoints, but remains available for internal PHP usage.
+- `ability_class` (`string`, **Optional**): The fully-qualified class name of a custom ability class that extends `WP_Ability`. This allows you to customize the behavior of an ability by extending the base `WP_Ability` class and overriding its methods. The custom class must extend `WP_Ability`. Default: `WP_Ability`.
 
 ### Ability ID Convention
 
@@ -380,6 +381,176 @@ function my_plugin_register_send_email_ability() {
     ));
 }
 ```
+
+#### Registering an Ability with a Custom Ability Class
+
+The `ability_class` parameter allows you to use a custom class that extends `WP_Ability`. This is useful when you need to add custom methods to your ability or override the default behavior of the base `WP_Ability` class.
+
+**When to use a custom ability class:**
+- You need to add custom helper methods specific to your ability
+- You want to override how the ability executes (e.g., add logging, caching, or custom validation)
+- You need to store additional state or configuration beyond what the standard metadata provides
+- You want to encapsulate complex business logic within the ability class itself
+
+**Example: Creating a custom ability class with additional methods**
+
+```php
+/**
+ * Custom ability class that adds a validation helper method.
+ *
+ * This example shows how to extend WP_Ability to add custom behavior
+ * while still leveraging all the standard ability functionality.
+ */
+class My_Plugin_Post_Validator_Ability extends WP_Ability {
+
+    /**
+     * Custom method to check if a post ID is valid and accessible.
+     *
+     * This helper method can be called from the execute callback or permission callback
+     * to perform validation logic that's specific to this ability.
+     *
+     * @param int $post_id The post ID to validate.
+     * @return true|WP_Error True if valid, WP_Error if invalid.
+     */
+    public function validate_post_id( $post_id ) {
+        // Check if the post exists
+        $post = get_post( $post_id );
+        if ( ! $post ) {
+            return new WP_Error(
+                'invalid_post',
+                __( 'The specified post does not exist.', 'my-plugin' )
+            );
+        }
+
+        // Check if the post is published
+        if ( 'publish' !== $post->post_status ) {
+            return new WP_Error(
+                'post_not_published',
+                __( 'The specified post is not published.', 'my-plugin' )
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Override the do_execute method to add custom logging.
+     *
+     * This demonstrates how you can override methods from WP_Ability
+     * to customize behavior before or after the standard execution.
+     *
+     * @param mixed $input Optional. The input data for the ability.
+     * @return mixed|WP_Error The result of the ability execution.
+     */
+    protected function do_execute( $input = null ) {
+        // Log the execution for debugging purposes
+        error_log( sprintf(
+            'Executing ability: %s with input: %s',
+            $this->get_name(),
+            json_encode( $input )
+        ) );
+
+        // Call the parent's do_execute to run the normal execute_callback
+        $result = parent::do_execute( $input );
+
+        // Log the result
+        if ( is_wp_error( $result ) ) {
+            error_log( sprintf(
+                'Ability %s failed: %s',
+                $this->get_name(),
+                $result->get_error_message()
+            ) );
+        } else {
+            error_log( sprintf(
+                'Ability %s completed successfully',
+                $this->get_name()
+            ) );
+        }
+
+        return $result;
+    }
+}
+
+/**
+ * Register the ability using the custom ability class.
+ */
+add_action( 'abilities_api_init', 'my_plugin_register_post_validator_ability' );
+function my_plugin_register_post_validator_ability() {
+    wp_register_ability( 'my-plugin/validate-post', array(
+        'label' => __( 'Validate Post', 'my-plugin' ),
+        'description' => __( 'Validates that a post exists, is published, and returns its metadata.', 'my-plugin' ),
+        'category' => 'data-retrieval',
+        'input_schema' => array(
+            'type' => 'object',
+            'properties' => array(
+                'post_id' => array(
+                    'type' => 'integer',
+                    'description' => 'The ID of the post to validate',
+                    'minimum' => 1
+                )
+            ),
+            'required' => array( 'post_id' ),
+            'additionalProperties' => false
+        ),
+        'output_schema' => array(
+            'type' => 'object',
+            'properties' => array(
+                'valid' => array(
+                    'type' => 'boolean',
+                    'description' => 'Whether the post is valid'
+                ),
+                'post_title' => array(
+                    'type' => 'string',
+                    'description' => 'The post title'
+                ),
+                'post_date' => array(
+                    'type' => 'string',
+                    'description' => 'The post publication date'
+                )
+            )
+        ),
+        'execute_callback' => function( $input ) {
+            // Get the ability instance to access the custom validation method
+            $ability = wp_get_ability( 'my-plugin/validate-post' );
+
+            // Use the custom validation method from our custom class
+            $is_valid = $ability->validate_post_id( $input['post_id'] );
+            if ( is_wp_error( $is_valid ) ) {
+                return $is_valid;
+            }
+
+            // If validation passes, return post information
+            $post = get_post( $input['post_id'] );
+            return array(
+                'valid' => true,
+                'post_title' => $post->post_title,
+                'post_date' => $post->post_date
+            );
+        },
+        'permission_callback' => function() {
+            // Any logged-in user can validate posts
+            return is_user_logged_in();
+        },
+        'meta' => array(
+            'annotations' => array(
+                'readonly' => true,
+                'destructive' => false
+            )
+        ),
+        // Specify the custom ability class to use
+        'ability_class' => 'My_Plugin_Post_Validator_Ability'
+    ));
+}
+```
+
+**Important notes about custom ability classes:**
+
+- Your custom class **must** extend `WP_Ability`
+- The custom class is only used to instantiate the ability - the `ability_class` parameter is not stored as a property of the ability
+- You can override protected methods like `do_execute()`, `validate_input()`, or `validate_output()` to customize behavior
+- You can add public methods to provide additional functionality specific to your ability
+- The custom class receives the same `$name` and `$args` parameters in its constructor as the base `WP_Ability` class
+- If the specified class does not exist or does not extend `WP_Ability`, registration will fail with a `_doing_it_wrong()` notice
 
 ## Using Abilities (`wp_get_ability`, `wp_get_abilities`)
 
