@@ -18,6 +18,18 @@ declare( strict_types=1 );
  * including category, namespace, search terms, meta properties, and annotations.
  *
  * @since n.e.x.t
+ *
+ * @phpstan-type AbilityQueryArgs array{
+ *   category?: string|array<string>,
+ *   namespace?: string|array<string>,
+ *   search?: string,
+ *   meta?: array<string,mixed>,
+ *   orderby?: string,
+ *   order?: string,
+ *   limit?: int,
+ *   offset?: int,
+ *   ...<string, mixed>
+ * }
  */
 class WP_Abilities_Query {
 
@@ -66,19 +78,7 @@ class WP_Abilities_Query {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param array<string,mixed> $args Optional. Query arguments. Default empty array.
-	 *
-	 * @phpstan-param array{
-	 *   category?: string|array<string>,
-	 *   namespace?: string|array<string>,
-	 *   search?: string,
-	 *   meta?: array<string,mixed>,
-	 *   orderby?: string,
-	 *   order?: string,
-	 *   limit?: int,
-	 *   offset?: int,
-	 *   ...<string, mixed>
-	 * } $args
+	 * @param AbilityQueryArgs $args Optional. Query arguments. Default empty array.
 	 */
 	public function __construct( array $args = array() ) {
 		$this->parse_query( $args );

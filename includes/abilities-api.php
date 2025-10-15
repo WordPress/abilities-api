@@ -100,6 +100,7 @@ function wp_get_ability( string $name ): ?WP_Ability {
  * @since n.e.x.t Added optional $args parameter for filtering abilities.
  *
  * @see WP_Abilities_Query
+ * @see WP_Abilities_Query::AbilityQueryArgs for the full type definition.
  *
  * @param array<string,mixed> $args Optional. Arguments to filter abilities. Default empty array.
  *                                   Accepts 'category', 'namespace', 'search', 'meta', 'orderby',
