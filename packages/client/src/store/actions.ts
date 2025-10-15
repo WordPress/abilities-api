@@ -97,14 +97,16 @@ export function registerAbility( ability: Ability ) {
 		}
 
 		// Ensure categories are loaded before validating
-		const categories = select.getAbilityCategories();
+		let categories = select.getAbilityCategories();
 		if ( categories.length === 0 ) {
 			await resolveSelect( STORE_NAME ).getAbilityCategories();
+			categories = select.getAbilityCategories();
 		}
 
-		// Validate that the category exists
-		const existingCategory = select.getAbilityCategory(
-			ability.category
+		// Validate that the category exists in the loaded categories
+		// We check the array directly to avoid triggering the single-category resolver
+		const existingCategory = categories.find(
+			( cat: AbilityCategory ) => cat.slug === ability.category
 		);
 		if ( ! existingCategory ) {
 			throw new Error(

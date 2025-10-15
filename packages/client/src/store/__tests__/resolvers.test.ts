@@ -17,11 +17,7 @@ import {
 	getAbilityCategory,
 } from '../resolvers';
 import { receiveAbilities, receiveCategories } from '../actions';
-import {
-	ENTITY_KIND,
-	ENTITY_NAME,
-	ENTITY_NAME_CATEGORIES,
-} from '../constants';
+import { ENTITY_KIND, ENTITY_NAME, ENTITY_NAME_CATEGORIES } from '../constants';
 import type { Ability, AbilityCategory } from '../../types';
 
 // Mock the WordPress core data store

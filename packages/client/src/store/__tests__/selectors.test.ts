@@ -359,10 +359,7 @@ describe( 'Store Selectors', () => {
 				categoriesBySlug: {},
 			};
 
-			const category = getAbilityCategory(
-				emptyState,
-				'data-retrieval'
-			);
+			const category = getAbilityCategory( emptyState, 'data-retrieval' );
 
 			expect( category ).toBeNull();
 		} );
@@ -381,7 +378,7 @@ describe( 'Store Selectors', () => {
 			const stateWithVariousSlugs: AbilitiesState = {
 				abilitiesByName: {},
 				categoriesBySlug: {
-					'simple': {
+					simple: {
 						slug: 'simple',
 						label: 'Simple',
 						description: 'Simple slug',
@@ -391,7 +388,7 @@ describe( 'Store Selectors', () => {
 						label: 'With Dashes',
 						description: 'Slug with dashes',
 					},
-					'with123': {
+					with123: {
 						slug: 'with123',
 						label: 'With Numbers',
 						description: 'Slug with numbers',
@@ -404,7 +401,9 @@ describe( 'Store Selectors', () => {
 			).toEqual( stateWithVariousSlugs.categoriesBySlug.simple );
 			expect(
 				getAbilityCategory( stateWithVariousSlugs, 'with-dashes' )
-			).toEqual( stateWithVariousSlugs.categoriesBySlug[ 'with-dashes' ] );
+			).toEqual(
+				stateWithVariousSlugs.categoriesBySlug[ 'with-dashes' ]
+			);
 			expect(
 				getAbilityCategory( stateWithVariousSlugs, 'with123' )
 			).toEqual( stateWithVariousSlugs.categoriesBySlug.with123 );

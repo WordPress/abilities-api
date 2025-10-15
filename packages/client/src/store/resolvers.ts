@@ -6,7 +6,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import type { Ability, AbilityCategory } from '../types';
+import type { Ability } from '../types';
 import { ENTITY_KIND, ENTITY_NAME, ENTITY_NAME_CATEGORIES } from './constants';
 import { receiveAbilities, receiveCategories } from './actions';
 

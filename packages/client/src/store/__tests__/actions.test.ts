@@ -3,6 +3,11 @@
  */
 
 /**
+ * WordPress dependencies
+ */
+import { resolveSelect } from '@wordpress/data';
+
+/**
  * Internal dependencies
  */
 import {
@@ -16,6 +21,11 @@ import {
 	UNREGISTER_ABILITY,
 } from '../constants';
 import type { Ability } from '../../types';
+
+// Mock the WordPress data store
+jest.mock( '@wordpress/data', () => ( {
+	resolveSelect: jest.fn(),
+} ) );
 
 describe( 'Store Actions', () => {
 	describe( 'receiveAbilities', () => {
@@ -224,7 +234,9 @@ describe( 'Store Actions', () => {
 
 			await expect(
 				action( { select: mockSelect, dispatch: mockDispatch } )
-			).rejects.toThrow( 'Ability "test/ability" must have a description' );
+			).rejects.toThrow(
+				'Ability "test/ability" must have a description'
+			);
 			expect( mockDispatch ).not.toHaveBeenCalled();
 		} );
 
@@ -294,19 +306,23 @@ describe( 'Store Actions', () => {
 					callback: jest.fn(),
 				};
 
-				// Update mock to include this category
-				mockSelect.getAbilityCategory.mockImplementation(
-					( slug: string ) => {
-						if ( slug === validCategory || slug === 'test-category' || slug === 'data-retrieval' ) {
-							return {
-								slug,
-								label: 'Test',
-								description: 'Test',
-							};
-						}
-						return null;
-					}
-				);
+				mockSelect.getAbilityCategories.mockReturnValue( [
+					{
+						slug: 'test-category',
+						label: 'Test Category',
+						description: 'Test category for testing',
+					},
+					{
+						slug: 'data-retrieval',
+						label: 'Data Retrieval',
+						description: 'Abilities that retrieve data',
+					},
+					{
+						slug: validCategory,
+						label: 'Test Category',
+						description: 'Test',
+					},
+				] );
 
 				mockSelect.getAbility.mockReturnValue( null );
 				mockDispatch.mockClear();
@@ -322,8 +338,18 @@ describe( 'Store Actions', () => {
 		} );
 
 		it( 'should validate and reject ability with non-existent category', async () => {
-			// Override getAbilityCategory to only return null
-			mockSelect.getAbilityCategory.mockReturnValue( null );
+			mockSelect.getAbilityCategories.mockReturnValue( [
+				{
+					slug: 'test-category',
+					label: 'Test Category',
+					description: 'Test category for testing',
+				},
+				{
+					slug: 'data-retrieval',
+					label: 'Data Retrieval',
+					description: 'Abilities that retrieve data',
+				},
+			] );
 
 			const ability: Ability = {
 				name: 'test/ability',
@@ -344,11 +370,18 @@ describe( 'Store Actions', () => {
 		} );
 
 		it( 'should accept ability with existing category', async () => {
-			mockSelect.getAbilityCategory.mockReturnValue( {
-				slug: 'data-retrieval',
-				label: 'Data Retrieval',
-				description: 'Abilities that retrieve data',
-			} );
+			mockSelect.getAbilityCategories.mockReturnValue( [
+				{
+					slug: 'test-category',
+					label: 'Test Category',
+					description: 'Test category for testing',
+				},
+				{
+					slug: 'data-retrieval',
+					label: 'Data Retrieval',
+					description: 'Abilities that retrieve data',
+				},
+			] );
 
 			const ability: Ability = {
 				name: 'test/ability',
@@ -361,9 +394,8 @@ describe( 'Store Actions', () => {
 			const action = registerAbility( ability );
 			await action( { select: mockSelect, dispatch: mockDispatch } );
 
-			expect( mockSelect.getAbilityCategory ).toHaveBeenCalledWith(
-				'data-retrieval'
-			);
+			// We check the categories array now, not calling getAbilityCategory
+			expect( mockSelect.getAbilityCategories ).toHaveBeenCalled();
 			expect( mockDispatch ).toHaveBeenCalledWith( {
 				type: REGISTER_ABILITY,
 				ability,
@@ -413,6 +445,53 @@ describe( 'Store Actions', () => {
 				action( { select: mockSelect, dispatch: mockDispatch } )
 			).rejects.toThrow( 'Ability "test/ability" is already registered' );
 			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should load categories when store is empty before validation', async () => {
+			// First call returns empty, second call returns loaded categories
+			let callCount = 0;
+			mockSelect.getAbilityCategories.mockImplementation( () => {
+				callCount++;
+				if ( callCount === 1 ) {
+					return []; // Empty on first call
+				}
+				return [
+					{
+						slug: 'test-category',
+						label: 'Test Category',
+						description: 'Test category',
+					},
+				]; // Loaded on second call
+			} );
+
+			// Mock resolveSelect to return a mock that resolves the getAbilityCategories call
+			const mockResolveSelectFn = jest.fn().mockReturnValue( {
+				getAbilityCategories: jest.fn().mockResolvedValue( undefined ),
+			} );
+			( resolveSelect as jest.Mock ).mockImplementation(
+				mockResolveSelectFn
+			);
+
+			const ability: Ability = {
+				name: 'test/ability',
+				label: 'Test Ability',
+				description: 'Test description',
+				category: 'test-category',
+				callback: jest.fn(),
+			};
+
+			const action = registerAbility( ability );
+			await action( { select: mockSelect, dispatch: mockDispatch } );
+
+			// Should have called getAbilityCategories twice (once to check, once after loading)
+			expect( mockSelect.getAbilityCategories ).toHaveBeenCalledTimes(
+				2
+			);
+			// Should have successfully registered
+			expect( mockDispatch ).toHaveBeenCalledWith( {
+				type: REGISTER_ABILITY,
+				ability,
+			} );
 		} );
 	} );
 

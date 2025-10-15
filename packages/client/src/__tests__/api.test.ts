@@ -537,9 +537,7 @@ describe( 'API functions', () => {
 		} );
 
 		it( 'should return empty array when no categories exist', async () => {
-			const mockGetAbilityCategories = jest
-				.fn()
-				.mockResolvedValue( [] );
+			const mockGetAbilityCategories = jest.fn().mockResolvedValue( [] );
 			( resolveSelect as jest.Mock ).mockReturnValue( {
 				getAbilityCategories: mockGetAbilityCategories,
 			} );
@@ -575,9 +573,7 @@ describe( 'API functions', () => {
 		} );
 
 		it( 'should return null if category not found', async () => {
-			const mockGetAbilityCategory = jest
-				.fn()
-				.mockResolvedValue( null );
+			const mockGetAbilityCategory = jest.fn().mockResolvedValue( null );
 			( resolveSelect as jest.Mock ).mockReturnValue( {
 				getAbilityCategory: mockGetAbilityCategory,
 			} );
