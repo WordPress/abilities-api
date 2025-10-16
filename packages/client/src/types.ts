@@ -135,6 +135,29 @@ export interface AbilityCategory {
 }
 
 /**
+ * Arguments for registering an ability category.
+ * Matches the server-side wp_register_ability_category() $args parameter.
+ *
+ * @see wp_register_ability_category()
+ */
+export interface AbilityCategoryArgs {
+	/**
+	 * The human-readable label for the category.
+	 */
+	label: string;
+
+	/**
+	 * The detailed description of the category.
+	 */
+	description: string;
+
+	/**
+	 * Optional metadata about the category.
+	 */
+	meta?: Record< string, any >;
+}
+
+/**
  * The state shape for the abilities store.
  */
 export interface AbilitiesState {

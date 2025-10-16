@@ -14,13 +14,23 @@ import {
 	receiveAbilities,
 	registerAbility,
 	unregisterAbility,
+	receiveCategories,
+	registerAbilityCategory,
+	unregisterAbilityCategory,
 } from '../actions';
 import {
 	RECEIVE_ABILITIES,
 	REGISTER_ABILITY,
 	UNREGISTER_ABILITY,
+	RECEIVE_CATEGORIES,
+	REGISTER_ABILITY_CATEGORY,
+	UNREGISTER_ABILITY_CATEGORY,
 } from '../constants';
-import type { Ability } from '../../types';
+import type {
+	Ability,
+	AbilityCategory,
+	AbilityCategoryArgs,
+} from '../../types';
 
 // Mock the WordPress data store
 jest.mock( '@wordpress/data', () => ( {
@@ -513,6 +523,390 @@ describe( 'Store Actions', () => {
 			expect( action ).toEqual( {
 				type: UNREGISTER_ABILITY,
 				name: abilityName,
+			} );
+		} );
+	} );
+
+	describe( 'receiveCategories', () => {
+		it( 'should create an action to receive categories', () => {
+			const categories: AbilityCategory[] = [
+				{
+					slug: 'data-retrieval',
+					label: 'Data Retrieval',
+					description: 'Abilities that retrieve data',
+				},
+				{
+					slug: 'user-management',
+					label: 'User Management',
+					description: 'Abilities for managing users',
+				},
+			];
+
+			const action = receiveCategories( categories );
+
+			expect( action ).toEqual( {
+				type: RECEIVE_CATEGORIES,
+				categories,
+			} );
+		} );
+
+		it( 'should handle empty categories array', () => {
+			const categories: AbilityCategory[] = [];
+			const action = receiveCategories( categories );
+
+			expect( action ).toEqual( {
+				type: RECEIVE_CATEGORIES,
+				categories: [],
+			} );
+		} );
+	} );
+
+	describe( 'registerAbilityCategory', () => {
+		let mockSelect: any;
+		let mockDispatch: jest.Mock;
+
+		beforeEach( () => {
+			jest.clearAllMocks();
+			mockSelect = {
+				getAbilityCategory: jest.fn().mockReturnValue( null ),
+				getAbilityCategories: jest.fn().mockReturnValue( [] ),
+			};
+			mockDispatch = jest.fn();
+
+			// Mock resolveSelect to return a mock that resolves the getAbilityCategories call
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategories: jest.fn().mockResolvedValue( undefined ),
+			} );
+		} );
+
+		it( 'should register a valid category', async () => {
+			const slug = 'test-category';
+			const args: AbilityCategoryArgs = {
+				label: 'Test Category',
+				description: 'A test category for testing',
+			};
+
+			const action = registerAbilityCategory( slug, args );
+			await action( { select: mockSelect, dispatch: mockDispatch } );
+
+			expect( mockDispatch ).toHaveBeenCalledWith( {
+				type: REGISTER_ABILITY_CATEGORY,
+				category: {
+					slug,
+					label: args.label,
+					description: args.description,
+				},
+			} );
+		} );
+
+		it( 'should register a category with meta', async () => {
+			const slug = 'test-category';
+			const args: AbilityCategoryArgs = {
+				label: 'Test Category',
+				description: 'A test category',
+				meta: { foo: 'bar', nested: { key: 'value' } },
+			};
+
+			const action = registerAbilityCategory( slug, args );
+			await action( { select: mockSelect, dispatch: mockDispatch } );
+
+			expect( mockDispatch ).toHaveBeenCalledWith( {
+				type: REGISTER_ABILITY_CATEGORY,
+				category: {
+					slug,
+					label: args.label,
+					description: args.description,
+					meta: args.meta,
+				},
+			} );
+		} );
+
+		it( 'should validate and reject empty slug', async () => {
+			const args: AbilityCategoryArgs = {
+				label: 'Test',
+				description: 'Test',
+			};
+
+			const action = registerAbilityCategory( '', args );
+
+			await expect(
+				action( { select: mockSelect, dispatch: mockDispatch } )
+			).rejects.toThrow( 'Category slug is required' );
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should validate and reject invalid slug formats', async () => {
+			const testCases = [
+				'Data-Retrieval', // Uppercase
+				'data_retrieval', // Underscores
+				'data.retrieval', // Dots
+				'data/retrieval', // Slashes
+				'-data-retrieval', // Leading dash
+				'data-retrieval-', // Trailing dash
+				'data--retrieval', // Double dash
+				'data retrieval', // Spaces
+				'data!retrieval', // Special characters
+			];
+
+			const args: AbilityCategoryArgs = {
+				label: 'Test',
+				description: 'Test',
+			};
+
+			for ( const invalidSlug of testCases ) {
+				const action = registerAbilityCategory( invalidSlug, args );
+
+				await expect(
+					action( { select: mockSelect, dispatch: mockDispatch } )
+				).rejects.toThrow(
+					'Category slug must contain only lowercase alphanumeric characters and dashes'
+				);
+				expect( mockDispatch ).not.toHaveBeenCalled();
+				mockDispatch.mockClear();
+			}
+		} );
+
+		it( 'should accept valid slug formats', async () => {
+			const validSlugs = [
+				'data-retrieval',
+				'user-management',
+				'analytics-123',
+				'ecommerce',
+				'a',
+				'123',
+				'test-multiple-words-with-dashes',
+			];
+
+			const args: AbilityCategoryArgs = {
+				label: 'Test Category',
+				description: 'Test description',
+			};
+
+			for ( const validSlug of validSlugs ) {
+				mockSelect.getAbilityCategory.mockReturnValue( null );
+				mockDispatch.mockClear();
+
+				const action = registerAbilityCategory( validSlug, args );
+				await action( { select: mockSelect, dispatch: mockDispatch } );
+
+				expect( mockDispatch ).toHaveBeenCalledWith( {
+					type: REGISTER_ABILITY_CATEGORY,
+					category: {
+						slug: validSlug,
+						label: args.label,
+						description: args.description,
+					},
+				} );
+			}
+		} );
+
+		it( 'should validate and reject missing label', async () => {
+			const slug = 'test-category';
+			const args = {
+				label: '',
+				description: 'Test',
+			} as AbilityCategoryArgs;
+
+			const action = registerAbilityCategory( slug, args );
+
+			await expect(
+				action( { select: mockSelect, dispatch: mockDispatch } )
+			).rejects.toThrow(
+				'The category properties must contain a `label` string.'
+			);
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should validate and reject non-string label', async () => {
+			const slug = 'test-category';
+			const args = {
+				label: 123 as any,
+				description: 'Test',
+			};
+
+			const action = registerAbilityCategory( slug, args );
+
+			await expect(
+				action( { select: mockSelect, dispatch: mockDispatch } )
+			).rejects.toThrow(
+				'The category properties must contain a `label` string.'
+			);
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should validate and reject missing description', async () => {
+			const slug = 'test-category';
+			const args = {
+				label: 'Test',
+				description: '',
+			} as AbilityCategoryArgs;
+
+			const action = registerAbilityCategory( slug, args );
+
+			await expect(
+				action( { select: mockSelect, dispatch: mockDispatch } )
+			).rejects.toThrow(
+				'The category properties must contain a `description` string.'
+			);
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should validate and reject non-string description', async () => {
+			const slug = 'test-category';
+			const args = {
+				label: 'Test',
+				description: 123 as any,
+			};
+
+			const action = registerAbilityCategory( slug, args );
+
+			await expect(
+				action( { select: mockSelect, dispatch: mockDispatch } )
+			).rejects.toThrow(
+				'The category properties must contain a `description` string.'
+			);
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should validate and reject non-object meta', async () => {
+			const slug = 'test-category';
+			const args = {
+				label: 'Test',
+				description: 'Test',
+				meta: 'invalid' as any,
+			};
+
+			const action = registerAbilityCategory( slug, args );
+
+			await expect(
+				action( { select: mockSelect, dispatch: mockDispatch } )
+			).rejects.toThrow(
+				'The category properties should provide a valid `meta` array.'
+			);
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should validate and reject array as meta', async () => {
+			const slug = 'test-category';
+			const args = {
+				label: 'Test',
+				description: 'Test',
+				meta: [ 'invalid' ] as any,
+			};
+
+			const action = registerAbilityCategory( slug, args );
+
+			await expect(
+				action( { select: mockSelect, dispatch: mockDispatch } )
+			).rejects.toThrow(
+				'The category properties should provide a valid `meta` array.'
+			);
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should validate and reject already registered category', async () => {
+			const existingCategory: AbilityCategory = {
+				slug: 'test-category',
+				label: 'Existing Category',
+				description: 'Already registered',
+			};
+
+			mockSelect.getAbilityCategory.mockReturnValue( existingCategory );
+
+			const args: AbilityCategoryArgs = {
+				label: 'Test',
+				description: 'Test',
+			};
+
+			const action = registerAbilityCategory( 'test-category', args );
+
+			await expect(
+				action( { select: mockSelect, dispatch: mockDispatch } )
+			).rejects.toThrow(
+				'Category "test-category" is already registered.'
+			);
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should allow registering ability after registering category', async () => {
+			// First register a category
+			const categorySlug = 'new-category';
+			const categoryArgs: AbilityCategoryArgs = {
+				label: 'New Category',
+				description: 'A newly registered category',
+			};
+
+			const categoryAction = registerAbilityCategory(
+				categorySlug,
+				categoryArgs
+			);
+			await categoryAction( {
+				select: mockSelect,
+				dispatch: mockDispatch,
+			} );
+
+			// Verify category was registered
+			expect( mockDispatch ).toHaveBeenCalledWith( {
+				type: REGISTER_ABILITY_CATEGORY,
+				category: {
+					slug: categorySlug,
+					label: categoryArgs.label,
+					description: categoryArgs.description,
+				},
+			} );
+
+			// Now mock that the category exists for ability registration
+			mockSelect.getAbilityCategories = jest.fn().mockReturnValue( [
+				{
+					slug: categorySlug,
+					label: categoryArgs.label,
+					description: categoryArgs.description,
+				},
+			] );
+			mockSelect.getAbility = jest.fn().mockReturnValue( null );
+			mockDispatch.mockClear();
+
+			// Register an ability using the new category
+			const ability: Ability = {
+				name: 'test/ability',
+				label: 'Test Ability',
+				description: 'Test description',
+				category: categorySlug,
+				callback: jest.fn(),
+			};
+
+			const abilityAction = registerAbility( ability );
+			await abilityAction( {
+				select: mockSelect,
+				dispatch: mockDispatch,
+			} );
+
+			// Should successfully register with the new category
+			expect( mockDispatch ).toHaveBeenCalledWith( {
+				type: REGISTER_ABILITY,
+				ability,
+			} );
+		} );
+	} );
+
+	describe( 'unregisterAbilityCategory', () => {
+		it( 'should create an action to unregister a category', () => {
+			const slug = 'test-category';
+			const action = unregisterAbilityCategory( slug );
+
+			expect( action ).toEqual( {
+				type: UNREGISTER_ABILITY_CATEGORY,
+				slug,
+			} );
+		} );
+
+		it( 'should handle valid category slugs', () => {
+			const slug = 'data-retrieval';
+			const action = unregisterAbilityCategory( slug );
+
+			expect( action ).toEqual( {
+				type: UNREGISTER_ABILITY_CATEGORY,
+				slug,
 			} );
 		} );
 	} );

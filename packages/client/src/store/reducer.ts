@@ -12,6 +12,8 @@ import {
 	REGISTER_ABILITY,
 	UNREGISTER_ABILITY,
 	RECEIVE_CATEGORIES,
+	REGISTER_ABILITY_CATEGORY,
+	UNREGISTER_ABILITY_CATEGORY,
 } from './constants';
 
 /**
@@ -81,7 +83,9 @@ interface AbilitiesAction {
 	abilities?: Ability[];
 	ability?: Ability;
 	categories?: AbilityCategory[];
+	category?: AbilityCategory;
 	name?: string;
+	slug?: string;
 }
 
 const DEFAULT_STATE: Record< string, Ability > = {};
@@ -152,6 +156,23 @@ function categoriesBySlug(
 			action.categories.forEach( ( category ) => {
 				newState[ category.slug ] = filterCategory( category );
 			} );
+			return newState;
+		}
+		case REGISTER_ABILITY_CATEGORY: {
+			if ( ! action.category ) {
+				return state;
+			}
+			return {
+				...state,
+				[ action.category.slug ]: filterCategory( action.category ),
+			};
+		}
+		case UNREGISTER_ABILITY_CATEGORY: {
+			if ( ! action.slug || ! state[ action.slug ] ) {
+				return state;
+			}
+			const newState = { ...state };
+			delete newState[ action.slug ];
 			return newState;
 		}
 		default:

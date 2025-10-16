@@ -151,6 +151,61 @@ await registerAbility( {
 } );
 ```
 
+#### `unregisterAbility( name: string ): void`
+
+Unregisters a client-side ability from the store.
+
+```javascript
+import { unregisterAbility } from '@wordpress/abilities';
+
+unregisterAbility( 'my-plugin/navigate' );
+```
+
+#### `registerAbilityCategory( slug: string, args: AbilityCategoryArgs ): Promise<void>`
+
+Registers a client-side ability category. This is useful when registering client-side abilities that introduce new categories not defined by the server.
+
+```javascript
+import { registerAbilityCategory } from '@wordpress/abilities';
+
+// Register a new category
+await registerAbilityCategory( 'block-editor', {
+  label: 'Block Editor',
+  description: 'Abilities for interacting with the WordPress block editor',
+} );
+
+// Register a category with optional metadata
+await registerAbilityCategory( 'custom-category', {
+  label: 'Custom Category',
+  description: 'A category for custom abilities',
+  meta: {
+    color: '#ff0000',
+  },
+} );
+
+// Then register abilities using the new category
+await registerAbility( {
+  name: 'my-plugin/insert-block',
+  label: 'Insert Block',
+  description: 'Inserts a block into the editor',
+  category: 'block-editor', // Uses the client-registered category
+  callback: async ( { blockType } ) => {
+    // Implementation
+    return { success: true };
+  },
+} );
+```
+
+#### `unregisterAbilityCategory( slug: string ): void`
+
+Unregisters an ability category from the store.
+
+```javascript
+import { unregisterAbilityCategory } from '@wordpress/abilities';
+
+unregisterAbilityCategory( 'block-editor' );
+```
+
 #### `executeAbility( name: string, input?: Record<string, any> ): Promise<any>`
 
 Executes an ability with optional input parameters. The HTTP method is automatically determined based on the ability's annotations:

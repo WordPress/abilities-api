@@ -11,6 +11,8 @@ import {
 	REGISTER_ABILITY,
 	UNREGISTER_ABILITY,
 	RECEIVE_CATEGORIES,
+	REGISTER_ABILITY_CATEGORY,
+	UNREGISTER_ABILITY_CATEGORY,
 } from '../constants';
 
 describe( 'Store Reducer', () => {
@@ -636,6 +638,221 @@ describe( 'Store Reducer', () => {
 				);
 				// Undefined properties should not be present
 				expect( category ).not.toHaveProperty( 'meta' );
+			} );
+		} );
+
+		describe( 'REGISTER_ABILITY_CATEGORY', () => {
+			it( 'should add category to the state', () => {
+				const category = {
+					slug: 'test-category',
+					label: 'Test Category',
+					description: 'A test category',
+				};
+
+				const action = {
+					type: REGISTER_ABILITY_CATEGORY,
+					category,
+				};
+
+				const state = reducer(
+					{ categoriesBySlug: defaultState, abilitiesByName: {} },
+					action
+				);
+
+				expect( state.categoriesBySlug ).toHaveProperty(
+					'test-category'
+				);
+				expect( state.categoriesBySlug[ 'test-category' ].label ).toBe(
+					'Test Category'
+				);
+			} );
+
+			it( 'should add category with meta to the state', () => {
+				const category = {
+					slug: 'test-category',
+					label: 'Test Category',
+					description: 'A test category',
+					meta: { color: 'blue', priority: 'high' },
+				};
+
+				const action = {
+					type: REGISTER_ABILITY_CATEGORY,
+					category,
+				};
+
+				const state = reducer(
+					{ categoriesBySlug: defaultState, abilitiesByName: {} },
+					action
+				);
+
+				expect(
+					state.categoriesBySlug[ 'test-category' ].meta
+				).toEqual( { color: 'blue', priority: 'high' } );
+			} );
+
+			it( 'should filter out extra properties when registering', () => {
+				const category = {
+					slug: 'test-category',
+					label: 'Test Category',
+					description: 'A test category',
+					// Extra properties that should be filtered out
+					_links: { self: { href: '/test' } },
+					_embedded: { author: { id: 1 } },
+					extra_field: 'should be removed',
+				};
+
+				const action = {
+					type: REGISTER_ABILITY_CATEGORY,
+					category,
+				};
+
+				const state = reducer(
+					{ categoriesBySlug: defaultState, abilitiesByName: {} },
+					action
+				);
+				const registeredCategory =
+					state.categoriesBySlug[ 'test-category' ];
+
+				// Should have valid properties
+				expect( registeredCategory.slug ).toBe( 'test-category' );
+				expect( registeredCategory.label ).toBe( 'Test Category' );
+				expect( registeredCategory.description ).toBe(
+					'A test category'
+				);
+
+				// Should NOT have invalid properties
+				expect( registeredCategory ).not.toHaveProperty( '_links' );
+				expect( registeredCategory ).not.toHaveProperty( '_embedded' );
+				expect( registeredCategory ).not.toHaveProperty(
+					'extra_field'
+				);
+			} );
+
+			it( 'should replace existing category', () => {
+				const initialState = {
+					'test-category': {
+						slug: 'test-category',
+						label: 'Old Label',
+						description: 'Old description',
+					},
+				};
+
+				const category = {
+					slug: 'test-category',
+					label: 'New Label',
+					description: 'New description',
+					meta: { color: 'red' },
+				};
+
+				const action = {
+					type: REGISTER_ABILITY_CATEGORY,
+					category,
+				};
+
+				const state = reducer(
+					{ categoriesBySlug: initialState, abilitiesByName: {} },
+					action
+				);
+
+				expect( state.categoriesBySlug[ 'test-category' ].label ).toBe(
+					'New Label'
+				);
+				expect(
+					state.categoriesBySlug[ 'test-category' ].description
+				).toBe( 'New description' );
+				expect(
+					state.categoriesBySlug[ 'test-category' ].meta
+				).toEqual( { color: 'red' } );
+			} );
+
+			it( 'should handle undefined category', () => {
+				const action = {
+					type: REGISTER_ABILITY_CATEGORY,
+					category: undefined,
+				};
+
+				const state = reducer(
+					{ categoriesBySlug: defaultState, abilitiesByName: {} },
+					action
+				);
+
+				expect( state.categoriesBySlug ).toEqual( defaultState );
+			} );
+		} );
+
+		describe( 'UNREGISTER_ABILITY_CATEGORY', () => {
+			it( 'should remove category from the state', () => {
+				const initialState = {
+					category1: {
+						slug: 'category1',
+						label: 'Category 1',
+						description: 'First category',
+					},
+					category2: {
+						slug: 'category2',
+						label: 'Category 2',
+						description: 'Second category',
+					},
+				};
+
+				const action = {
+					type: UNREGISTER_ABILITY_CATEGORY,
+					slug: 'category1',
+				};
+
+				const state = reducer(
+					{ categoriesBySlug: initialState, abilitiesByName: {} },
+					action
+				);
+
+				expect( state.categoriesBySlug ).not.toHaveProperty(
+					'category1'
+				);
+				expect( state.categoriesBySlug ).toHaveProperty( 'category2' );
+			} );
+
+			it( 'should handle unregistering non-existent category', () => {
+				const initialState = {
+					'test-category': {
+						slug: 'test-category',
+						label: 'Test Category',
+						description: 'A test category',
+					},
+				};
+
+				const action = {
+					type: UNREGISTER_ABILITY_CATEGORY,
+					slug: 'non-existent',
+				};
+
+				const state = reducer(
+					{ categoriesBySlug: initialState, abilitiesByName: {} },
+					action
+				);
+
+				expect( state.categoriesBySlug ).toEqual( initialState );
+			} );
+
+			it( 'should handle undefined slug', () => {
+				const initialState = {
+					'test-category': {
+						slug: 'test-category',
+						label: 'Test Category',
+						description: 'A test category',
+					},
+				};
+
+				const action = {
+					type: UNREGISTER_ABILITY_CATEGORY,
+					slug: undefined,
+				};
+
+				const state = reducer(
+					{ categoriesBySlug: initialState, abilitiesByName: {} },
+					action
+				);
+
+				expect( state.categoriesBySlug ).toEqual( initialState );
 			} );
 		} );
 	} );

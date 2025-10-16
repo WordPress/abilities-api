@@ -13,6 +13,7 @@ import { store } from './store';
 import type {
 	Ability,
 	AbilityCategory,
+	AbilityCategoryArgs,
 	AbilitiesQueryArgs,
 	AbilityInput,
 	AbilityOutput,
@@ -112,6 +113,66 @@ export async function registerAbility( ability: Ability ): Promise< void > {
  */
 export function unregisterAbility( name: string ): void {
 	dispatch( store ).unregisterAbility( name );
+}
+
+/**
+ * Register a client-side ability category.
+ *
+ * Categories registered on the client are stored alongside server-side categories
+ * in the same store and can be used when registering client side abilities.
+ * This is useful when registering client-side abilities that introduce new
+ * categories not defined by the server.
+ *
+ * Categories will be automatically fetched from the REST API if they haven't been
+ * loaded yet to check for duplicates against server-side categories.
+ *
+ * @param  slug Category slug (lowercase alphanumeric with dashes only).
+ * @param  args Category arguments (label, description, optional meta).
+ * @return Promise that resolves when registration is complete.
+ * @throws {Error} If the category fails validation.
+ *
+ * @example
+ * ```js
+ * // Register a new category for block editor abilities
+ * await registerAbilityCategory('block-editor', {
+ *   label: 'Block Editor',
+ *   description: 'Abilities for interacting with the WordPress block editor'
+ * });
+ *
+ * // Then register abilities using this category
+ * await registerAbility({
+ *   name: 'my-plugin/insert-block',
+ *   label: 'Insert Block',
+ *   description: 'Inserts a block into the editor',
+ *   category: 'block-editor',
+ *   callback: async ({ blockType }) => {
+ *     // Implementation
+ *     return { success: true };
+ *   }
+ * });
+ * ```
+ */
+export async function registerAbilityCategory(
+	slug: string,
+	args: AbilityCategoryArgs
+): Promise< void > {
+	await dispatch( store ).registerAbilityCategory( slug, args );
+}
+
+/**
+ * Unregister an ability category.
+ *
+ * Removes a category from the store.
+ *
+ * @param slug The category slug to unregister.
+ *
+ * @example
+ * ```js
+ * unregisterAbilityCategory('block-editor');
+ * ```
+ */
+export function unregisterAbilityCategory( slug: string ): void {
+	dispatch( store ).unregisterAbilityCategory( slug );
 }
 
 /**
