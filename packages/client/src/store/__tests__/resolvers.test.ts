@@ -430,6 +430,68 @@ describe( 'Store Resolvers', () => {
 			expect( mockDispatch ).not.toHaveBeenCalled();
 		} );
 
+		it( 'should fetch from server even when only client-registered categories exist', async () => {
+			// This tests the scenario where a client category is registered first
+			// The resolver should still fetch server categories
+			const clientOnlyCategories: AbilityCategory[] = [
+				{
+					slug: 'client-category',
+					label: 'Client Category',
+					description: 'A category registered on the client',
+					meta: {
+						_clientRegistered: true,
+					},
+				},
+			];
+
+			const serverCategories: AbilityCategory[] = [
+				{
+					slug: 'data-retrieval',
+					label: 'Data Retrieval',
+					description: 'Server category',
+				},
+				{
+					slug: 'user-management',
+					label: 'User Management',
+					description: 'Another server category',
+				},
+			];
+
+			const mockResolveSelect = {
+				getEntityRecords: jest
+					.fn()
+					.mockResolvedValue( serverCategories ),
+			};
+
+			const mockSelectInstance = {
+				getAbilityCategories: jest
+					.fn()
+					.mockReturnValue( clientOnlyCategories ),
+			};
+
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+
+			const resolver = getAbilityCategories();
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelectInstance,
+			} );
+
+			// Should fetch from server because only client categories exist
+			expect( mockRegistry.resolveSelect ).toHaveBeenCalledWith(
+				coreStore
+			);
+			expect( mockResolveSelect.getEntityRecords ).toHaveBeenCalledWith(
+				ENTITY_KIND,
+				ENTITY_NAME_CATEGORIES,
+				{ per_page: -1 }
+			);
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveCategories( serverCategories )
+			);
+		} );
+
 		it( 'should handle null response', async () => {
 			const mockResolveSelect = {
 				getEntityRecords: jest.fn().mockResolvedValue( null ),

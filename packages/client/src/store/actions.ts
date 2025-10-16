@@ -221,7 +221,12 @@ export function registerAbilityCategory(
 			slug,
 			label: args.label,
 			description: args.description,
-			...( args.meta && { meta: args.meta } ),
+			meta: {
+				...( args.meta || {} ),
+				// Internal implementation note: Client-registered categories will have `meta._clientRegistered` set to `true` to differentiate them from server-fetched categories.
+				// This is used internally by the resolver to determine whether to fetch categories from the server.
+				_clientRegistered: true,
+			},
 		};
 
 		dispatch( {

@@ -6,7 +6,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import type { Ability } from '../types';
+import type { Ability, AbilityCategory } from '../types';
 import { ENTITY_KIND, ENTITY_NAME, ENTITY_NAME_CATEGORIES } from './constants';
 import { receiveAbilities, receiveCategories } from './actions';
 
@@ -85,7 +85,15 @@ export function getAbilityCategories() {
 	// @ts-expect-error - registry types are not yet available
 	return async ( { dispatch, registry, select } ) => {
 		const existingCategories = select.getAbilityCategories();
-		if ( existingCategories && existingCategories.length > 0 ) {
+
+		// Check if we have any server-side categories (categories without meta._clientRegistered flag)
+		// Client categories have meta._clientRegistered=true and might be registered immediately
+		// We only want to skip fetching if we've already fetched server categories
+		const hasServerCategories = existingCategories.some(
+			( category: AbilityCategory ) => ! category.meta?._clientRegistered
+		);
+
+		if ( hasServerCategories ) {
 			return;
 		}
 
@@ -108,6 +116,9 @@ export function getAbilityCategories() {
 export function getAbilityCategory( slug: string ) {
 	// @ts-expect-error - registry types are not yet available
 	return async ( { dispatch, registry, select } ) => {
+		// Check if category already exists in store (either client-registered or server-fetched).
+		// This prevents unnecessary network requests while allowing client-side categories
+		// to be retrieved immediately without hitting the API.
 		const existingCategory = select.getAbilityCategory( slug );
 		if ( existingCategory ) {
 			return;
