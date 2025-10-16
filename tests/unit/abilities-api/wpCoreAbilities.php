@@ -146,9 +146,8 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
         $this->assertIsArray( $ability_data );
         $this->assertArrayHasKey( 'environment', $ability_data );
         $this->assertArrayHasKey( 'php_version', $ability_data );
-        $this->assertArrayHasKey( 'mysql_version', $ability_data );
+        $this->assertArrayHasKey( 'db_server_info', $ability_data );
         $this->assertArrayHasKey( 'wp_version', $ability_data );
-        $this->assertArrayHasKey( 'database_type', $ability_data );
         $this->assertSame( $environment, $ability_data['environment'] );
 
         wp_set_current_user( 0 );

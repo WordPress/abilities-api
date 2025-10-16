@@ -17,6 +17,13 @@ declare( strict_types = 1 );
 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound -- Core class intended for WordPress core.
 class WP_Core_Abilities {
 	/**
+	 * Category slugs for core abilities.
+	 *
+	 * @since 0.3.0
+	 */
+	public const CATEGORY_SITE = 'site';
+	public const CATEGORY_USER = 'user';
+	/**
 	 * Registers the core abilities categories.
 	 *
 	 * @since 0.3.0
@@ -25,22 +32,22 @@ class WP_Core_Abilities {
 	 */
 	public static function register_category(): void {
 		// Site-related capabilities
-		wp_register_ability_category(
-			'site',
-			array(
-				'label'       => __( 'Site' ),
-				'description' => __( 'Abilities that retrieve or modify site information and settings.' ),
-			)
-		);
+			wp_register_ability_category(
+				self::CATEGORY_SITE,
+				array(
+					'label'       => __( 'Site' ),
+					'description' => __( 'Abilities that retrieve or modify site information and settings.' ),
+				)
+			);
 
 		// User-related capabilities
-		wp_register_ability_category(
-			'user',
-			array(
-				'label'       => __( 'User' ),
-				'description' => __( 'Abilities that retrieve or modify user information and settings.' ),
-			)
-		);
+			wp_register_ability_category(
+				self::CATEGORY_USER,
+				array(
+					'label'       => __( 'User' ),
+					'description' => __( 'Abilities that retrieve or modify user information and settings.' ),
+				)
+			);
 	}
 
 	/**
@@ -79,8 +86,8 @@ class WP_Core_Abilities {
 			'wp/get-site-info',
 			array(
 				'label'               => __( 'Get Site Information' ),
-				'description'         => __( 'Returns a single site information field from get_bloginfo().' ),
-				'category'            => 'site',
+				'description'         => __( 'Returns a single site information field configured in WordPress (e.g., site name, URL, version) for display or diagnostics.' ),
+				'category'            => self::CATEGORY_SITE,
 				'input_schema'        => array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -103,7 +110,7 @@ class WP_Core_Abilities {
 						),
 						'value' => array(
 							'type'        => 'string',
-							'description' => __( 'The value returned by get_bloginfo().' ),
+							'description' => __( 'The string value of the requested site information field.' ),
 						),
 					),
 					'additionalProperties' => false,
@@ -114,19 +121,17 @@ class WP_Core_Abilities {
 
 					return array(
 						'field' => $field,
-						'value' => (string) $value,
+						'value' => $value,
 					);
 				},
 				'permission_callback' => static function (): bool {
-					// Site information can expose sensitive details; require admin capability.
 					return current_user_can( 'manage_options' );
 				},
 				'meta'                => array(
 					'annotations'  => array(
-						'instructions' => __( 'Retrieves a single site property by passing an allowed field to get_bloginfo().' ),
-						'readonly'     => true,
-						'destructive'  => false,
-						'idempotent'   => true,
+						'readonly'    => true,
+						'destructive' => false,
+						'idempotent'  => true,
 					),
 					'show_in_rest' => true,
 				),
@@ -146,8 +151,8 @@ class WP_Core_Abilities {
 			'wp/get-current-user-info',
 			array(
 				'label'               => __( 'Get Current User Information' ),
-				'description'         => __( 'Returns basic information about the current authenticated user.' ),
-				'category'            => 'user',
+				'description'         => __( 'Returns basic profile details for the current authenticated user to support personalization, auditing, and access-aware behavior.' ),
+				'category'            => self::CATEGORY_USER,
 				'output_schema'       => array(
 					'type'                 => 'object',
 					'required'             => array( 'id', 'display_name', 'user_nicename', 'user_login', 'roles', 'locale' ),
@@ -199,12 +204,11 @@ class WP_Core_Abilities {
 				},
 				'meta'                => array(
 					'annotations'  => array(
-						'instructions' => __( 'Retrieves information about the current authenticated user.' ),
-						'readonly'     => true,
-						'destructive'  => false,
-						'idempotent'   => true,
+						'readonly'    => true,
+						'destructive' => false,
+						'idempotent'  => true,
 					),
-					'show_in_rest' => true,
+					'show_in_rest' => false,
 				),
 			)
 		);
@@ -222,31 +226,27 @@ class WP_Core_Abilities {
 			'wp/get-environment-info',
 			array(
 				'label'               => __( 'Get Environment Info' ),
-				'description'         => __( 'Returns basic information about the WordPress runtime environment.' ),
-				'category'            => 'site',
+				'description'         => __( 'Returns core details about the site\'s runtime context for diagnostics and compatibility (environment, PHP runtime, database server info, WordPress version).' ),
+				'category'            => self::CATEGORY_SITE,
 				'output_schema'       => array(
 					'type'                 => 'object',
-					'required'             => array( 'environment', 'php_version', 'mysql_version', 'wp_version', 'database_type' ),
+					'required'             => array( 'environment', 'php_version', 'db_server_info', 'wp_version' ),
 					'properties'           => array(
-						'environment'   => array(
+						'environment'    => array(
 							'type'        => 'string',
-							'description' => __( 'The environment type returned by wp_get_environment_type().' ),
+							'description' => __( 'The site\'s runtime environment classification (e.g., production, staging, development).' ),
 						),
-						'php_version'   => array(
+						'php_version'    => array(
 							'type'        => 'string',
-							'description' => __( 'The PHP version.' ),
+							'description' => __( 'The PHP runtime version executing WordPress.' ),
 						),
-						'mysql_version' => array(
+						'db_server_info' => array(
 							'type'        => 'string',
-							'description' => __( 'The database server version (MySQL or MariaDB).' ),
+							'description' => __( 'The database server vendor and version string reported by the driver (e.g., “8.0.34”, “10.11.6-MariaDB”).' ),
 						),
-						'wp_version'    => array(
+						'wp_version'     => array(
 							'type'        => 'string',
-							'description' => __( 'The WordPress version.' ),
-						),
-						'database_type' => array(
-							'type'        => 'string',
-							'description' => __( 'The database server type (e.g., mysql or mariadb).' ),
+							'description' => __( 'The WordPress core version running on this site.' ),
 						),
 					),
 					'additionalProperties' => false,
@@ -256,35 +256,27 @@ class WP_Core_Abilities {
 
 					$env          = wp_get_environment_type();
 					$php_version  = phpversion();
-					$db_version   = '';
-					if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'db_version' ) ) {
-						$db_version = (string) $wpdb->db_version();
+					$db_server_info  = '';
+					if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'db_server_info' ) ) {
+						$db_server_info = $wpdb->db_server_info() ?? '';
 					}
-					$wp_version   = (string) get_bloginfo( 'version' );
-
-					$type = 'mysql';
-					if ( stripos( $db_version, 'mariadb' ) !== false ) {
-						$type = 'mariadb';
-					}
+					$wp_version   = get_bloginfo( 'version' );
 
 					return array(
-						'environment'   => (string) $env,
-						'php_version'   => (string) $php_version,
-						'mysql_version' => (string) $db_version,
-						'wp_version'    => (string) $wp_version,
-						'database_type' => (string) $type,
+						'environment'    => $env,
+						'php_version'    => $php_version,
+						'db_server_info' => $db_server_info,
+						'wp_version'     => $wp_version,
 					);
 				},
 				'permission_callback' => static function (): bool {
-					// Environment information is restricted to administrators.
 					return current_user_can( 'manage_options' );
 				},
 				'meta'                => array(
 					'annotations'  => array(
-						'instructions' => __( 'Retrieves environment information such as environment type, PHP, database, and WordPress versions.' ),
-						'readonly'     => true,
-						'destructive'  => false,
-						'idempotent'   => true,
+						'readonly'    => true,
+						'destructive' => false,
+						'idempotent'  => true,
 					),
 					'show_in_rest' => true,
 				),
