@@ -242,7 +242,8 @@ class WP_Core_Abilities {
 						),
 						'db_server_info' => array(
 							'type'        => 'string',
-							'description' => __( 'The database server vendor and version string reported by the driver (e.g., “8.0.34”, “10.11.6-MariaDB”).' ),
+							'description' => __( 'The database server vendor and version string reported by the driver.' ),
+							'examples' => ['8.0.34', '10.11.6-MariaDB']
 						),
 						'wp_version'     => array(
 							'type'        => 'string',
