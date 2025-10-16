@@ -19,6 +19,7 @@
 ## Documentation
 
 - **[Developer docs](docs/README.md)**.
+- **[Contributing Guidelines](CONTRIBUTING.md)**.
 
 ## Inspiration
 
