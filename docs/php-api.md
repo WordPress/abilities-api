@@ -403,7 +403,7 @@ class My_Plugin_Post_Validator_Ability extends WP_Ability {
      * to customize behavior before or after the standard execution.
      *
      * @param mixed $input Optional. The input data for the ability.
-     * @return mixed|WP_Error The result of the ability execution.
+     * @return mixed|\WP_Error The result of the ability execution.
      */
     protected function do_execute( $input = null ) {
         // Log the execution for debugging purposes
@@ -476,14 +476,14 @@ function my_plugin_register_post_validator_ability() {
             $post_id = $input['post_id'];   
             $post = get_post( $post_id );
             if ( ! $post ) {
-                return new WP_Error(
+                return new \WP_Error(
                     'invalid_post',
                     __( 'The specified post does not exist.', 'my-plugin' )
                 );
             }
             // Check if the post is published
             if ( 'publish' !== $post->post_status ) {
-                return new WP_Error(
+                return new \WP_Error(
                     'post_not_published',
                     __( 'The specified post is not published.', 'my-plugin' )
                 );
@@ -516,7 +516,7 @@ function my_plugin_register_post_validator_ability() {
 - Your custom class **must** extend `WP_Ability`
 - The custom class is only used to instantiate the ability - the `ability_class` parameter is not stored as a property of the ability
 - You can override protected methods like `do_execute()`, `validate_input()`, or `validate_output()` to customize behavior
-- You can add public methods to provide additional functionality specific to your ability
+- You can add custom methods to provide additional functionality specific to your ability
 - The custom class receives the same `$name` and `$args` parameters in its constructor as the base `WP_Ability` class
 - If the specified class does not exist or does not extend `WP_Ability`, registration will fail with a `_doing_it_wrong()` notice
 
