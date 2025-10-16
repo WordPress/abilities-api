@@ -235,6 +235,7 @@ class WP_Core_Abilities {
 						'environment'    => array(
 							'type'        => 'string',
 							'description' => __( 'The site\'s runtime environment classification (e.g., production, staging, development).' ),
+							'examples'    => array( 'production', 'staging', 'development', 'local' ),
 						),
 						'php_version'    => array(
 							'type'        => 'string',
@@ -243,7 +244,7 @@ class WP_Core_Abilities {
 						'db_server_info' => array(
 							'type'        => 'string',
 							'description' => __( 'The database server vendor and version string reported by the driver.' ),
-							'examples' => ['8.0.34', '10.11.6-MariaDB']
+							'examples'    => array( '8.0.34', '10.11.6-MariaDB' ),
 						),
 						'wp_version'     => array(
 							'type'        => 'string',
