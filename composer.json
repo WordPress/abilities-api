@@ -24,6 +24,11 @@
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"autoload": {
+		"classmap": [
+			"includes/abilities-api/",
+			"includes/rest-api/",
+			"includes/assets/"
+		],
 		"files": [
 			"includes/bootstrap.php"
 		]

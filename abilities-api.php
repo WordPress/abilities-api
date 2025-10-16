@@ -26,5 +26,9 @@
  */
 define( 'WP_ABILITIES_API_DIR', plugin_dir_path( __FILE__ ) );
 
+// Load Composer autoloader if not already loaded (for standalone plugin usage).
+if ( file_exists( WP_ABILITIES_API_DIR . 'vendor/autoload.php' ) ) {
+	require_once WP_ABILITIES_API_DIR . 'vendor/autoload.php';
+}
 
 require_once WP_ABILITIES_API_DIR . 'includes/bootstrap.php';
