@@ -60,11 +60,12 @@ export function getAbility(
  * @param state Store state.
  * @return Array of categories.
  */
-export function getAbilityCategories(
-	state: AbilitiesState
-): AbilityCategory[] {
-	return Object.values( state.categoriesBySlug );
-}
+export const getAbilityCategories = createSelector(
+	( state: AbilitiesState ): AbilityCategory[] => {
+		return Object.values( state.categoriesBySlug );
+	},
+	( state: AbilitiesState ) => [ state.categoriesBySlug ]
+);
 
 /**
  * Returns a specific ability category by slug.
