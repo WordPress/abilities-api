@@ -22,4 +22,26 @@ export declare function getAbility(name: string): ({ dispatch, registry, select 
     registry: any;
     select: any;
 }) => Promise<void>;
+/**
+ * Resolver for getAbilityCategories selector.
+ * Fetches all categories from the server.
+ *
+ * The resolver only fetches once and stores all categories.
+ */
+export declare function getAbilityCategories(): ({ dispatch, registry, select }: {
+    dispatch: any;
+    registry: any;
+    select: any;
+}) => Promise<void>;
+/**
+ * Resolver for getAbilityCategory selector.
+ * Fetches a specific category from the server if not already in store.
+ *
+ * @param slug Category slug.
+ */
+export declare function getAbilityCategory(slug: string): ({ dispatch, registry, select }: {
+    dispatch: any;
+    registry: any;
+    select: any;
+}) => Promise<void>;
 //# sourceMappingURL=resolvers.d.ts.map

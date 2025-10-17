@@ -25,7 +25,7 @@ declare global {
 /**
  * Public API functions
  */
-export { getAbilities, getAbility, executeAbility, registerAbility, unregisterAbility, } from './api';
+export { getAbilities, getAbility, getAbilityCategories, getAbilityCategory, executeAbility, registerAbility, unregisterAbility, registerAbilityCategory, unregisterAbilityCategory, } from './api';
 /**
  * The store can be used directly with @wordpress/data via selectors
  * in React components with useSelect.
@@ -48,7 +48,7 @@ export { store } from './store';
 /**
  * Type definitions
  */
-export type { Ability, AbilitiesState, AbilityCallback, PermissionCallback, AbilityInput, AbilityOutput, ValidationError, } from './types';
+export type { Ability, AbilityCategory, AbilityCategoryArgs, AbilitiesState, AbilitiesQueryArgs, AbilityCallback, PermissionCallback, AbilityInput, AbilityOutput, ValidationError, } from './types';
 /**
  * Validation utilities
  */
