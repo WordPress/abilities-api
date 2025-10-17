@@ -100,14 +100,39 @@ if ( ability ) {
 }
 ```
 
-#### `registerAbility( ability: Ability ): void`
+#### `getAbilityCategories(): Promise<AbilityCategory[]>`
+
+Returns all registered ability categories. Categories are used to organize abilities into logical groups.
+
+```javascript
+const categories = await getAbilityCategories();
+console.log( `Found ${ categories.length } categories` );
+
+categories.forEach( ( category ) => {
+  console.log( `${ category.label }: ${ category.description }` );
+} );
+```
+
+#### `getAbilityCategory( slug: string ): Promise<AbilityCategory | null>`
+
+Returns a specific ability category by slug, or null if not found.
+
+```javascript
+const category = await getAbilityCategory( 'data-retrieval' );
+if ( category ) {
+  console.log( `Found category: ${ category.label }` );
+  console.log( `Description: ${ category.description }` );
+}
+```
+
+#### `registerAbility( ability: Ability ): Promise<void>`
 
 Registers a client-side ability. Client abilities are executed locally in the browser and must include a callback function and a valid category.
 
 ```javascript
 import { registerAbility } from '@wordpress/abilities';
 
-registerAbility( {
+await registerAbility( {
   name: 'my-plugin/navigate',
   label: 'Navigate to URL',
   description: 'Navigates to a URL within WordPress admin',
@@ -124,6 +149,61 @@ registerAbility( {
     return { success: true };
   },
 } );
+```
+
+#### `unregisterAbility( name: string ): void`
+
+Unregisters a client-side ability from the store.
+
+```javascript
+import { unregisterAbility } from '@wordpress/abilities';
+
+unregisterAbility( 'my-plugin/navigate' );
+```
+
+#### `registerAbilityCategory( slug: string, args: AbilityCategoryArgs ): Promise<void>`
+
+Registers a client-side ability category. This is useful when registering client-side abilities that introduce new categories not defined by the server.
+
+```javascript
+import { registerAbilityCategory } from '@wordpress/abilities';
+
+// Register a new category
+await registerAbilityCategory( 'block-editor', {
+  label: 'Block Editor',
+  description: 'Abilities for interacting with the WordPress block editor',
+} );
+
+// Register a category with optional metadata
+await registerAbilityCategory( 'custom-category', {
+  label: 'Custom Category',
+  description: 'A category for custom abilities',
+  meta: {
+    color: '#ff0000',
+  },
+} );
+
+// Then register abilities using the new category
+await registerAbility( {
+  name: 'my-plugin/insert-block',
+  label: 'Insert Block',
+  description: 'Inserts a block into the editor',
+  category: 'block-editor', // Uses the client-registered category
+  callback: async ( { blockType } ) => {
+    // Implementation
+    return { success: true };
+  },
+} );
+```
+
+#### `unregisterAbilityCategory( slug: string ): void`
+
+Unregisters an ability category from the store.
+
+```javascript
+import { unregisterAbilityCategory } from '@wordpress/abilities';
+
+unregisterAbilityCategory( 'block-editor' );
 ```
 
 #### `executeAbility( name: string, input?: Record<string, any> ): Promise<any>`
@@ -152,6 +232,8 @@ When using with `@wordpress/data`:
 
 - `getAbilities( args: AbilitiesQueryArgs = {} )` - Returns all abilities from the store, optionally filtered by query arguments
 - `getAbility( name: string )` - Returns a specific ability from the store
+- `getAbilityCategories()` - Returns all categories from the store
+- `getAbilityCategory( slug: string )` - Returns a specific category from the store
 
 ```javascript
 import { useSelect } from '@wordpress/data';
@@ -164,6 +246,12 @@ function MyComponent() {
     []
   );
 
+  // Get all categories
+  const categories = useSelect(
+    ( select ) => select( abilitiesStore ).getAbilityCategories(),
+    []
+  );
+
   // Get abilities in a specific category
   const dataAbilities = useSelect(
     ( select ) =>
@@ -171,10 +259,24 @@ function MyComponent() {
     []
   );
 
+  // Get a specific category
+  const dataCategory = useSelect(
+    ( select ) => select( abilitiesStore ).getAbilityCategory( 'data-retrieval' ),
+    []
+  );
+
   return (
     <div>
       <h2>All Abilities ({ allAbilities.length })</h2>
-      <h2>Data Retrieval Abilities</h2>
+      <h2>Categories ({ categories.length })</h2>
+      <ul>
+        { categories.map( ( category ) => (
+          <li key={ category.slug }>
+            <strong>{ category.label }</strong>: { category.description }
+          </li>
+        ) ) }
+      </ul>
+      <h2>{ dataCategory?.label } Abilities</h2>
       <ul>
         { dataAbilities.map( ( ability ) => (
           <li key={ ability.name }>{ ability.label }</li>
