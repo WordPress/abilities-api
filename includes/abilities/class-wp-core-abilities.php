@@ -15,7 +15,7 @@ declare( strict_types = 1 );
  * @since 0.3.0
  */
 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound -- Core class intended for WordPress core.
-class WP_Core_Abilities {
+final class WP_Core_Abilities {
 	/**
 	 * Category slugs for core abilities.
 	 *
@@ -32,28 +32,28 @@ class WP_Core_Abilities {
 	 */
 	public static function register_category(): void {
 		// Site-related capabilities
-			wp_register_ability_category(
-				self::CATEGORY_SITE,
-				array(
-					'label'       => __( 'Site' ),
-					'description' => __( 'Abilities that retrieve or modify site information and settings.' ),
-				)
-			);
+		wp_register_ability_category(
+			self::CATEGORY_SITE,
+			array(
+				'label'       => __( 'Site' ),
+				'description' => __( 'Abilities that retrieve or modify site information and settings.' ),
+			)
+		);
 
 		// User-related capabilities
-			wp_register_ability_category(
-				self::CATEGORY_USER,
-				array(
-					'label'       => __( 'User' ),
-					'description' => __( 'Abilities that retrieve or modify user information and settings.' ),
-				)
-			);
+		wp_register_ability_category(
+			self::CATEGORY_USER,
+			array(
+				'label'       => __( 'User' ),
+				'description' => __( 'Abilities that retrieve or modify user information and settings.' ),
+			)
+		);
 	}
 
 	/**
 	 * Registers the default core abilities.
 	 *
- * @since 0.3.0
+ 	* @since 0.3.0
 	 *
 	 * @return void
 	 */
