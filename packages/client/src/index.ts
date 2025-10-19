@@ -31,9 +31,13 @@ declare global {
 export {
 	getAbilities,
 	getAbility,
+	getAbilityCategories,
+	getAbilityCategory,
 	executeAbility,
 	registerAbility,
 	unregisterAbility,
+	registerAbilityCategory,
+	unregisterAbilityCategory,
 } from './api';
 
 /**
@@ -61,7 +65,10 @@ export { store } from './store';
  */
 export type {
 	Ability,
+	AbilityCategory,
+	AbilityCategoryArgs,
 	AbilitiesState,
+	AbilitiesQueryArgs,
 	AbilityCallback,
 	PermissionCallback,
 	AbilityInput,
