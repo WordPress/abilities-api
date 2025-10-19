@@ -53,7 +53,7 @@ final class WP_Core_Abilities {
 	/**
 	 * Registers the default core abilities.
 	 *
- 	* @since 0.3.0
+	* @since 0.3.0
 	 *
 	 * @return void
 	 */
@@ -64,7 +64,7 @@ final class WP_Core_Abilities {
 	}
 
 	/**
-	 * Registers the `wp/get-site-info` ability.
+	 * Registers the `core/get-site-info` ability.
 	 *
 	 * @since 0.3.0
 	 *
@@ -83,7 +83,7 @@ final class WP_Core_Abilities {
 		);
 
 		wp_register_ability(
-			'wp/get-site-info',
+			'core/get-site-info',
 			array(
 				'label'               => __( 'Get Site Information' ),
 				'description'         => __( 'Returns a single site information field configured in WordPress (e.g., site name, URL, version) for display or diagnostics.' ),
@@ -140,7 +140,7 @@ final class WP_Core_Abilities {
 	}
 
 	/**
-	 * Registers the `wp/get-current-user-info` ability.
+	 * Registers the `core/get-current-user-info` ability.
 	 *
 	 * @since 0.3.0
 	 *
@@ -148,7 +148,7 @@ final class WP_Core_Abilities {
 	 */
 	protected static function register_get_current_user_info(): void {
 		wp_register_ability(
-			'wp/get-current-user-info',
+			'core/get-current-user-info',
 			array(
 				'label'               => __( 'Get Current User Information' ),
 				'description'         => __( 'Returns basic profile details for the current authenticated user to support personalization, auditing, and access-aware behavior.' ),
@@ -215,7 +215,7 @@ final class WP_Core_Abilities {
 	}
 
 	/**
-	 * Registers the `wp/get-environment-info` ability.
+	 * Registers the `core/get-environment-info` ability.
 	 *
 	 * @since 0.3.0
 	 *
@@ -223,7 +223,7 @@ final class WP_Core_Abilities {
 	 */
 	protected static function register_get_environment_info(): void {
 		wp_register_ability(
-			'wp/get-environment-info',
+			'core/get-environment-info',
 			array(
 				'label'               => __( 'Get Environment Info' ),
 				'description'         => __( 'Returns core details about the site\'s runtime context for diagnostics and compatibility (environment, PHP runtime, database server info, WordPress version).' ),

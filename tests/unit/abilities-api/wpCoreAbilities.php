@@ -15,14 +15,14 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 
         // Unregister core abilities if they were already registered to avoid duplicate registration warnings.
         $registry = WP_Abilities_Registry::get_instance();
-        if ( $registry->is_registered( 'wp/get-site-info' ) ) {
-            $registry->unregister( 'wp/get-site-info' );
+        if ( $registry->is_registered( 'core/get-site-info' ) ) {
+            $registry->unregister( 'core/get-site-info' );
         }
-        if ( $registry->is_registered( 'wp/get-current-user-info' ) ) {
-            $registry->unregister( 'wp/get-current-user-info' );
+        if ( $registry->is_registered( 'core/get-current-user-info' ) ) {
+            $registry->unregister( 'core/get-current-user-info' );
         }
-        if ( $registry->is_registered( 'wp/get-environment-info' ) ) {
-            $registry->unregister( 'wp/get-environment-info' );
+        if ( $registry->is_registered( 'core/get-environment-info' ) ) {
+            $registry->unregister( 'core/get-environment-info' );
         }
 
         // Unregister categories if they exist.
@@ -52,10 +52,10 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 	}
 
 	/**
-     * Tests that the `wp/get-site-info` ability is registered with the expected schema.
+     * Tests that the `core/get-site-info` ability is registered with the expected schema.
      */
     public function test_core_get_bloginfo_ability_is_registered(): void {
-        $ability = wp_get_ability( 'wp/get-site-info' );
+        $ability = wp_get_ability( 'core/get-site-info' );
 
 		$this->assertInstanceOf( WP_Ability::class, $ability );
 		$this->assertTrue( $ability->get_meta_item( 'show_in_rest', false ) );
@@ -66,14 +66,14 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 	}
 
 	/**
-     * Tests executing the `wp/get-site-info` ability.
+     * Tests executing the `core/get-site-info` ability.
      */
     public function test_core_get_bloginfo_executes(): void {
         // Requires manage_options.
         $admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
         wp_set_current_user( $admin_id );
 
-        $ability = wp_get_ability( 'wp/get-site-info' );
+        $ability = wp_get_ability( 'core/get-site-info' );
 
 		$result = $ability->execute(
 			array(
@@ -96,7 +96,7 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
      * Tests that executing the current user info ability requires authentication.
      */
     public function test_core_get_current_user_info_requires_authentication(): void {
-        $ability = wp_get_ability( 'wp/get-current-user-info' );
+        $ability = wp_get_ability( 'core/get-current-user-info' );
 
 		$this->assertFalse( $ability->check_permissions() );
 
@@ -118,7 +118,7 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 
 		wp_set_current_user( $user_id );
 
-        $ability = wp_get_ability( 'wp/get-current-user-info' );
+        $ability = wp_get_ability( 'core/get-current-user-info' );
 
 		$this->assertTrue( $ability->check_permissions() );
 
@@ -139,7 +139,7 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
         $admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
         wp_set_current_user( $admin_id );
 
-        $ability      = wp_get_ability( 'wp/get-environment-info' );
+        $ability      = wp_get_ability( 'core/get-environment-info' );
         $environment  = wp_get_environment_type();
         $ability_data = $ability->execute();
 
