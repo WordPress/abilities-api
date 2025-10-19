@@ -86,43 +86,70 @@ final class WP_Core_Abilities {
 			'core/get-site-info',
 			array(
 				'label'               => __( 'Get Site Information' ),
-				'description'         => __( 'Returns a single site information field configured in WordPress (e.g., site name, URL, version) for display or diagnostics.' ),
+				'description'         => __( 'Returns site information configured in WordPress. By default returns all fields, or optionally a filtered subset.' ),
 				'category'            => self::CATEGORY_SITE,
 				'input_schema'        => array(
 					'type'                 => 'object',
 					'properties'           => array(
-						'field' => array(
-							'type'        => 'string',
-							'enum'        => $fields,
-							'description' => __( 'The site information field to retrieve.' ),
+						'fields' => array(
+							'type'        => 'array',
+							'items'       => array(
+								'type' => 'string',
+								'enum' => $fields,
+							),
+							'description' => __( 'Optional: Limit response to specific fields. If omitted, all fields are returned.' ),
 						),
 					),
-					'required'             => array( 'field' ),
 					'additionalProperties' => false,
 				),
 				'output_schema'       => array(
 					'type'                 => 'object',
-					'required'             => array( 'field', 'value' ),
 					'properties'           => array(
-						'field' => array(
+						'name'        => array(
 							'type'        => 'string',
-							'description' => __( 'The requested site information field.' ),
+							'description' => __( 'The site title.' ),
 						),
-						'value' => array(
+						'description' => array(
 							'type'        => 'string',
-							'description' => __( 'The string value of the requested site information field.' ),
+							'description' => __( 'The site tagline.' ),
+						),
+						'url'         => array(
+							'type'        => 'string',
+							'description' => __( 'The site home URL.' ),
+						),
+						'wpurl'       => array(
+							'type'        => 'string',
+							'description' => __( 'The WordPress installation URL.' ),
+						),
+						'admin_email' => array(
+							'type'        => 'string',
+							'description' => __( 'The site administrator email address.' ),
+						),
+						'charset'     => array(
+							'type'        => 'string',
+							'description' => __( 'The site character encoding.' ),
+						),
+						'language'    => array(
+							'type'        => 'string',
+							'description' => __( 'The site language locale code.' ),
+						),
+						'version'     => array(
+							'type'        => 'string',
+							'description' => __( 'The WordPress version.' ),
 						),
 					),
 					'additionalProperties' => false,
 				),
 				'execute_callback'    => static function ( $input = array() ): array {
-					$field = $input['field'];
-					$value = get_bloginfo( $field );
+					$all_fields       = array( 'name', 'description', 'url', 'wpurl', 'admin_email', 'charset', 'language', 'version' );
+					$requested_fields = ! empty( $input['fields'] ) ? $input['fields'] : $all_fields;
 
-					return array(
-						'field' => $field,
-						'value' => $value,
-					);
+					$result = array();
+					foreach ( $requested_fields as $field ) {
+						$result[ $field ] = get_bloginfo( $field );
+					}
+
+					return $result;
 				},
 				'permission_callback' => static function (): bool {
 					return current_user_can( 'manage_options' );

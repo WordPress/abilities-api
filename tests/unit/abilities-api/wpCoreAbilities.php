@@ -60,13 +60,22 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 		$this->assertInstanceOf( WP_Ability::class, $ability );
 		$this->assertTrue( $ability->get_meta_item( 'show_in_rest', false ) );
 
-		$input_schema = $ability->get_input_schema();
-		$this->assertSame( array( 'field' ), $input_schema['required'] );
-		$this->assertContains( 'name', $input_schema['properties']['field']['enum'] );
+		$input_schema  = $ability->get_input_schema();
+		$output_schema = $ability->get_output_schema();
+
+		// Input schema should have optional fields array.
+		$this->assertArrayHasKey( 'fields', $input_schema['properties'] );
+		$this->assertSame( 'array', $input_schema['properties']['fields']['type'] );
+		$this->assertContains( 'name', $input_schema['properties']['fields']['items']['enum'] );
+
+		// Output schema should have all fields documented.
+		$this->assertArrayHasKey( 'name', $output_schema['properties'] );
+		$this->assertArrayHasKey( 'url', $output_schema['properties'] );
+		$this->assertArrayHasKey( 'version', $output_schema['properties'] );
 	}
 
 	/**
-     * Tests executing the `core/get-site-info` ability.
+     * Tests executing the `core/get-site-info` ability returns all fields by default.
      */
     public function test_core_get_bloginfo_executes(): void {
         // Requires manage_options.
@@ -75,19 +84,30 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 
         $ability = wp_get_ability( 'core/get-site-info' );
 
+		// Test without fields parameter - should return all fields.
+		$result = $ability->execute( array() );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'name', $result );
+		$this->assertArrayHasKey( 'description', $result );
+		$this->assertArrayHasKey( 'url', $result );
+		$this->assertArrayHasKey( 'version', $result );
+		$this->assertSame( get_bloginfo( 'name' ), $result['name'] );
+
+		// Test with fields parameter - should return only requested fields.
 		$result = $ability->execute(
 			array(
-				'field' => 'name',
+				'fields' => array( 'name', 'url' ),
 			)
 		);
 
-        $this->assertSame(
-            array(
-                'field' => 'name',
-                'value' => get_bloginfo( 'name' ),
-            ),
-            $result
-        );
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'name', $result );
+		$this->assertArrayHasKey( 'url', $result );
+		$this->assertArrayNotHasKey( 'description', $result );
+		$this->assertArrayNotHasKey( 'version', $result );
+		$this->assertSame( get_bloginfo( 'name' ), $result['name'] );
+		$this->assertSame( get_bloginfo( 'url' ), $result['url'] );
 
         wp_set_current_user( 0 );
     }
