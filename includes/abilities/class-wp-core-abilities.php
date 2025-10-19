@@ -140,7 +140,7 @@ final class WP_Core_Abilities {
 	}
 
 	/**
-	 * Registers the `core/get-current-user-info` ability.
+	 * Registers the `core/get-user-info` ability.
 	 *
 	 * @since 0.3.0
 	 *
@@ -148,9 +148,9 @@ final class WP_Core_Abilities {
 	 */
 	protected static function register_get_current_user_info(): void {
 		wp_register_ability(
-			'core/get-current-user-info',
+			'core/get-user-info',
 			array(
-				'label'               => __( 'Get Current User Information' ),
+				'label'               => __( 'Get User Information' ),
 				'description'         => __( 'Returns basic profile details for the current authenticated user to support personalization, auditing, and access-aware behavior.' ),
 				'category'            => self::CATEGORY_USER,
 				'output_schema'       => array(

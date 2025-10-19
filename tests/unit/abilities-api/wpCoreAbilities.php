@@ -18,8 +18,8 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
         if ( $registry->is_registered( 'core/get-site-info' ) ) {
             $registry->unregister( 'core/get-site-info' );
         }
-        if ( $registry->is_registered( 'core/get-current-user-info' ) ) {
-            $registry->unregister( 'core/get-current-user-info' );
+        if ( $registry->is_registered( 'core/get-user-info' ) ) {
+            $registry->unregister( 'core/get-user-info' );
         }
         if ( $registry->is_registered( 'core/get-environment-info' ) ) {
             $registry->unregister( 'core/get-environment-info' );
@@ -96,7 +96,7 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
      * Tests that executing the current user info ability requires authentication.
      */
     public function test_core_get_current_user_info_requires_authentication(): void {
-        $ability = wp_get_ability( 'core/get-current-user-info' );
+        $ability = wp_get_ability( 'core/get-user-info' );
 
 		$this->assertFalse( $ability->check_permissions() );
 
@@ -118,7 +118,7 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 
 		wp_set_current_user( $user_id );
 
-        $ability = wp_get_ability( 'core/get-current-user-info' );
+        $ability = wp_get_ability( 'core/get-user-info' );
 
 		$this->assertTrue( $ability->check_permissions() );
 
