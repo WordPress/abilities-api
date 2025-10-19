@@ -59,7 +59,7 @@ final class WP_Core_Abilities {
 	 */
 	public static function register(): void {
 		self::register_get_site_info();
-		self::register_get_current_user_info();
+		self::register_get_user_info();
 		self::register_get_environment_info();
 	}
 
@@ -146,7 +146,7 @@ final class WP_Core_Abilities {
 	 *
 	 * @return void
 	 */
-	protected static function register_get_current_user_info(): void {
+	protected static function register_get_user_info(): void {
 		wp_register_ability(
 			'core/get-user-info',
 			array(
