@@ -101,6 +101,7 @@ final class WP_Core_Abilities {
 						),
 					),
 					'additionalProperties' => false,
+					'default'              => array(),
 				),
 				'output_schema'       => array(
 					'type'                 => 'object',
@@ -141,6 +142,7 @@ final class WP_Core_Abilities {
 					'additionalProperties' => false,
 				),
 				'execute_callback'    => static function ( $input = array() ): array {
+					$input = is_array( $input ) ? $input : array();
 					$all_fields       = array( 'name', 'description', 'url', 'wpurl', 'admin_email', 'charset', 'language', 'version' );
 					$requested_fields = ! empty( $input['fields'] ) ? $input['fields'] : $all_fields;
 
@@ -151,7 +153,8 @@ final class WP_Core_Abilities {
 
 					return $result;
 				},
-				'permission_callback' => static function (): bool {
+				'permission_callback' => static function ( $input = null ): bool {
+					unset( $input );
 					return current_user_can( 'manage_options' );
 				},
 				'meta'                => array(

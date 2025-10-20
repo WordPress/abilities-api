@@ -63,6 +63,10 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 		$input_schema  = $ability->get_input_schema();
 		$output_schema = $ability->get_output_schema();
 
+		$this->assertSame( 'object', $input_schema['type'] );
+		$this->assertArrayHasKey( 'default', $input_schema );
+		$this->assertSame( array(), $input_schema['default'] );
+
 		// Input schema should have optional fields array.
 		$this->assertArrayHasKey( 'fields', $input_schema['properties'] );
 		$this->assertSame( 'array', $input_schema['properties']['fields']['type'] );
@@ -85,7 +89,7 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
         $ability = wp_get_ability( 'core/get-site-info' );
 
 		// Test without fields parameter - should return all fields.
-		$result = $ability->execute( array() );
+		$result = $ability->execute();
 
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'name', $result );
