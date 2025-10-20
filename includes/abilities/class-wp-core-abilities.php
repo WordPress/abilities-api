@@ -153,8 +153,7 @@ final class WP_Core_Abilities {
 
 					return $result;
 				},
-				'permission_callback' => static function ( $input = null ): bool {
-					unset( $input );
+				'permission_callback' => static function (): bool {
 					return current_user_can( 'manage_options' );
 				},
 				'meta'                => array(
