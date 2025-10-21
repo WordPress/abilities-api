@@ -119,15 +119,17 @@ The `$args` array accepts the following keys:
 - `label` (`string`, **Required**): A human-readable name for the ability. Used for display purposes. Should be translatable.
 - `description` (`string`, **Required**): A detailed description of what the ability does, its purpose, and its parameters or return values. This is crucial for AI agents to understand how and when to use the ability. Should be translatable.
 - `category` (`string`, **Required**): The slug of the category this ability belongs to. The category must be registered before registering the ability using `wp_register_ability_category()`. Categories help organize and filter abilities by their purpose. See [Registering Categories](#registering-categories) for details.
-- `input_schema` (`array`, **Required**): A JSON Schema definition describing the expected input parameters for the ability's execute callback. Used for validation and documentation.
+- `input_schema` (`array`, **Optional**): A JSON Schema definition describing the expected input parameters for the ability's execute callback. Only needed when creating Abilities that require inputs. Defaults to `null` only when no schema is provided. Used for validation and documentation.
 - `output_schema` (`array`, **Required**): A JSON Schema definition describing the expected format of the data returned by the ability. Used for validation and documentation.
 - `execute_callback` (`callable`, **Required**): The PHP function or method to execute when this ability is called.
-  - The callback receives one optional argument: it can have any type as defined in the input schema (e.g., `array`, `object`, `string`, etc.).
+  - The callback receives one optional argument, the input data for the ability. The argument is required when the input schema is defined.
+  - The input argument will have the same type as defined in the input schema (e.g., `array`, `object`, `string`, etc.).
   - The callback should return the result of the ability's operation or return a `WP_Error` object on failure.
 - `permission_callback` (`callable`, **Required**): A callback function to check if the current user has permission to execute this ability.
-  - The callback receives one optional argument: it can have any type as defined in the input schema (e.g., `array`, `object`, `string`, etc.).
+  - The callback receives one optional argument, the input data for the ability. The argument is required when the input schema is defined.
+  - The input argument will have the same type as defined in the input schema (e.g., `array`, `object`, `string`, etc.).
   - The callback should return a boolean (`true` if the user has permission, `false` otherwise), or a `WP_Error` object on failure.
-  - If the input does not validate against the input schema, the permission callback will not be called, and a `WP_Error` will be returned instead.
+  - If an input schema is set, and the input does not validate against the input schema, the permission callback will not be called, and a `WP_Error` will be returned instead.
 - `meta` (`array`, **Optional**): An associative array for storing arbitrary additional metadata about the ability.
   - `annotations` (`array`, **Optional**): An associative array of annotations providing hints about the ability's behavior characteristics. Supports the following keys:
     - `instructions` (`string`, **Optional**): Custom instructions or guidance for using the ability (default: `''`).
@@ -149,7 +151,7 @@ The `$id` parameter must follow the pattern `namespace/ability-name`:
 
 ### Code Examples
 
-#### Registering a Simple Data Retrieval Ability
+#### Registering a simple data retrieval Ability without an input schema
 
 ```php
 add_action( 'abilities_api_init', 'my_plugin_register_site_info_ability' );
@@ -158,11 +160,6 @@ function my_plugin_register_site_info_ability() {
         'label' => __( 'Get Site Information', 'my-plugin' ),
         'description' => __( 'Retrieves basic information about the WordPress site including name, description, and URL.', 'my-plugin' ),
         'category' => 'data-retrieval',
-        'input_schema' => array(
-            'type' => 'object',
-            'properties' => array(),
-            'additionalProperties' => false
-        ),
         'output_schema' => array(
             'type' => 'object',
             'properties' => array(
@@ -181,7 +178,7 @@ function my_plugin_register_site_info_ability() {
                 )
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => function() {
             return array(
                 'name' => get_bloginfo( 'name' ),
                 'description' => get_bloginfo( 'description' ),
@@ -312,8 +309,7 @@ function my_plugin_register_woo_stats_ability() {
             return current_user_can( 'manage_woocommerce' );
         },
         'meta' => array(
-            'requires_plugin' => 'woocommerce',
-            'category' => 'ecommerce'
+            'requires_plugin' => 'woocommerce'
         )
     ));
 }
