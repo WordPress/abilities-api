@@ -92,16 +92,41 @@ function wp_get_ability( string $name ): ?WP_Ability {
 }
 
 /**
- * Retrieves all registered abilities using Abilities API.
+ * Retrieves a collection of registered abilities.
+ *
+ * Returns a WP_Abilities_Collection instance that provides a fluent, chainable
+ * API for filtering, sorting, and manipulating abilities.
  *
  * @since 0.1.0
+ * @since n.e.x.t Returns WP_Abilities_Collection instead of array.
  *
- * @see WP_Abilities_Registry::get_all_registered()
+ * @see WP_Abilities_Collection
  *
- * @return \WP_Ability[] The array of registered abilities.
+ * @return \WP_Abilities_Collection Collection of WP_Ability instances.
+ *
+ * @example
+ * // Get all abilities as collection
+ * $abilities = wp_get_abilities();
+ *
+ * @example
+ * // Filter by category
+ * $math_abilities = wp_get_abilities()->where_category('math');
+ *
+ * @example
+ * // Chain multiple filters
+ * $abilities = wp_get_abilities()
+ *     ->where_namespace(['WordPress', 'woocommerce'])
+ *     ->where_meta(['show_in_rest' => true])
+ *     ->search('product')
+ *     ->sort_by_desc('name');
+ *
+ * @example
+ * // Convert to array if needed
+ * $abilities_array = wp_get_abilities()->to_array();
  */
-function wp_get_abilities(): array {
-	return WP_Abilities_Registry::get_instance()->get_all_registered();
+function wp_get_abilities(): WP_Abilities_Collection {
+	$registry = WP_Abilities_Registry::get_instance();
+	return new WP_Abilities_Collection( $registry->get_all_registered() );
 }
 
 /**
