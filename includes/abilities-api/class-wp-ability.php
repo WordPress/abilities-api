@@ -23,7 +23,7 @@ class WP_Ability {
 	/**
 	 * The default value for the `show_in_rest` meta.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 * @var bool
 	 */
 	protected const DEFAULT_SHOW_IN_REST = false;
@@ -32,7 +32,7 @@ class WP_Ability {
 	 * The default ability annotations.
 	 * They are not guaranteed to provide a faithful description of ability behavior.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 * @var array<string,(bool|string)>
 	 */
 	protected static $default_annotations = array(
@@ -120,7 +120,7 @@ class WP_Ability {
 	/**
 	 * The ability category (required).
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 * @var string
 	 */
 	protected $category;
@@ -321,6 +321,27 @@ class WP_Ability {
 	}
 
 	/**
+	 * Applies the defined input default when no input is provided.
+	 *
+	 * @since 0.4.0
+	 *
+	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
+	 * @return mixed The input with the schema default applied when available.
+	 */
+	public function normalize_input( $input = null ) {
+		if ( null !== $input ) {
+			return $input;
+		}
+
+		$input_schema = $this->get_input_schema();
+		if ( ! empty( $input_schema ) && array_key_exists( 'default', $input_schema ) ) {
+			return $input_schema['default'];
+		}
+
+		return null;
+	}
+
+	/**
 	 * Retrieves the output schema for the ability.
 	 *
 	 * @since 0.1.0
@@ -345,7 +366,7 @@ class WP_Ability {
 	/**
 	 * Retrieves the category for the ability.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @return string The category for the ability.
 	 */
@@ -356,7 +377,7 @@ class WP_Ability {
 	/**
 	 * Retrieves a specific metadata item for the ability.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param string $key           The metadata key to retrieve.
 	 * @param mixed  $default_value Optional. The default value to return if the metadata item is not found. Default `null`.
@@ -410,7 +431,7 @@ class WP_Ability {
 	/**
 	 * Invokes a callable, ensuring the input is passed through only if the input schema is defined.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param callable $callback The callable to invoke.
 	 * @param mixed    $input    Optional. The input data for the ability. Default `null`.
@@ -436,6 +457,7 @@ class WP_Ability {
 	 * @return bool|\WP_Error Whether the ability has the necessary permission.
 	 */
 	public function check_permissions( $input = null ) {
+		$input    = $this->normalize_input( $input );
 		$is_valid = $this->validate_input( $input );
 		if ( is_wp_error( $is_valid ) ) {
 			return $is_valid;
@@ -522,6 +544,7 @@ class WP_Ability {
 	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
 	public function execute( $input = null ) {
+		$input           = $this->normalize_input( $input );
 		$has_permissions = $this->check_permissions( $input );
 		if ( true !== $has_permissions ) {
 			if ( is_wp_error( $has_permissions ) ) {

@@ -3,6 +3,8 @@
 [_Part of the **AI Building Blocks for WordPress** initiative_
 ](https://make.wordpress.org/ai/2025/07/17/ai-building-blocks)
 
+[Handbook](https://make.wordpress.org/ai/handbook/projects/abilities-api/)
+
 ## Overview
 
 - **Purpose:** provide a common way for WordPress core, plugins, and themes to describe what they can do ("abilities") in a machine‑readable, human‑friendly form.
@@ -29,13 +31,15 @@
 
 ## Current Status
 
-| Milestone                           | State       |
+| Milestones                          | State       |
 | ----------------------------------- | ----------- |
 | Placeholder repository              | **created** |
 | Spec draft                          | **created** |
 | Prototype plugin & Composer package | **created** |
-| Community feedback (#core‑ai Slack) | in progress |
-| Core proposal                       | planned     |
+| Community feedback (#core‑ai Slack) | **created** |
+| Core proposal                       | in progress |
+| Initial                             | **created** |
+| WordPress 6.9                       | in progress |
 
 ## How to Get Involved
 

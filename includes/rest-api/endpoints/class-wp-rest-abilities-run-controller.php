@@ -132,7 +132,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$input  = $this->get_input_from_request( $request );
+		$input  = $ability->normalize_input( $this->get_input_from_request( $request ) );
 		$result = $ability->execute( $input );
 		if ( is_wp_error( $result ) ) {
 			if ( 'ability_invalid_input' === $result->get_error_code() ) {
@@ -162,7 +162,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$input = $this->get_input_from_request( $request );
+		$input = $ability->normalize_input( $this->get_input_from_request( $request ) );
 		if ( ! $ability->check_permissions( $input ) ) {
 			return new \WP_Error(
 				'rest_ability_cannot_execute',

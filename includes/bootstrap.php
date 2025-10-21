@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Version of the plugin.
 if ( ! defined( 'WP_ABILITIES_API_VERSION' ) ) {
-	define( 'WP_ABILITIES_API_VERSION', '0.2.0' );
+	define( 'WP_ABILITIES_API_VERSION', '0.3.0' );
 }
 
 // Load core classes if they are not already defined (for non-Composer installs or direct includes).
@@ -39,6 +39,20 @@ if ( ! class_exists( 'WP_Abilities_Category_Registry' ) ) {
 // Ensure procedural functions are available, too.
 if ( ! function_exists( 'wp_register_ability' ) ) {
 	require_once __DIR__ . '/abilities-api.php';
+}
+
+// Load core abilities class.
+if ( ! class_exists( 'WP_Core_Abilities' ) ) {
+	require_once __DIR__ . '/abilities/class-wp-core-abilities.php';
+}
+
+// Register core abilities category and abilities when requested via filter or when not in test environment.
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Plugin-specific hook for feature plugin context.
+if ( ! ( defined( 'WP_RUN_CORE_TESTS' ) || defined( 'WP_TESTS_CONFIG_FILE_PATH' ) || ( function_exists( 'getenv' ) && false !== getenv( 'WP_PHPUNIT__DIR' ) ) ) || apply_filters( 'abilities_api_register_core_abilities', false ) ) {
+	if ( function_exists( 'add_action' ) ) {
+		add_action( 'abilities_api_categories_init', array( 'WP_Core_Abilities', 'register_category' ) );
+		add_action( 'abilities_api_init', array( 'WP_Core_Abilities', 'register' ) );
+	}
 }
 
 // Load REST API init class for plugin bootstrap.
