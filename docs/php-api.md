@@ -118,7 +118,7 @@ The `$args` array accepts the following keys:
 
 - `label` (`string`, **Required**): A human-readable name for the ability. Used for display purposes. Should be translatable.
 - `description` (`string`, **Required**): A detailed description of what the ability does, its purpose, and its parameters or return values. This is crucial for AI agents to understand how and when to use the ability. Should be translatable.
-- `category` (`string`, **Required**): The slug of the category this ability belongs to. The category must be registered before registering the ability using `wp_register_ability_category()`. Categories help organize and filter abilities by their purpose. See [Registering Categories](7.registering-categories.md) for details.
+- `category` (`string`, **Required**): The slug of the category this ability belongs to. The category must be registered before registering the ability using `wp_register_ability_category()`. Categories help organize and filter abilities by their purpose. See [Registering Categories](#registering-categories) for details.
 - `input_schema` (`array`, **Required**): A JSON Schema definition describing the expected input parameters for the ability's execute callback. Used for validation and documentation.
 - `output_schema` (`array`, **Required**): A JSON Schema definition describing the expected format of the data returned by the ability. Used for validation and documentation.
 - `execute_callback` (`callable`, **Required**): The PHP function or method to execute when this ability is called.
