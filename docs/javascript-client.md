@@ -34,7 +34,7 @@ console.log(`Found ${abilities.length} abilities`);
 
 // List all abilities
 abilities.forEach(ability => {
-    console.log(`${ability.name}: ${ability.description}`);
+  console.log(`${ability.name}: ${ability.description}`);
 });
 
 // Get abilities in a specific category
@@ -61,6 +61,46 @@ if ( ability ) {
   console.log( 'Label:', ability.label );
   console.log( 'Description:', ability.description );
   console.log( 'Input Schema:', ability.input_schema );
+}
+```
+
+### `getAbilityCategories()`
+
+Returns an array of all registered ability categories.
+
+**Parameters:** None
+
+**Returns:** `Promise<Array>` - Array of category objects
+
+**Example:**
+
+```javascript
+const categories = await getAbilityCategories();
+console.log( `Found ${ categories.length } categories` );
+
+// List all categories
+categories.forEach( ( category ) => {
+  console.log( `${ category.label }: ${ category.description }` );
+} );
+```
+
+### `getAbilityCategory( slug )`
+
+Retrieves a specific category by slug.
+
+**Parameters:**
+
+- `slug` (string) - The category slug (e.g., 'data-retrieval')
+
+**Returns:** `Promise<Object|null>` - The category object or null if not found
+
+**Example:**
+
+```javascript
+const category = await getAbilityCategory( 'data-retrieval' );
+if ( category ) {
+  console.log( 'Label:', category.label );
+  console.log( 'Description:', category.description );
 }
 ```
 
@@ -98,7 +138,7 @@ Registers a client-side ability that runs in the browser.
 
 - `ability` (object) - The ability configuration object
 
-**Returns:** `void`
+**Returns:** `Promise<void>`
 
 **Example:**
 
@@ -110,7 +150,7 @@ const showNotification = ( message ) => {
 };
 
 // Register a notification ability which calls the showNotification function
-registerAbility( {
+await registerAbility( {
   name: 'my-plugin/show-notification',
   label: 'Show Notification',
   description: 'Display a notification message to the user',
@@ -160,11 +200,76 @@ Removes a previously registered client-side ability.
 
 - `name` (string) - The ability name to unregister
 
+**Returns:** `void`
+
 **Example:**
 
 ```javascript
 // Unregister an ability
 unregisterAbility( 'my-plugin/old-ability' );
+```
+
+### `registerAbilityCategory( slug, args )`
+
+Registers a client-side ability category. This is useful when registering client-side abilities that introduce new categories not defined by the server.
+
+**Parameters:**
+
+- `slug` (string) - The category slug (lowercase alphanumeric with dashes only)
+- `args` (object) - Category configuration object
+  - `label` (string) - Human-readable label for the category
+  - `description` (string) - Detailed description of the category
+  - `meta` (object, optional) - Optional metadata about the category
+
+**Returns:** `Promise<void>`
+
+**Example:**
+
+```javascript
+// Register a new category
+await registerAbilityCategory( 'block-editor', {
+  label: 'Block Editor',
+  description: 'Abilities for interacting with the WordPress block editor',
+} );
+
+// Register a category with metadata
+await registerAbilityCategory( 'custom-category', {
+  label: 'Custom Category',
+  description: 'A category for custom abilities',
+  meta: {
+    priority: 'high',
+    icon: 'dashicons-admin-customizer',
+  },
+} );
+
+// Then register abilities using the new category
+await registerAbility( {
+  name: 'my-plugin/insert-block',
+  label: 'Insert Block',
+  description: 'Inserts a block into the editor',
+  category: 'block-editor', // Uses the client-registered category
+  callback: async ( { blockType } ) => {
+    // Implementation
+    return { success: true };
+  },
+} );
+```
+
+### `unregisterAbilityCategory( slug )`
+
+Removes a previously registered client-side category.
+
+**Parameters:**
+
+- `slug` (string) - The category slug to unregister
+
+**Returns:** `void`
+
+**Example:**
+
+```javascript
+// Unregister a category
+unregisterAbilityCategory( 'block-editor' );
 ```
 
 ## Error Handling
