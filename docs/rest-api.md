@@ -1,4 +1,4 @@
-# 5. REST API Reference
+# REST API Reference
 
 The WordPress Abilities API provides REST endpoints that allow external systems to discover and execute abilities via HTTP requests.
 

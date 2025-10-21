@@ -1,4 +1,4 @@
-# 6. Hooks
+# Hooks
 
 The Abilities API provides [WordPress Action and Filter Hooks](https://developer.wordpress.org/apis/hooks/) that allow developers to monitor and respond to ability execution events.
 

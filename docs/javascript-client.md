@@ -1,4 +1,4 @@
-# 7. JavaScript/TypeScript Client
+# JavaScript/TypeScript Client
 
 The JavaScript client provides an interface for discovering and executing WordPress Abilities from the browser.
 
