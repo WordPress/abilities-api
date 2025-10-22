@@ -1,4 +1,4 @@
-# 6. Hooks
+# Hooks
 
 The Abilities API provides [WordPress Action and Filter Hooks](https://developer.wordpress.org/apis/hooks/) that allow developers to monitor and respond to ability execution events.
 
@@ -29,6 +29,7 @@ do_action( 'abilities_api_categories_init', $registry );
 #### Usage Example
 
 ```php
+add_action( 'abilities_api_categories_init', 'my_plugin_register_categories' );
 /**
  * Register custom ability categories.
  *
@@ -45,9 +46,49 @@ function my_plugin_register_categories( $registry ) {
         'description' => __( 'Abilities that provide analytical data and insights.', 'my-plugin' ),
     ));
 }
-add_action( 'abilities_api_categories_init', 'my_plugin_register_categories' );
 ```
 
+### `abilities_api_init`
+
+Fires when the abilities registry has been initialized. This is the proper hook to use when registering abilities.
+
+```php
+do_action( 'abilities_api_init', $registry );
+```
+
+#### Parameters
+
+- `$registry` (`\WP_Abilities_Registry`): The abilities registry instance.
+
+#### Usage Example
+
+```php
+add_action('abilities_api_init', 'my_plugin_register_abilities');
+/**
+ * Register custom abilities.
+ */
+function function my_plugin_register_abilities() {
+    wp_register_ability( 'my-plugin/ability', array(
+        'label'               => __( 'Title', 'my-plugin' ),
+        'description'         => __( 'Description.', 'my-plugin' ),
+        'category'            => 'analytics',
+        'input_schema'        => array(
+            'type'                 => 'object',
+            'properties'           => array(),
+            'additionalProperties' => false,
+        ),
+        'output_schema'       => array(
+            'type'        => 'string',
+            'description' => 'The site title.',
+        ),
+        'execute_callback'    => 'my_plugin_get_site_title',
+        'permission_callback' => '__return_true', // Everyone can access this
+        'meta'                => array(
+            'category'    => 'site-info',
+            'show_in_rest' => true, // Optional: expose via REST API
+    ) );
+}
+```
 ### `before_execute_ability`
 
 Fires immediately before an ability gets executed, after permission checks have passed but before the execution callback is called.
@@ -64,6 +105,7 @@ do_action( 'before_execute_ability', $ability_name, $input );
 #### Usage Example
 
 ```php
+add_action( 'before_execute_ability', 'log_ability_execution', 10, 2 );
 /**
  * Log each ability execution attempt.
  * @param string $ability_name The name of the ability being executed.
@@ -75,7 +117,6 @@ function log_ability_execution( string $ability_name, $input ) {
         error_log( 'Input: ' . wp_json_encode( $input ) );
     }
 }
-add_action( 'before_execute_ability', 'log_ability_execution', 10, 2 );
 ```
 
 ### `after_execute_ability`
@@ -95,6 +136,7 @@ do_action( 'after_execute_ability', string $ability_name, $input, $result );
 #### Usage Example
 
 ```php
+add_action( 'after_execute_ability', 'log_ability_result', 10, 3 );
 /**
  * Log the result of each ability execution.
  *
@@ -106,7 +148,6 @@ function log_ability_result( string $ability_name, $input, $result ) {
     error_log( 'Completed ability: ' . $ability_name );
     error_log( 'Result: ' . wp_json_encode( $result ) );
 }
-add_action( 'after_execute_ability', 'log_ability_result', 10, 3 );
 ```
 
 ## Filters
@@ -127,6 +168,7 @@ $args = apply_filters( 'register_ability_args', array $args, string $ability_nam
 #### Usage Example
 
 ```php
+add_filter( 'register_ability_args', 'my_modify_ability_args', 10, 2 );
 /**
  * Modify ability args before validation.
  *
@@ -166,7 +208,6 @@ function my_modify_ability_args( array $args, string $ability_name ): array {
 
     return $args;
 }
-add_filter( 'register_ability_args', 'my_modify_ability_args', 10, 2 );
 ```
 
 ### `register_ability_category_args`
@@ -185,6 +226,7 @@ $args = apply_filters( 'register_ability_category_args', array $args, string $sl
 #### Usage Example
 
 ```php
+add_filter( 'register_ability_category_args', 'my_modify_category_args', 10, 2 );
 /**
  * Modify category args before validation.
  *
@@ -200,5 +242,4 @@ function my_modify_category_args( array $args, string $slug ): array {
     }
     return $args;
 }
-add_filter( 'register_ability_category_args', 'my_modify_category_args', 10, 2 );
 ```

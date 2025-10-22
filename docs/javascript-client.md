@@ -1,4 +1,4 @@
-# 7. JavaScript/TypeScript Client
+# JavaScript/TypeScript Client
 
 The JavaScript client provides an interface for discovering and executing WordPress Abilities from the browser.
 
@@ -34,7 +34,7 @@ console.log(`Found ${abilities.length} abilities`);
 
 // List all abilities
 abilities.forEach(ability => {
-    console.log(`${ability.name}: ${ability.description}`);
+  console.log(`${ability.name}: ${ability.description}`);
 });
 
 // Get abilities in a specific category
