@@ -26,7 +26,7 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
         }
 
         // Unregister categories if they exist.
-        $category_registry = WP_Abilities_Category_Registry::get_instance();
+        $category_registry = WP_Ability_Categories_Registry::get_instance();
         if ( $category_registry->is_registered( 'site' ) ) {
             wp_unregister_ability_category( 'site' );
         }
@@ -38,13 +38,13 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 		$callback = static function (): void {
 			WP_Core_Abilities::register_category();
 		};
-		add_action( 'abilities_api_categories_init', $callback );
-		do_action( 'abilities_api_categories_init', WP_Abilities_Category_Registry::get_instance() );
-		remove_action( 'abilities_api_categories_init', $callback );
+		add_action( 'wp_abilities_api_categories_init', $callback );
+		do_action( 'wp_abilities_api_categories_init', WP_Ability_Categories_Registry::get_instance() );
+		remove_action( 'wp_abilities_api_categories_init', $callback );
 
 		// Fire the init action if it hasn't been fired yet.
-		if ( ! did_action( 'abilities_api_init' ) ) {
-			do_action( 'abilities_api_init' );
+		if ( ! did_action( 'wp_abilities_api_init' ) ) {
+			do_action( 'wp_abilities_api_init' );
 		}
 
 		// Register core abilities for testing.

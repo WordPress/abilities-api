@@ -42,18 +42,20 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 	public function test_routes_registered_on_rest_api_init(): void {
 		// Routes should not exist before init
 		$routes = $this->server->get_routes();
-		$this->assertArrayNotHasKey( '/wp/v2/abilities', $routes );
-		$this->assertArrayNotHasKey( '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+)', $routes );
-		$this->assertArrayNotHasKey( '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run', $routes );
+		$this->assertArrayNotHasKey( '/wp-abilities/v1/categories', $routes );
+		$this->assertArrayNotHasKey( '/wp-abilities/v1/abilities', $routes );
+		$this->assertArrayNotHasKey( '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+)', $routes );
+		$this->assertArrayNotHasKey( '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run', $routes );
 
 		// Trigger rest_api_init
 		do_action( 'rest_api_init' );
 
 		// Routes should now be registered
 		$routes = $this->server->get_routes();
-		$this->assertArrayHasKey( '/wp/v2/abilities', $routes );
-		$this->assertArrayHasKey( '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+)', $routes );
-		$this->assertArrayHasKey( '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run', $routes );
+		$this->assertArrayHasKey( '/wp-abilities/v1/categories', $routes );
+		$this->assertArrayHasKey( '/wp-abilities/v1/abilities', $routes );
+		$this->assertArrayHasKey( '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+)', $routes );
+		$this->assertArrayHasKey( '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run', $routes );
 	}
 
 	/**
@@ -65,17 +67,23 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 
 		$routes = $this->server->get_routes();
 
+		// Check categories controller
+		$this->assertArrayHasKey( '/wp-abilities/v1/categories', $routes );
+		$categories_route = $routes['/wp-abilities/v1/categories'][0];
+		$this->assertIsArray( $categories_route['callback'] );
+		$this->assertInstanceOf( 'WP_REST_Abilities_V1_Categories_Controller', $categories_route['callback'][0] );
+
 		// Check list controller
-		$this->assertArrayHasKey( '/wp/v2/abilities', $routes );
-		$list_route = $routes['/wp/v2/abilities'][0];
+		$this->assertArrayHasKey( '/wp-abilities/v1/abilities', $routes );
+		$list_route = $routes['/wp-abilities/v1/abilities'][0];
 		$this->assertIsArray( $list_route['callback'] );
-		$this->assertInstanceOf( 'WP_REST_Abilities_List_Controller', $list_route['callback'][0] );
+		$this->assertInstanceOf( 'WP_REST_Abilities_V1_List_Controller', $list_route['callback'][0] );
 
 		// Check run controller
-		$this->assertArrayHasKey( '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run', $routes );
-		$run_route = $routes['/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run'][0];
+		$this->assertArrayHasKey( '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run', $routes );
+		$run_route = $routes['/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run'][0];
 		$this->assertIsArray( $run_route['callback'] );
-		$this->assertInstanceOf( 'WP_REST_Abilities_Run_Controller', $run_route['callback'][0] );
+		$this->assertInstanceOf( 'WP_REST_Abilities_V1_Run_Controller', $run_route['callback'][0] );
 	}
 
 	/**
@@ -84,8 +92,9 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 	public function test_required_files_loaded(): void {
 		// Classes should be available after requiring the main plugin file
 		$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ) );
-		$this->assertTrue( class_exists( 'WP_REST_Abilities_List_Controller' ) );
-		$this->assertTrue( class_exists( 'WP_REST_Abilities_Run_Controller' ) );
+		$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_Categories_Controller' ) );
+		$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ) );
+		$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_Run_Controller' ) );
 	}
 
 	/**
@@ -96,8 +105,18 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 
 		$routes = $this->server->get_routes();
 
+		// Categories endpoint should support GET
+		$categories_methods = $routes['/wp-abilities/v1/categories'][0]['methods'];
+		// Methods can be a string like 'GET' or an array of method constants
+		if ( is_string( $categories_methods ) ) {
+			$this->assertEquals( WP_REST_Server::READABLE, $categories_methods );
+		} else {
+			// Just check it's set, don't check specific values
+			$this->assertNotEmpty( $categories_methods );
+		}
+
 		// List endpoint should support GET
-		$list_methods = $routes['/wp/v2/abilities'][0]['methods'];
+		$list_methods = $routes['/wp-abilities/v1/abilities'][0]['methods'];
 		// Methods can be a string like 'GET' or an array of method constants
 		if ( is_string( $list_methods ) ) {
 			$this->assertEquals( WP_REST_Server::READABLE, $list_methods );
@@ -107,7 +126,7 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 		}
 
 		// Single ability endpoint should support GET
-		$single_methods = $routes['/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+)'][0]['methods'];
+		$single_methods = $routes['/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+)'][0]['methods'];
 		// Methods can be a string like 'GET' or an array of method constants
 		if ( is_string( $single_methods ) ) {
 			$this->assertEquals( WP_REST_Server::READABLE, $single_methods );
@@ -117,7 +136,7 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 		}
 
 		// Run endpoint should support all methods (for type-based routing)
-		$run_route = $routes['/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run'][0];
+		$run_route = $routes['/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run'][0];
 		// ALLMETHODS can be a string or array
 		if ( is_string( $run_route['methods'] ) ) {
 			$this->assertEquals( WP_REST_Server::ALLMETHODS, $run_route['methods'] );
@@ -136,14 +155,14 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 		$namespaces = $this->server->get_namespaces();
 		$this->assertContains( 'wp/v2', $namespaces );
 
-		// Verify abilities endpoints are under wp/v2 namespace
+		// Verify abilities endpoints are under /wp-abilities/v1 namespace
 		$routes = $this->server->get_routes();
 		foreach ( array_keys( $routes ) as $route ) {
-			if ( strpos( $route, 'abilities' ) === false || $route === '/' ) {
+			if ( strpos( $route, 'abilities' ) === false ) {
 				continue;
 			}
 
-			$this->assertStringStartsWith( '/wp/v2/abilities', $route );
+			$this->assertStringStartsWith( '/wp-abilities/v1', $route );
 		}
 	}
 
@@ -155,14 +174,14 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 		do_action( 'rest_api_init' );
 
 		$routes_first                = $this->server->get_routes();
-		$abilities_route_count_first = count( $routes_first['/wp/v2/abilities'] ?? array() );
+		$abilities_route_count_first = count( $routes_first['/wp-abilities/v1/abilities'] ?? array() );
 
 		// Second init (simulating multiple calls)
 		// Note: WordPress doesn't prevent duplicate registration, so we expect 2x routes
 		WP_REST_Abilities_Init::register_routes();
 
 		$routes_second                = $this->server->get_routes();
-		$abilities_route_count_second = count( $routes_second['/wp/v2/abilities'] ?? array() );
+		$abilities_route_count_second = count( $routes_second['/wp-abilities/v1/abilities'] ?? array() );
 
 		// WordPress allows duplicate route registration
 		$this->assertEquals( $abilities_route_count_first * 2, $abilities_route_count_second );

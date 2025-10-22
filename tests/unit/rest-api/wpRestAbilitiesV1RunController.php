@@ -3,16 +3,17 @@
 /**
  * Tests for the REST run controller for abilities endpoint.
  *
- * @covers WP_REST_Abilities_Run_Controller
+ * @covers WP_REST_Abilities_V1_Run_Controller
+ *
  * @group abilities-api
  * @group rest-api
  */
-class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
+class Tests_REST_API_WpRestAbilitiesV1RunController extends WP_UnitTestCase {
 
 	/**
 	 * REST Server instance.
 	 *
-	 * @var \WP_REST_Server
+	 * @var WP_REST_Server
 	 */
 	protected $server;
 
@@ -47,6 +48,22 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'role' => 'subscriber',
 			)
 		);
+
+		// Fire the init hook to allow test ability categories registration.
+		do_action( 'wp_abilities_api_categories_init' );
+		self::register_test_categories();
+	}
+
+	/**
+	 * Tear down after class.
+	 */
+	public static function tear_down_after_class(): void {
+		// Clean up registered test ability categories.
+		foreach ( array( 'math', 'system', 'general' ) as $slug ) {
+			wp_unregister_ability_category( $slug );
+		}
+
+		parent::tear_down_after_class();
 	}
 
 	/**
@@ -61,15 +78,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 		do_action( 'rest_api_init' );
 
-		// Register test categories during the hook
-		add_action(
-			'abilities_api_categories_init',
-			array( $this, 'register_test_categories' )
-		);
-		do_action( 'abilities_api_categories_init' );
-
-		do_action( 'abilities_api_init' );
-
+		// Initialize Abilities API.
+		do_action( 'wp_abilities_api_init' );
 		$this->register_test_abilities();
 
 		// Set default user for tests
@@ -80,20 +90,13 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	 * Tear down after each test.
 	 */
 	public function tear_down(): void {
+		// Clean up test abilities.
 		foreach ( wp_get_abilities() as $ability ) {
 			if ( ! str_starts_with( $ability->get_name(), 'test/' ) ) {
 				continue;
 			}
 
 			wp_unregister_ability( $ability->get_name() );
-		}
-
-		// Clean up registered categories.
-		$category_registry = WP_Abilities_Category_Registry::get_instance();
-		foreach ( array( 'math', 'system', 'general' ) as $category ) {
-			if ( $category_registry->is_registered( $category ) ) {
-				wp_unregister_ability_category( $category );
-			}
 		}
 
 		global $wp_rest_server;
@@ -105,7 +108,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	/**
 	 * Register test categories for testing.
 	 */
-	public function register_test_categories(): void {
+	public static function register_test_categories(): void {
 		wp_register_ability_category(
 			'math',
 			array(
@@ -199,7 +202,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 					$user_id = $input['user_id'] ?? get_current_user_id();
 					$user    = get_user_by( 'id', $user_id );
 					if ( ! $user ) {
-						return new \WP_Error( 'user_not_found', 'User not found' );
+						return new WP_Error( 'user_not_found', 'User not found' );
 					}
 					return array(
 						'id'    => $user->ID,
@@ -212,6 +215,47 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'meta'                => array(
 					'annotations'  => array(
 						'readonly' => true,
+					),
+					'show_in_rest' => true,
+				),
+			)
+		);
+
+		// Destructive ability (DELETE method).
+		wp_register_ability(
+			'test/delete-user',
+			array(
+				'label'               => 'Delete User',
+				'description'         => 'Deletes a user',
+				'category'            => 'system',
+				'input_schema'        => array(
+					'type'       => 'object',
+					'properties' => array(
+						'user_id' => array(
+							'type'    => 'integer',
+							'default' => 0,
+						),
+					),
+				),
+				'output_schema'       => array(
+					'type'     => 'string',
+					'required' => true,
+				),
+				'execute_callback'    => static function ( array $input ) {
+					$user_id = $input['user_id'] ?? get_current_user_id();
+					$user    = get_user_by( 'id', $user_id );
+					if ( ! $user ) {
+						return new WP_Error( 'user_not_found', 'User not found' );
+					}
+					return 'User successfully deleted!';
+				},
+				'permission_callback' => static function () {
+					return is_user_logged_in();
+				},
+				'meta'                => array(
+					'annotations'  => array(
+						'destructive' => true,
+						'idempotent'  => true,
 					),
 					'show_in_rest' => true,
 				),
@@ -288,7 +332,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 				'description'         => 'Returns error',
 				'category'            => 'general',
 				'execute_callback'    => static function () {
-					return new \WP_Error( 'test_error', 'This is a test error' );
+					return new WP_Error( 'test_error', 'This is a test error' );
 				},
 				'permission_callback' => '__return_true',
 				'meta'                => array(
@@ -347,9 +391,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test executing a regular ability with POST.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_execute_regular_ability_post(): void {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/calculator/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
 			wp_json_encode(
@@ -370,9 +416,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test executing a read-only ability with GET.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_execute_readonly_ability_get(): void {
-		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/user-info/run' );
+		$request = new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/test/user-info/run' );
 		$request->set_query_params(
 			array(
 				'input' => array(
@@ -389,7 +437,30 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test executing a destructive ability with GET.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_execute_destructive_ability_delete(): void {
+		$request = new WP_REST_Request( 'DELETE', '/wp-abilities/v1/abilities/test/delete-user/run' );
+		$request->set_query_params(
+			array(
+				'input' => array(
+					'user_id' => self::$user_id,
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'User successfully deleted!', $response->get_data() );
+	}
+
+	/**
 	 * Test HTTP method validation for regular abilities.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_regular_ability_requires_post(): void {
 		wp_register_ability(
@@ -408,7 +479,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		$request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/open-tool/run' );
+		$request  = new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/test/open-tool/run' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( 405, $response->get_status() );
@@ -419,10 +490,12 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test HTTP method validation for read-only abilities.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_readonly_ability_requires_get(): void {
 		// Try POST on a read-only ability (should fail).
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/user-info/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/user-info/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body( wp_json_encode( array( 'user_id' => 1 ) ) );
 
@@ -434,14 +507,34 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$this->assertSame( 'Read-only abilities require GET method.', $data['message'] );
 	}
 
+	/**
+	 * Test HTTP method validation for destructive abilities.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_destructive_ability_requires_delete(): void {
+		// Try POST on a destructive ability (should fail).
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/delete-user/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'user_id' => 1 ) ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 405, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'rest_ability_invalid_method', $data['code'] );
+		$this->assertSame( 'Abilities that perform destructive actions require DELETE method.', $data['message'] );
+	}
 
 	/**
 	 * Test output validation against schema.
 	 * Note: When output validation fails in WP_Ability::execute(), it returns null,
 	 * which causes the REST controller to return 'ability_invalid_output'.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_output_validation(): void {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/invalid-output/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/invalid-output/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 
 		$response = $this->server->dispatch( $request );
@@ -457,11 +550,13 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test permission check for execution.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_execution_permission_denied(): void {
 		wp_set_current_user( self::$no_permission_user_id );
 
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/calculator/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
 			wp_json_encode(
@@ -484,9 +579,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test contextual permission check.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_contextual_permission_check(): void {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/restricted/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/restricted/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
 			wp_json_encode(
@@ -520,9 +617,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test handling an ability that does not show in REST.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_do_not_show_in_rest(): void {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/not-show-in-rest/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/not-show-in-rest/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 
 		$response = $this->server->dispatch( $request );
@@ -535,9 +634,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test handling of null is a valid return value.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_null_return_handling(): void {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/null-return/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/null-return/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 
 		$response = $this->server->dispatch( $request );
@@ -549,9 +650,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test handling of WP_Error return from ability.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_wp_error_return_handling(): void {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/error-return/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/error-return/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 
 		$response = $this->server->dispatch( $request );
@@ -565,10 +668,12 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	/**
 	 * Test non-existent ability returns 404.
 	 *
+	 * @ticket 64098
+	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::get_registered
 	 */
 	public function test_execute_non_existent_ability(): void {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/non/existent/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/non/existent/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 
 		$response = $this->server->dispatch( $request );
@@ -580,9 +685,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test schema retrieval for run endpoint.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_run_endpoint_schema(): void {
-		$request  = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities/test/calculator/run' );
+		$request  = new WP_REST_Request( 'OPTIONS', '/wp-abilities/v1/abilities/test/calculator/run' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -597,9 +704,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test that invalid JSON in POST body is handled correctly.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_invalid_json_in_post_body(): void {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/calculator/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		// Set raw body with invalid JSON
 		$request->set_body( '{"input": {invalid json}' );
@@ -612,9 +721,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test GET request with complex nested input array.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_get_request_with_nested_input_array(): void {
-		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/query-params/run' );
+		$request = new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/test/query-params/run' );
 		$request->set_query_params(
 			array(
 				'input' => array(
@@ -638,9 +749,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test GET request with non-array input parameter.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_get_request_with_non_array_input(): void {
-		$request = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/query-params/run' );
+		$request = new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/test/query-params/run' );
 		$request->set_query_params(
 			array(
 				'input' => 'not-an-array', // String instead of array
@@ -654,9 +767,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test POST request with non-array input in JSON body.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_post_request_with_non_array_input(): void {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/calculator/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
 			wp_json_encode(
@@ -673,6 +788,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test ability with invalid output that fails validation.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_output_validation_failure_returns_error(): void {
 		// Register ability with strict output schema.
@@ -703,7 +820,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/strict-output/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/strict-output/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 
 		$response = $this->server->dispatch( $request );
@@ -720,6 +837,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test ability with invalid input that fails validation.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_input_validation_failure_returns_error(): void {
 		// Register ability with strict input schema.
@@ -748,7 +867,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/strict-input/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/strict-input/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		// Missing required field
 		$request->set_body( wp_json_encode( array( 'input' => array( 'other_field' => 'value' ) ) ) );
@@ -767,6 +886,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test ability without annotations defaults to POST method.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_ability_without_annotations_defaults_to_post_method(): void {
 		// Register ability without annotations.
@@ -787,12 +908,12 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		);
 
 		// Should require POST (default behavior).
-		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/no-annotations/run' );
+		$get_request  = new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/test/no-annotations/run' );
 		$get_response = $this->server->dispatch( $get_request );
 		$this->assertEquals( 405, $get_response->get_status() );
 
 		// Should work with POST.
-		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/no-annotations/run' );
+		$post_request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/no-annotations/run' );
 		$post_request->set_header( 'Content-Type', 'application/json' );
 
 		$post_response = $this->server->dispatch( $post_request );
@@ -800,10 +921,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test edge case with empty input for both GET and POST methods.
+	 * Test edge case with empty input for GET method.
+	 *
+	 * @ticket 64098
 	 */
-	public function test_empty_input_handling(): void {
-		// Registers abilities for empty input testing.
+	public function test_empty_input_handling_get_method(): void {
 		wp_register_ability(
 			'test/read-only-empty',
 			array(
@@ -823,6 +945,55 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
+		// Tests GET with no input parameter.
+		$get_request  = new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/test/read-only-empty/run' );
+		$get_response = $this->server->dispatch( $get_request );
+		$this->assertEquals( 200, $get_response->get_status() );
+		$this->assertTrue( $get_response->get_data()['input_was_empty'] );
+	}
+
+	/**
+	 * Test edge case with empty input for GET method, and normalized input using schema.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_empty_input_handling_get_method_with_normalized_input(): void {
+		wp_register_ability(
+			'test/read-only-empty-array',
+			array(
+				'label'               => 'Read-only Empty Array',
+				'description'         => 'Read-only with inferred empty array input from schema.',
+				'category'            => 'general',
+				'input_schema'        => array(
+					'type'    => 'array',
+					'default' => array(),
+				),
+				'execute_callback'    => static function ( $input ) {
+					return is_array( $input ) && empty( $input );
+				},
+				'permission_callback' => '__return_true',
+				'meta'                => array(
+					'annotations'  => array(
+						'readonly' => true,
+					),
+					'show_in_rest' => true,
+				),
+			)
+		);
+
+		// Tests GET with no input parameter.
+		$get_request  = new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/test/read-only-empty-array/run' );
+		$get_response = $this->server->dispatch( $get_request );
+		$this->assertEquals( 200, $get_response->get_status() );
+		$this->assertTrue( $get_response->get_data() );
+	}
+
+	/**
+	 * Test edge case with empty input for POST method.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_empty_input_handling_post_method(): void {
 		wp_register_ability(
 			'test/regular-empty',
 			array(
@@ -839,14 +1010,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		// Tests GET with no input parameter.
-		$get_request  = new WP_REST_Request( 'GET', '/wp/v2/abilities/test/read-only-empty/run' );
-		$get_response = $this->server->dispatch( $get_request );
-		$this->assertEquals( 200, $get_response->get_status() );
-		$this->assertTrue( $get_response->get_data()['input_was_empty'] );
-
 		// Tests POST with no body.
-		$post_request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/regular-empty/run' );
+		$post_request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/regular-empty/run' );
 		$post_request->set_header( 'Content-Type', 'application/json' );
 		$post_request->set_body( '{}' ); // Empty JSON object
 
@@ -876,11 +1041,14 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	/**
 	 * Test malformed JSON in POST body.
 	 *
+	 * @ticket 64098
+	 *
 	 * @dataProvider data_malformed_json_provider
+	 *
 	 * @param string $json Malformed JSON to test.
 	 */
 	public function test_malformed_json_post_body( string $json ): void {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/calculator/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/calculator/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body( $json );
 
@@ -890,9 +1058,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 		$this->assertEquals( 400, $response->get_status() );
 	}
 
-
 	/**
 	 * Test input with various PHP types as strings.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_php_type_strings_in_input(): void {
 		// Register ability that accepts any input
@@ -927,7 +1096,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			'negative' => -1,
 		);
 
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/echo/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/echo/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body( wp_json_encode( array( 'input' => $inputs ) ) );
 
@@ -940,6 +1109,8 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test input with mixed encoding.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_mixed_encoding_in_input(): void {
 		// Register ability that accepts any input
@@ -972,7 +1143,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			'quotes'   => "It's \"quoted\"",
 		);
 
-		$request = new WP_REST_Request( 'POST', '/wp/v2/abilities/test/echo-encoding/run' );
+		$request = new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/test/echo-encoding/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body( wp_json_encode( array( 'input' => $input ) ) );
 
@@ -1004,7 +1175,10 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 	/**
 	 * Test request with invalid HTTP methods.
 	 *
+	 * @ticket 64098
+	 *
 	 * @dataProvider data_invalid_http_methods_provider
+	 *
 	 * @param string $method HTTP method to test.
 	 */
 	public function test_invalid_http_methods( string $method ): void {
@@ -1025,7 +1199,7 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 			)
 		);
 
-		$request  = new WP_REST_Request( $method, '/wp/v2/abilities/test/method-test/run' );
+		$request  = new WP_REST_Request( $method, '/wp-abilities/v1/abilities/test/method-test/run' );
 		$response = $this->server->dispatch( $request );
 
 		// Regular abilities should only accept POST, so these should return 405.
@@ -1037,9 +1211,11 @@ class Tests_REST_API_WpRestAbilitiesRunController extends WP_UnitTestCase {
 
 	/**
 	 * Test OPTIONS method handling.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_options_method_handling(): void {
-		$request  = new WP_REST_Request( 'OPTIONS', '/wp/v2/abilities/test/calculator/run' );
+		$request  = new WP_REST_Request( 'OPTIONS', '/wp-abilities/v1/abilities/test/calculator/run' );
 		$response = $this->server->dispatch( $request );
 		// OPTIONS requests return 200 with allowed methods
 		$this->assertEquals( 200, $response->get_status() );
