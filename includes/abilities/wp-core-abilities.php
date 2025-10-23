@@ -16,7 +16,7 @@ declare( strict_types = 1 );
  *
  * @return void
  */
-function register_core_ability_categories(): void {
+function wp_register_core_ability_categories(): void {
 	wp_register_ability_category(
 		'site',
 		array(
@@ -42,7 +42,7 @@ function register_core_ability_categories(): void {
  *
  * @return void
  */
-function register_core_abilities(): void {
+function wp_register_core_abilities(): void {
 	$category_site = 'site';
 	$category_user = 'user';
 
@@ -223,7 +223,7 @@ function register_core_abilities(): void {
 					'environment'    => array(
 						'type'        => 'string',
 						'description' => __( 'The site\'s runtime environment classification (can be one of these: production, staging, development, local).' ),
-						'enum'    => array( 'production', 'staging', 'development', 'local' ),
+						'enum'        => array( 'production', 'staging', 'development', 'local' ),
 					),
 					'php_version'    => array(
 						'type'        => 'string',
