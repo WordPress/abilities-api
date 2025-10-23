@@ -16,7 +16,8 @@ declare( strict_types = 1 );
  *
  * @return void
  */
-function wp_register_core_ability_categories(): void {
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+function register_core_ability_categories(): void {
 	wp_register_ability_category(
 		'site',
 		array(
@@ -24,7 +25,6 @@ function wp_register_core_ability_categories(): void {
 			'description' => __( 'Abilities that retrieve or modify site information and settings.' ),
 		)
 	);
-
 
 	wp_register_ability_category(
 		'user',
@@ -42,10 +42,10 @@ function wp_register_core_ability_categories(): void {
  *
  * @return void
  */
-function wp_register_core_abilities(): void {
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+function register_core_abilities(): void {
 	$category_site = 'site';
 	$category_user = 'user';
-
 
 	$site_info_fields = array(
 		'name',
@@ -142,7 +142,6 @@ function wp_register_core_abilities(): void {
 			),
 		)
 	);
-
 
 	wp_register_ability(
 		'core/get-user-info',
