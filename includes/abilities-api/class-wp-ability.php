@@ -321,6 +321,27 @@ class WP_Ability implements \JsonSerializable {
 	}
 
 	/**
+	 * Applies the defined input default when no input is provided.
+	 *
+	 * @since 0.4.0
+	 *
+	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
+	 * @return mixed The input with the schema default applied when available.
+	 */
+	public function normalize_input( $input = null ) {
+		if ( null !== $input ) {
+			return $input;
+		}
+
+		$input_schema = $this->get_input_schema();
+		if ( ! empty( $input_schema ) && array_key_exists( 'default', $input_schema ) ) {
+			return $input_schema['default'];
+		}
+
+		return null;
+	}
+
+	/**
 	 * Retrieves the output schema for the ability.
 	 *
 	 * @since 0.1.0
@@ -569,6 +590,7 @@ class WP_Ability implements \JsonSerializable {
 	 * @return bool|\WP_Error Whether the ability has the necessary permission.
 	 */
 	public function check_permissions( $input = null ) {
+		$input    = $this->normalize_input( $input );
 		$is_valid = $this->validate_input( $input );
 		if ( is_wp_error( $is_valid ) ) {
 			return $is_valid;
@@ -655,6 +677,7 @@ class WP_Ability implements \JsonSerializable {
 	 * @return mixed|\WP_Error The result of the ability execution, or WP_Error on failure.
 	 */
 	public function execute( $input = null ) {
+		$input           = $this->normalize_input( $input );
 		$has_permissions = $this->check_permissions( $input );
 		if ( true !== $has_permissions ) {
 			if ( is_wp_error( $has_permissions ) ) {

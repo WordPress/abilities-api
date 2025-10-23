@@ -1,4 +1,4 @@
-# 1. Introduction & Overview
+# Introduction & Overview
 
 ## What is the Abilities API?
 
