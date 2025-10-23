@@ -43,6 +43,14 @@ export interface Ability {
 	description: string;
 
 	/**
+	 * The category this ability belongs to.
+	 * Must be a valid category slug (lowercase alphanumeric with dashes).
+	 * Example: 'data-retrieval', 'user-management'
+	 * @see WP_Ability::get_category()
+	 */
+	category: string;
+
+	/**
 	 * JSON Schema for the ability's input parameters.
 	 * @see WP_Ability::get_input_schema()
 	 */
@@ -73,12 +81,80 @@ export interface Ability {
 	 * @see WP_Ability::get_meta()
 	 */
 	meta?: {
-		/**
-		 * The type of ability - 'resource' uses GET, 'tool' uses POST.
-		 */
-		type?: 'resource' | 'tool';
+		annotations?: {
+			instructions?: string;
+			readonly?: boolean;
+			destructive?: boolean;
+			idempotent?: boolean;
+		};
 		[ key: string ]: any;
 	};
+}
+
+/**
+ * The shape of the arguments for querying abilities.
+ */
+export interface AbilitiesQueryArgs {
+	/**
+	 * Optional category slug to filter abilities.
+	 */
+	category?: string;
+}
+
+/**
+ * Represents an ability category in the WordPress Abilities API.
+ *
+ * @see WP_Ability_Category
+ */
+export interface AbilityCategory {
+	/**
+	 * The unique slug identifier for the category.
+	 * Must be lowercase alphanumeric with dashes only.
+	 * Example: 'data-retrieval', 'user-management'
+	 * @see WP_Ability_Category::get_slug()
+	 */
+	slug: string;
+
+	/**
+	 * The human-readable label for the category.
+	 * @see WP_Ability_Category::get_label()
+	 */
+	label: string;
+
+	/**
+	 * The detailed description of the category.
+	 * @see WP_Ability_Category::get_description()
+	 */
+	description: string;
+
+	/**
+	 * Metadata about the category.
+	 * @see WP_Ability_Category::get_meta()
+	 */
+	meta?: Record< string, any >;
+}
+
+/**
+ * Arguments for registering an ability category.
+ * Matches the server-side wp_register_ability_category() $args parameter.
+ *
+ * @see wp_register_ability_category()
+ */
+export interface AbilityCategoryArgs {
+	/**
+	 * The human-readable label for the category.
+	 */
+	label: string;
+
+	/**
+	 * The detailed description of the category.
+	 */
+	description: string;
+
+	/**
+	 * Optional metadata about the category.
+	 */
+	meta?: Record< string, any >;
 }
 
 /**
@@ -89,6 +165,11 @@ export interface AbilitiesState {
 	 * Map of ability names to ability objects.
 	 */
 	abilitiesByName: Record< string, Ability >;
+
+	/**
+	 * Map of category slugs to category objects.
+	 */
+	categoriesBySlug: Record< string, AbilityCategory >;
 }
 
 /**

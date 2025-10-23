@@ -14,12 +14,14 @@ import apiFetch from '@wordpress/api-fetch';
 import {
 	getAbilities,
 	getAbility,
+	getAbilityCategories,
+	getAbilityCategory,
 	registerAbility,
 	unregisterAbility,
 	executeAbility,
 } from '../api';
 import { store } from '../store';
-import type { Ability } from '../types';
+import type { Ability, AbilityCategory } from '../types';
 
 // Mock WordPress dependencies
 jest.mock( '@wordpress/data', () => ( {
@@ -46,6 +48,7 @@ describe( 'API functions', () => {
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -53,6 +56,7 @@ describe( 'API functions', () => {
 					name: 'test/ability2',
 					label: 'Test Ability 2',
 					description: 'Second test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -71,6 +75,42 @@ describe( 'API functions', () => {
 			expect( mockGetAbilities ).toHaveBeenCalled();
 			expect( result ).toEqual( mockAbilities );
 		} );
+
+		it( 'should pass category parameter to store when filtering', async () => {
+			const mockAbilities: Ability[] = [
+				{
+					name: 'test/ability1',
+					label: 'Test Ability 1',
+					description: 'First test ability',
+					category: 'data-retrieval',
+					input_schema: { type: 'object' },
+					output_schema: { type: 'object' },
+				},
+				{
+					name: 'test/ability2',
+					label: 'Test Ability 2',
+					description: 'Second test ability',
+					category: 'data-retrieval',
+					input_schema: { type: 'object' },
+					output_schema: { type: 'object' },
+				},
+			];
+
+			const mockGetAbilities = jest
+				.fn()
+				.mockResolvedValue( mockAbilities );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilities: mockGetAbilities,
+			} );
+
+			const result = await getAbilities( { category: 'data-retrieval' } );
+
+			expect( resolveSelect ).toHaveBeenCalledWith( store );
+			expect( mockGetAbilities ).toHaveBeenCalledWith( {
+				category: 'data-retrieval',
+			} );
+			expect( result ).toEqual( mockAbilities );
+		} );
 	} );
 
 	describe( 'getAbility', () => {
@@ -79,6 +119,7 @@ describe( 'API functions', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Test ability description',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -124,6 +165,7 @@ describe( 'API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: jest.fn(),
@@ -158,6 +200,7 @@ describe( 'API functions', () => {
 				name: 'test/server-ability',
 				label: 'Server Ability',
 				description: 'Test server ability',
+				category: 'test-category',
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -200,6 +243,7 @@ describe( 'API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: mockCallback,
@@ -238,6 +282,7 @@ describe( 'API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
+				category: 'test-category',
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -259,12 +304,12 @@ describe( 'API functions', () => {
 			).rejects.toThrow( 'invalid input' );
 		} );
 
-		it( 'should execute a resource-type ability via GET', async () => {
+		it( 'should execute a read-only ability via GET', async () => {
 			const mockAbility: Ability = {
-				name: 'test/resource',
-				label: 'Resource Ability',
-				description: 'Test resource ability',
-				meta: { type: 'resource' },
+				name: 'test/read-only',
+				label: 'Read-only Ability',
+				description: 'Test read-only ability.',
+				category: 'test-category',
 				input_schema: {
 					type: 'object',
 					properties: {
@@ -273,6 +318,9 @@ describe( 'API functions', () => {
 					},
 				},
 				output_schema: { type: 'object' },
+				meta: {
+					annotations: { readonly: true },
+				},
 			};
 
 			const mockGetAbility = jest.fn().mockResolvedValue( mockAbility );
@@ -280,29 +328,32 @@ describe( 'API functions', () => {
 				getAbility: mockGetAbility,
 			} );
 
-			const mockResponse = { data: 'resource data' };
+			const mockResponse = { data: 'read-only data' };
 			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
 				mockResponse
 			);
 
 			const input = { id: '123', format: 'json' };
-			const result = await executeAbility( 'test/resource', input );
+			const result = await executeAbility( 'test/read-only', input );
 
 			expect( apiFetch ).toHaveBeenCalledWith( {
-				path: '/wp/v2/abilities/test/resource/run?input%5Bid%5D=123&input%5Bformat%5D=json',
+				path: '/wp/v2/abilities/test/read-only/run?input%5Bid%5D=123&input%5Bformat%5D=json',
 				method: 'GET',
 			} );
 			expect( result ).toEqual( mockResponse );
 		} );
 
-		it( 'should execute a resource-type ability with empty input', async () => {
+		it( 'should execute a read-only ability with empty input', async () => {
 			const mockAbility: Ability = {
-				name: 'test/resource',
-				label: 'Resource Ability',
-				description: 'Test resource ability',
-				meta: { type: 'resource' },
+				name: 'test/read-only',
+				label: 'Read-only Ability',
+				description: 'Test read-only ability.',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
+				meta: {
+					annotations: { readonly: true },
+				},
 			};
 
 			const mockGetAbility = jest.fn().mockResolvedValue( mockAbility );
@@ -310,15 +361,15 @@ describe( 'API functions', () => {
 				getAbility: mockGetAbility,
 			} );
 
-			const mockResponse = { data: 'all resources' };
+			const mockResponse = { data: 'read-only data' };
 			( apiFetch as unknown as jest.Mock ).mockResolvedValue(
 				mockResponse
 			);
 
-			const result = await executeAbility( 'test/resource', {} );
+			const result = await executeAbility( 'test/read-only', {} );
 
 			expect( apiFetch ).toHaveBeenCalledWith( {
-				path: '/wp/v2/abilities/test/resource/run?',
+				path: '/wp/v2/abilities/test/read-only/run?',
 				method: 'GET',
 			} );
 			expect( result ).toEqual( mockResponse );
@@ -335,6 +386,7 @@ describe( 'API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: mockCallback,
@@ -367,6 +419,7 @@ describe( 'API functions', () => {
 				name: 'test/server-ability',
 				label: 'Server Ability',
 				description: 'Test server ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -395,6 +448,7 @@ describe( 'API functions', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Test ability without callback',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				// No callback - should execute as server ability
@@ -430,6 +484,7 @@ describe( 'API functions', () => {
 				name: 'test/client-ability',
 				label: 'Client Ability',
 				description: 'Test client ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: {
 					type: 'object',
@@ -449,6 +504,110 @@ describe( 'API functions', () => {
 			await expect(
 				executeAbility( 'test/client-ability', {} )
 			).rejects.toThrow( 'invalid output' );
+		} );
+	} );
+
+	describe( 'getAbilityCategories', () => {
+		it( 'should resolve and return all categories from the store', async () => {
+			const mockCategories: AbilityCategory[] = [
+				{
+					slug: 'data-retrieval',
+					label: 'Data Retrieval',
+					description: 'Abilities that retrieve data',
+				},
+				{
+					slug: 'user-management',
+					label: 'User Management',
+					description: 'Abilities for managing users',
+				},
+			];
+
+			const mockGetAbilityCategories = jest
+				.fn()
+				.mockResolvedValue( mockCategories );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategories: mockGetAbilityCategories,
+			} );
+
+			const result = await getAbilityCategories();
+
+			expect( resolveSelect ).toHaveBeenCalledWith( store );
+			expect( mockGetAbilityCategories ).toHaveBeenCalled();
+			expect( result ).toEqual( mockCategories );
+		} );
+
+		it( 'should return empty array when no categories exist', async () => {
+			const mockGetAbilityCategories = jest.fn().mockResolvedValue( [] );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategories: mockGetAbilityCategories,
+			} );
+
+			const result = await getAbilityCategories();
+
+			expect( result ).toEqual( [] );
+		} );
+	} );
+
+	describe( 'getAbilityCategory', () => {
+		it( 'should return a specific category by slug', async () => {
+			const mockCategory: AbilityCategory = {
+				slug: 'data-retrieval',
+				label: 'Data Retrieval',
+				description: 'Abilities that retrieve data',
+			};
+
+			const mockGetAbilityCategory = jest
+				.fn()
+				.mockResolvedValue( mockCategory );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategory: mockGetAbilityCategory,
+			} );
+
+			const result = await getAbilityCategory( 'data-retrieval' );
+
+			expect( resolveSelect ).toHaveBeenCalledWith( store );
+			expect( mockGetAbilityCategory ).toHaveBeenCalledWith(
+				'data-retrieval'
+			);
+			expect( result ).toEqual( mockCategory );
+		} );
+
+		it( 'should return null if category not found', async () => {
+			const mockGetAbilityCategory = jest.fn().mockResolvedValue( null );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategory: mockGetAbilityCategory,
+			} );
+
+			const result = await getAbilityCategory( 'non-existent' );
+
+			expect( mockGetAbilityCategory ).toHaveBeenCalledWith(
+				'non-existent'
+			);
+			expect( result ).toBeNull();
+		} );
+
+		it( 'should handle categories with meta', async () => {
+			const mockCategory: AbilityCategory = {
+				slug: 'user-management',
+				label: 'User Management',
+				description: 'Abilities for managing users',
+				meta: {
+					priority: 'high',
+				},
+			};
+
+			const mockGetAbilityCategory = jest
+				.fn()
+				.mockResolvedValue( mockCategory );
+			( resolveSelect as jest.Mock ).mockReturnValue( {
+				getAbilityCategory: mockGetAbilityCategory,
+			} );
+
+			const result = await getAbilityCategory( 'user-management' );
+
+			expect( result ).toEqual( mockCategory );
+			expect( result?.meta ).toBeDefined();
+			expect( result?.meta?.priority ).toBe( 'high' );
 		} );
 	} );
 } );

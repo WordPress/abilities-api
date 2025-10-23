@@ -10,10 +10,15 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { getAbilities, getAbility } from '../resolvers';
-import { receiveAbilities } from '../actions';
-import { ENTITY_KIND, ENTITY_NAME } from '../constants';
-import type { Ability } from '../../types';
+import {
+	getAbilities,
+	getAbility,
+	getAbilityCategories,
+	getAbilityCategory,
+} from '../resolvers';
+import { receiveAbilities, receiveCategories } from '../actions';
+import { ENTITY_KIND, ENTITY_NAME, ENTITY_NAME_CATEGORIES } from '../constants';
+import type { Ability, AbilityCategory } from '../../types';
 
 // Mock the WordPress core data store
 jest.mock( '@wordpress/core-data', () => ( {
@@ -41,6 +46,7 @@ describe( 'Store Resolvers', () => {
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -51,16 +57,16 @@ describe( 'Store Resolvers', () => {
 			};
 
 			const mockSelectInstance = {
-				getEntityRecordsTotalPages: jest.fn().mockReturnValue( 1 ),
+				getAbilities: jest.fn().mockReturnValue( [] ), // Store is empty
 			};
 
 			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
-			mockRegistry.select.mockReturnValue( mockSelectInstance );
 
 			const resolver = getAbilities();
 			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
+				select: mockSelectInstance,
 			} );
 
 			expect( mockRegistry.resolveSelect ).toHaveBeenCalledWith(
@@ -76,9 +82,47 @@ describe( 'Store Resolvers', () => {
 			);
 		} );
 
+		it( 'should not fetch if store already has abilities', async () => {
+			const existingAbilities: Ability[] = [
+				{
+					name: 'test/ability1',
+					label: 'Test Ability 1',
+					description: 'First test ability',
+					category: 'data-retrieval',
+					input_schema: { type: 'object' },
+					output_schema: { type: 'object' },
+				},
+			];
+
+			const mockResolveSelect = {
+				getEntityRecords: jest.fn(),
+			};
+
+			const mockSelectInstance = {
+				getAbilities: jest.fn().mockReturnValue( existingAbilities ), // Store has data
+			};
+
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+
+			const resolver = getAbilities( { category: 'data-retrieval' } );
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelectInstance,
+			} );
+
+			// Should not fetch since store already has abilities
+			expect( mockResolveSelect.getEntityRecords ).not.toHaveBeenCalled();
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
 		it( 'should handle empty abilities', async () => {
 			const mockResolveSelect = {
 				getEntityRecords: jest.fn().mockResolvedValue( [] ),
+			};
+
+			const mockSelectInstance = {
+				getAbilities: jest.fn().mockReturnValue( [] ), // Store is empty
 			};
 
 			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
@@ -87,6 +131,7 @@ describe( 'Store Resolvers', () => {
 			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
+				select: mockSelectInstance,
 			} );
 
 			expect( mockDispatch ).toHaveBeenCalledWith(
@@ -99,12 +144,17 @@ describe( 'Store Resolvers', () => {
 				getEntityRecords: jest.fn().mockResolvedValue( null ),
 			};
 
+			const mockSelectInstance = {
+				getAbilities: jest.fn().mockReturnValue( [] ), // Store is empty
+			};
+
 			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
 
 			const resolver = getAbilities();
 			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
+				select: mockSelectInstance,
 			} );
 
 			expect( mockDispatch ).toHaveBeenCalledWith(
@@ -118,6 +168,7 @@ describe( 'Store Resolvers', () => {
 					name: 'test/ability1',
 					label: 'Test Ability 1',
 					description: 'First test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -125,6 +176,7 @@ describe( 'Store Resolvers', () => {
 					name: 'test/ability2',
 					label: 'Test Ability 2',
 					description: 'Second test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -132,6 +184,7 @@ describe( 'Store Resolvers', () => {
 					name: 'test/ability3',
 					label: 'Test Ability 3',
 					description: 'Third test ability',
+					category: 'test-category',
 					input_schema: { type: 'object' },
 					output_schema: { type: 'object' },
 				},
@@ -141,12 +194,17 @@ describe( 'Store Resolvers', () => {
 				getEntityRecords: jest.fn().mockResolvedValue( allAbilities ),
 			};
 
+			const mockSelectInstance = {
+				getAbilities: jest.fn().mockReturnValue( [] ), // Store is empty
+			};
+
 			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
 
 			const resolver = getAbilities();
 			await resolver( {
 				dispatch: mockDispatch,
 				registry: mockRegistry,
+				select: mockSelectInstance,
 			} );
 
 			// Should fetch all abilities in one request with per_page: -1
@@ -172,6 +230,7 @@ describe( 'Store Resolvers', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Test ability description',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -211,6 +270,7 @@ describe( 'Store Resolvers', () => {
 				name: 'test/ability',
 				label: 'Test Ability',
 				description: 'Already in store',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 				callback: jest.fn(),
@@ -262,6 +322,7 @@ describe( 'Store Resolvers', () => {
 				name: 'my-plugin/feature-action',
 				label: 'Namespaced Action',
 				description: 'Namespaced ability',
+				category: 'test-category',
 				input_schema: { type: 'object' },
 				output_schema: { type: 'object' },
 			};
@@ -287,6 +348,286 @@ describe( 'Store Resolvers', () => {
 			);
 			expect( mockDispatch ).toHaveBeenCalledWith(
 				receiveAbilities( [ mockAbility ] )
+			);
+		} );
+	} );
+
+	describe( 'getAbilityCategories', () => {
+		it( 'should fetch and dispatch categories from the server', async () => {
+			const mockCategories: AbilityCategory[] = [
+				{
+					slug: 'data-retrieval',
+					label: 'Data Retrieval',
+					description: 'Abilities that retrieve data',
+				},
+				{
+					slug: 'user-management',
+					label: 'User Management',
+					description: 'Abilities for managing users',
+				},
+			];
+
+			const mockResolveSelect = {
+				getEntityRecords: jest.fn().mockResolvedValue( mockCategories ),
+			};
+
+			const mockSelectInstance = {
+				getAbilityCategories: jest.fn().mockReturnValue( [] ),
+			};
+
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+
+			const resolver = getAbilityCategories();
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelectInstance,
+			} );
+
+			expect( mockRegistry.resolveSelect ).toHaveBeenCalledWith(
+				coreStore
+			);
+			expect( mockResolveSelect.getEntityRecords ).toHaveBeenCalledWith(
+				ENTITY_KIND,
+				ENTITY_NAME_CATEGORIES,
+				{ per_page: -1 }
+			);
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveCategories( mockCategories )
+			);
+		} );
+
+		it( 'should not fetch if store already has categories', async () => {
+			const existingCategories: AbilityCategory[] = [
+				{
+					slug: 'data-retrieval',
+					label: 'Data Retrieval',
+					description: 'Abilities that retrieve data',
+				},
+			];
+
+			const mockResolveSelect = {
+				getEntityRecords: jest.fn(),
+			};
+
+			const mockSelectInstance = {
+				getAbilityCategories: jest
+					.fn()
+					.mockReturnValue( existingCategories ),
+			};
+
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+
+			const resolver = getAbilityCategories();
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelectInstance,
+			} );
+
+			// Should not fetch since store already has categories
+			expect( mockResolveSelect.getEntityRecords ).not.toHaveBeenCalled();
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should fetch from server even when only client-registered categories exist', async () => {
+			// This tests the scenario where a client category is registered first
+			// The resolver should still fetch server categories
+			const clientOnlyCategories: AbilityCategory[] = [
+				{
+					slug: 'client-category',
+					label: 'Client Category',
+					description: 'A category registered on the client',
+					meta: {
+						_clientRegistered: true,
+					},
+				},
+			];
+
+			const serverCategories: AbilityCategory[] = [
+				{
+					slug: 'data-retrieval',
+					label: 'Data Retrieval',
+					description: 'Server category',
+				},
+				{
+					slug: 'user-management',
+					label: 'User Management',
+					description: 'Another server category',
+				},
+			];
+
+			const mockResolveSelect = {
+				getEntityRecords: jest
+					.fn()
+					.mockResolvedValue( serverCategories ),
+			};
+
+			const mockSelectInstance = {
+				getAbilityCategories: jest
+					.fn()
+					.mockReturnValue( clientOnlyCategories ),
+			};
+
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+
+			const resolver = getAbilityCategories();
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelectInstance,
+			} );
+
+			// Should fetch from server because only client categories exist
+			expect( mockRegistry.resolveSelect ).toHaveBeenCalledWith(
+				coreStore
+			);
+			expect( mockResolveSelect.getEntityRecords ).toHaveBeenCalledWith(
+				ENTITY_KIND,
+				ENTITY_NAME_CATEGORIES,
+				{ per_page: -1 }
+			);
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveCategories( serverCategories )
+			);
+		} );
+
+		it( 'should handle null response', async () => {
+			const mockResolveSelect = {
+				getEntityRecords: jest.fn().mockResolvedValue( null ),
+			};
+
+			const mockSelectInstance = {
+				getAbilityCategories: jest.fn().mockReturnValue( [] ),
+			};
+
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+
+			const resolver = getAbilityCategories();
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelectInstance,
+			} );
+
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveCategories( [] )
+			);
+		} );
+	} );
+
+	describe( 'getAbilityCategory', () => {
+		it( 'should fetch and dispatch a specific category', async () => {
+			const mockCategory: AbilityCategory = {
+				slug: 'data-retrieval',
+				label: 'Data Retrieval',
+				description: 'Abilities that retrieve data',
+			};
+
+			const mockResolveSelect = {
+				getEntityRecord: jest.fn().mockResolvedValue( mockCategory ),
+			};
+
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+			mockSelect.getAbilityCategory = jest.fn().mockReturnValue( null );
+
+			const resolver = getAbilityCategory( 'data-retrieval' );
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelect,
+			} );
+
+			expect( mockSelect.getAbilityCategory ).toHaveBeenCalledWith(
+				'data-retrieval'
+			);
+			expect( mockRegistry.resolveSelect ).toHaveBeenCalledWith(
+				coreStore
+			);
+			expect( mockResolveSelect.getEntityRecord ).toHaveBeenCalledWith(
+				ENTITY_KIND,
+				ENTITY_NAME_CATEGORIES,
+				'data-retrieval'
+			);
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveCategories( [ mockCategory ] )
+			);
+		} );
+
+		it( 'should not fetch if category already exists in store', async () => {
+			const existingCategory: AbilityCategory = {
+				slug: 'data-retrieval',
+				label: 'Data Retrieval',
+				description: 'Already in store',
+			};
+
+			mockSelect.getAbilityCategory = jest
+				.fn()
+				.mockReturnValue( existingCategory );
+
+			const resolver = getAbilityCategory( 'data-retrieval' );
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelect,
+			} );
+
+			expect( mockSelect.getAbilityCategory ).toHaveBeenCalledWith(
+				'data-retrieval'
+			);
+			expect( mockRegistry.resolveSelect ).not.toHaveBeenCalled();
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should handle non-existent categories', async () => {
+			const mockResolveSelect = {
+				getEntityRecord: jest.fn().mockResolvedValue( null ),
+			};
+
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+			mockSelect.getAbilityCategory = jest.fn().mockReturnValue( null );
+
+			const resolver = getAbilityCategory( 'non-existent' );
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelect,
+			} );
+
+			expect( mockResolveSelect.getEntityRecord ).toHaveBeenCalledWith(
+				ENTITY_KIND,
+				ENTITY_NAME_CATEGORIES,
+				'non-existent'
+			);
+			expect( mockDispatch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should handle categories with meta', async () => {
+			const mockCategory: AbilityCategory = {
+				slug: 'user-management',
+				label: 'User Management',
+				description: 'Abilities for managing users',
+				meta: {
+					priority: 'high',
+				},
+			};
+
+			const mockResolveSelect = {
+				getEntityRecord: jest.fn().mockResolvedValue( mockCategory ),
+			};
+
+			mockRegistry.resolveSelect.mockReturnValue( mockResolveSelect );
+			mockSelect.getAbilityCategory = jest.fn().mockReturnValue( null );
+
+			const resolver = getAbilityCategory( 'user-management' );
+			await resolver( {
+				dispatch: mockDispatch,
+				registry: mockRegistry,
+				select: mockSelect,
+			} );
+
+			expect( mockDispatch ).toHaveBeenCalledWith(
+				receiveCategories( [ mockCategory ] )
 			);
 		} );
 	} );
