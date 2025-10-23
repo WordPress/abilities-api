@@ -104,7 +104,7 @@ class WP_REST_Abilities_V1_Run_Controller extends WP_REST_Controller {
 	 * @since 6.9.0
 	 *
 	 * @param string                     $request_method The HTTP method of the request.
-	 * @param array<string, (null|bool)> $annotations    The ability annotations.
+	 * @param array<string, (bool|null)> $annotations    The ability annotations.
 	 * @return true|WP_Error True on success, or WP_Error object on failure.
 	 */
 	public function validate_request_method( string $request_method, array $annotations ) {

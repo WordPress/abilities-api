@@ -60,6 +60,7 @@
 	</rule>
 	<rule ref="WordPress-Extra">
 		<exclude name="WordPress.WP.I18n.MissingArgDomain" />
+		<exclude name="WordPress.Security.EscapeOutput"/>
 
 		<!-- Needed to typehint, see: https://github.com/WordPress/WordPress-Coding-Standards/issues/403 -->
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
@@ -114,6 +115,7 @@
 			<!-- Doesn't use PHPCompatibility-->
 			<property name="enableOnObjects" value="false" />
 		</properties>
+		<exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaMagicConstant"/>
 	</rule>
 	<rule ref="SlevomatCodingStandard.Classes.RequireSelfReference" />
 	<rule ref="SlevomatCodingStandard.Classes.UselessLateStaticBinding" />
@@ -138,20 +140,6 @@
 		</properties>
 	</rule>
 	<rule ref="SlevomatCodingStandard.Namespaces.DisallowGroupUse" />
-	<rule ref="SlevomatCodingStandard.Namespaces.FullyQualifiedClassNameInAnnotation">
-		<properties>
-			<!-- Support PHPStan annotations -->
-			<property name="ignoredAnnotationNames" type="array">
-				<element value="@phpstan-import-type" />
-				<element value="@phpstan-param" />
-				<element value="@phpstan-return" />
-				<element value="@phpstan-template" />
-				<element value="@phpstan-type" />
-				<element value="@phpstan-var" />
-			</property>
-		</properties>
-	</rule>
-	<rule ref="SlevomatCodingStandard.Namespaces.FullyQualifiedExceptions" />
 	<rule ref="SlevomatCodingStandard.Namespaces.UnusedUses" />
 	<rule ref="SlevomatCodingStandard.Namespaces.UseDoesNotStartWithBackslash" />
 	<rule ref="SlevomatCodingStandard.Namespaces.UseFromSameNamespace" />

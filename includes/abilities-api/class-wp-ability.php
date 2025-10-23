@@ -33,7 +33,7 @@ class WP_Ability {
 	 * They are not guaranteed to provide a faithful description of ability behavior.
 	 *
 	 * @since 6.9.0
-	 * @var array<string, (null|bool)>
+	 * @var array<string, (bool|null)>
 	 */
 	protected static $default_annotations = array(
 		// If true, the ability does not modify its environment.
@@ -150,7 +150,7 @@ class WP_Ability {
 	 *     @type array<string, mixed> $meta                  {
 	 *         Optional. Additional metadata for the ability.
 	 *
-	 *         @type array<string, null|bool> $annotations  Optional. Annotation metadata for the ability.
+	 *         @type array<string, bool|null> $annotations  Optional. Annotation metadata for the ability.
 	 *         @type bool                     $show_in_rest Optional. Whether to expose this ability in the REST API. Default false.
 	 *     }
 	 * }
@@ -205,7 +205,7 @@ class WP_Ability {
 	 *     @type array<string, mixed> $meta                  {
 	 *         Optional. Additional metadata for the ability.
 	 *
-	 *         @type array<string, null|bool> $annotations  Optional. Annotation metadata for the ability.
+	 *         @type array<string, bool|null> $annotations  Optional. Annotation metadata for the ability.
 	 *         @type bool                     $show_in_rest Optional. Whether to expose this ability in the REST API. Default false.
 	 *     }
 	 * }
@@ -224,7 +224,7 @@ class WP_Ability {
 	 *     @type array<string, mixed> $meta                  {
 	 *         Additional metadata for the ability.
 	 *
-	 *         @type array<string, null|bool> $annotations  Optional. Annotation metadata for the ability.
+	 *         @type array<string, bool|null> $annotations  Optional. Annotation metadata for the ability.
 	 *         @type bool                     $show_in_rest Whether to expose this ability in the REST API. Default false.
 	 *     }
 	 * }
