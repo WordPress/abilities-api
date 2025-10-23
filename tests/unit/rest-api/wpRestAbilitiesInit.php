@@ -48,7 +48,7 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run', $routes );
 
 		// Trigger rest_api_init
-		do_action( 'rest_api_init' );
+		do_action( 'rest_api_init', $this->server );
 
 		// Routes should now be registered
 		$routes = $this->server->get_routes();
@@ -63,7 +63,7 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 	 */
 	public function test_correct_controllers_instantiated(): void {
 		// Trigger rest_api_init
-		do_action( 'rest_api_init' );
+		do_action( 'rest_api_init', $this->server );
 
 		$routes = $this->server->get_routes();
 
@@ -101,7 +101,7 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 	 * Test that routes support expected HTTP methods.
 	 */
 	public function test_routes_support_expected_methods(): void {
-		do_action( 'rest_api_init' );
+		do_action( 'rest_api_init', $this->server );
 
 		$routes = $this->server->get_routes();
 
@@ -150,7 +150,7 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 	 * Test namespace and base configuration.
 	 */
 	public function test_namespace_and_base_configuration(): void {
-		do_action( 'rest_api_init' );
+		do_action( 'rest_api_init', $this->server );
 
 		$namespaces = $this->server->get_namespaces();
 		$this->assertContains( 'wp/v2', $namespaces );
@@ -170,21 +170,26 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 	 * Test that multiple calls to register_routes don't duplicate routes.
 	 */
 	public function test_no_duplicate_routes_on_multiple_init(): void {
-		// First init
-		do_action( 'rest_api_init' );
+		// First init.
+		do_action( 'rest_api_init', $this->server );
 
-		$routes_first                = $this->server->get_routes();
-		$abilities_route_count_first = count( $routes_first['/wp-abilities/v1/abilities'] ?? array() );
+		$routes_init = $this->server->get_routes();
 
-		$this->assertEquals( 1, $abilities_route_count_first );
+		// This number depends on how many routes are registered initially.
+		$initial_count = count( $routes_init['/wp-abilities/v1/abilities'] ?? array() );
 
-		// Second init (simulating multiple calls)
-		// Note: WordPress doesn't prevent duplicate registration, so we expect 2x routes
-		WP_REST_Abilities_Init::register_routes();
+		$this->assertGreaterThanOrEqual( 1, $initial_count );
+		$this->assertCount( $initial_count, $routes_init['/wp-abilities/v1/categories'] ?? array() );
+		$this->assertCount( $initial_count, $routes_init['/wp-abilities/v1/abilities'] ?? array() );
+		$this->assertCount( $initial_count	, $routes_init['/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\-\/]+?)/run'] ?? array() );
 
-		$routes_second                = $this->server->get_routes();
-		$abilities_route_count_second = count( $routes_second['/wp-abilities/v1/abilities'] ?? array() );
+		// Second init (simulating multiple calls).
+		WP_REST_Abilities_Init::register_routes( $this->server );
 
-		$this->assertEquals( 2, $abilities_route_count_second );
+		$routes_second_init = $this->server->get_routes();
+
+		$this->assertCount( $initial_count, $routes_second_init['/wp-abilities/v1/categories'] ?? array() );
+		$this->assertCount( $initial_count, $routes_second_init['/wp-abilities/v1/abilities'] ?? array() );
+		$this->assertCount( $initial_count, $routes_second_init['/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\-\/]+?)/run'] ?? array() );
 	}
 }

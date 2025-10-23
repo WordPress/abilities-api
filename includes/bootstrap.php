@@ -61,7 +61,7 @@ if ( ! class_exists( 'WP_REST_Abilities_Init' ) ) {
 
 	// Initialize REST API routes when WordPress is available.
 	if ( function_exists( 'add_action' ) ) {
-		add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
+		add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ), 11 );
 	}
 }
 
