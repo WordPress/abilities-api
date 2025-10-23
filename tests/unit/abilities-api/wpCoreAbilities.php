@@ -36,7 +36,7 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 
 		// Register core abilities category during the proper hook.
 		$callback = static function (): void {
-			WP_Core_Abilities::register_category();
+			register_core_ability_categories();
 		};
 		add_action( 'abilities_api_categories_init', $callback );
 		do_action( 'abilities_api_categories_init', WP_Abilities_Category_Registry::get_instance() );
@@ -48,7 +48,7 @@ class Tests_Abilities_API_WpCoreAbilities extends WP_UnitTestCase {
 		}
 
 		// Register core abilities for testing.
-		WP_Core_Abilities::register();
+		register_core_abilities();
 	}
 
 	/**
