@@ -176,6 +176,8 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 		$routes_first                = $this->server->get_routes();
 		$abilities_route_count_first = count( $routes_first['/wp-abilities/v1/abilities'] ?? array() );
 
+		$this->assertEquals( 1, $abilities_route_count_first );
+
 		// Second init (simulating multiple calls)
 		// Note: WordPress doesn't prevent duplicate registration, so we expect 2x routes
 		WP_REST_Abilities_Init::register_routes();
@@ -183,7 +185,6 @@ class Tests_REST_API_WpRestAbilitiesInit extends WP_UnitTestCase {
 		$routes_second                = $this->server->get_routes();
 		$abilities_route_count_second = count( $routes_second['/wp-abilities/v1/abilities'] ?? array() );
 
-		// WordPress allows duplicate route registration
-		$this->assertEquals( $abilities_route_count_first * 2, $abilities_route_count_second );
+		$this->assertEquals( 2, $abilities_route_count_second );
 	}
 }
