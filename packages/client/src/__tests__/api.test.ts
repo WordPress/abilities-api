@@ -228,7 +228,7 @@ describe( 'API functions', () => {
 				'test/server-ability'
 			);
 			expect( apiFetch ).toHaveBeenCalledWith( {
-				path: '/wp/v2/abilities/test/server-ability/run',
+				path: '/wp-abilities/v1/abilities/test/server-ability/run',
 				method: 'POST',
 				data: { input },
 			} );
@@ -337,7 +337,7 @@ describe( 'API functions', () => {
 			const result = await executeAbility( 'test/read-only', input );
 
 			expect( apiFetch ).toHaveBeenCalledWith( {
-				path: '/wp/v2/abilities/test/read-only/run?input%5Bid%5D=123&input%5Bformat%5D=json',
+				path: '/wp-abilities/v1/abilities/test/read-only/run?input%5Bid%5D=123&input%5Bformat%5D=json',
 				method: 'GET',
 			} );
 			expect( result ).toEqual( mockResponse );
@@ -369,7 +369,7 @@ describe( 'API functions', () => {
 			const result = await executeAbility( 'test/read-only', {} );
 
 			expect( apiFetch ).toHaveBeenCalledWith( {
-				path: '/wp/v2/abilities/test/read-only/run?',
+				path: '/wp-abilities/v1/abilities/test/read-only/run?',
 				method: 'GET',
 			} );
 			expect( result ).toEqual( mockResponse );
@@ -469,7 +469,7 @@ describe( 'API functions', () => {
 			} );
 
 			expect( apiFetch ).toHaveBeenCalledWith( {
-				path: '/wp/v2/abilities/test/ability/run',
+				path: '/wp-abilities/v1/abilities/test/ability/run',
 				method: 'POST',
 				data: { input: { data: 'test' } },
 			} );
