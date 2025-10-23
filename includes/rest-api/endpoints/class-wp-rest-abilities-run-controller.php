@@ -162,8 +162,13 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$input = $ability->normalize_input( $this->get_input_from_request( $request ) );
-		if ( ! $ability->check_permissions( $input ) ) {
+		$input  = $ability->normalize_input( $this->get_input_from_request( $request ) );
+		$result = $ability->check_permissions( $input );
+		if ( true !== $result ) {
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
 			return new \WP_Error(
 				'rest_ability_cannot_execute',
 				__( 'Sorry, you are not allowed to execute this ability.' ),
