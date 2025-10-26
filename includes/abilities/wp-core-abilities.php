@@ -43,7 +43,7 @@ function register_core_ability_categories(): void {
  * @return void
  */
 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
-function register_core_abilities(): void {
+function wp_register_core_abilities(): void {
 	$category_site = 'site';
 	$category_user = 'user';
 

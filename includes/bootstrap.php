@@ -42,7 +42,7 @@ if ( ! function_exists( 'wp_register_ability' ) ) {
 }
 
 // Load core abilities registration functions.
-if ( ! function_exists( 'register_core_abilities' ) ) {
+if ( ! function_exists( 'wp_register_core_abilities' ) ) {
 	require_once __DIR__ . '/abilities/wp-core-abilities.php';
 }
 
