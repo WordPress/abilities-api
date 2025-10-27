@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Abilities API
- * @since 0.3.0
+ * @since 6.9.0
  */
 
 declare( strict_types = 1 );
@@ -14,41 +14,41 @@ declare( strict_types = 1 );
 /**
  * Encapsulates the properties and methods related to a specific ability category.
  *
- * @since 0.3.0
+ * @since 6.9.0
  *
- * @see WP_Abilities_Category_Registry
+ * @see WP_Ability_Categories_Registry
  */
 final class WP_Ability_Category {
 
 	/**
-	 * The unique slug for the category.
+	 * The unique slug for the ability category.
 	 *
-	 * @since 0.3.0
+	 * @since 6.9.0
 	 * @var string
 	 */
 	protected $slug;
 
 	/**
-	 * The human-readable category label.
+	 * The human-readable ability category label.
 	 *
-	 * @since 0.3.0
+	 * @since 6.9.0
 	 * @var string
 	 */
 	protected $label;
 
 	/**
-	 * The detailed category description.
+	 * The detailed ability category description.
 	 *
-	 * @since 0.3.0
+	 * @since 6.9.0
 	 * @var string
 	 */
 	protected $description;
 
 	/**
-	 * The optional category metadata.
+	 * The optional ability category metadata.
 	 *
-	 * @since 0.3.0
-	 * @var array<string,mixed>
+	 * @since 6.9.0
+	 * @var array<string, mixed>
 	 */
 	protected $meta = array();
 
@@ -59,17 +59,23 @@ final class WP_Ability_Category {
 	 *
 	 * @access private
 	 *
-	 * @since 0.3.0
+	 * @since 6.9.0
 	 *
 	 * @see wp_register_ability_category()
 	 *
-	 * @param string              $slug The unique slug for the category.
-	 * @param array<string,mixed> $args An associative array of arguments for the category.
+	 * @param string               $slug The unique slug for the ability category.
+	 * @param array<string, mixed> $args {
+	 *     An associative array of arguments for the ability category.
+	 *
+	 *     @type string               $label       The human-readable label for the ability category.
+	 *     @type string               $description A description of the ability category.
+	 *     @type array<string, mixed> $meta        Optional. Additional metadata for the ability category.
+	 * }
 	 */
 	public function __construct( string $slug, array $args ) {
 		if ( empty( $slug ) ) {
-			throw new \InvalidArgumentException(
-				esc_html__( 'The category slug cannot be empty.' )
+			throw new InvalidArgumentException(
+				__( 'The ability category slug cannot be empty.' )
 			);
 		}
 
@@ -83,12 +89,12 @@ final class WP_Ability_Category {
 					__METHOD__,
 					sprintf(
 						/* translators: %s: Property name. */
-						esc_html__( 'Property "%1$s" is not a valid property for category "%2$s". Please check the %3$s class for allowed properties.' ),
+						__( 'Property "%1$s" is not a valid property for ability category "%2$s". Please check the %3$s class for allowed properties.' ),
 						'<code>' . esc_html( $property_name ) . '</code>',
 						'<code>' . esc_html( $this->slug ) . '</code>',
-						'<code>' . esc_html( self::class ) . '</code>'
+						'<code>' . __CLASS__ . '</code>'
 					),
-					'0.3.0'
+					'6.9.0'
 				);
 				continue;
 			}
@@ -98,39 +104,44 @@ final class WP_Ability_Category {
 	}
 
 	/**
-	 * Prepares and validates the properties used to instantiate the category.
+	 * Prepares and validates the properties used to instantiate the ability category.
 	 *
-	 * @since 0.3.0
+	 * @since 6.9.0
 	 *
-	 * @param array<string,mixed> $args An associative array of arguments used to instantiate the class.
-	 * @return array<string,mixed> The validated and prepared properties.
-	 * @throws \InvalidArgumentException if an argument is invalid.
+	 * @param array<string, mixed> $args $args {
+	 *     An associative array of arguments used to instantiate the ability category class.
 	 *
-	 * @phpstan-return array{
-	 *   label: string,
-	 *   description: string,
-	 *   meta?: array<string,mixed>,
-	 *   ...<string, mixed>,
+	 *     @type string               $label       The human-readable label for the ability category.
+	 *     @type string               $description A description of the ability category.
+	 *     @type array<string, mixed> $meta        Optional. Additional metadata for the ability category.
 	 * }
+	 * @return array<string, mixed> $args {
+	 *     An associative array with validated and prepared ability category properties.
+	 *
+	 *     @type string               $label       The human-readable label for the ability category.
+	 *     @type string               $description A description of the ability category.
+	 *     @type array<string, mixed> $meta        Optional. Additional metadata for the ability category.
+	 * }
+	 * @throws InvalidArgumentException if an argument is invalid.
 	 */
 	protected function prepare_properties( array $args ): array {
 		// Required args must be present and of the correct type.
 		if ( empty( $args['label'] ) || ! is_string( $args['label'] ) ) {
-			throw new \InvalidArgumentException(
-				esc_html__( 'The category properties must contain a `label` string.' )
+			throw new InvalidArgumentException(
+				__( 'The ability category properties must contain a `label` string.' )
 			);
 		}
 
 		if ( empty( $args['description'] ) || ! is_string( $args['description'] ) ) {
-			throw new \InvalidArgumentException(
-				esc_html__( 'The category properties must contain a `description` string.' )
+			throw new InvalidArgumentException(
+				__( 'The ability category properties must contain a `description` string.' )
 			);
 		}
 
 		// Optional args only need to be of the correct type if they are present.
 		if ( isset( $args['meta'] ) && ! is_array( $args['meta'] ) ) {
-			throw new \InvalidArgumentException(
-				esc_html__( 'The category properties should provide a valid `meta` array.' )
+			throw new InvalidArgumentException(
+				__( 'The ability category properties should provide a valid `meta` array.' )
 			);
 		}
 
@@ -138,44 +149,44 @@ final class WP_Ability_Category {
 	}
 
 	/**
-	 * Retrieves the slug of the category.
+	 * Retrieves the slug of the ability category.
 	 *
-	 * @since 0.3.0
+	 * @since 6.9.0
 	 *
-	 * @return string The category slug.
+	 * @return string The ability category slug.
 	 */
 	public function get_slug(): string {
 		return $this->slug;
 	}
 
 	/**
-	 * Retrieves the human-readable label for the category.
+	 * Retrieves the human-readable label for the ability category.
 	 *
-	 * @since 0.3.0
+	 * @since 6.9.0
 	 *
-	 * @return string The human-readable category label.
+	 * @return string The human-readable ability category label.
 	 */
 	public function get_label(): string {
 		return $this->label;
 	}
 
 	/**
-	 * Retrieves the detailed description for the category.
+	 * Retrieves the detailed description for the ability category.
 	 *
-	 * @since 0.3.0
+	 * @since 6.9.0
 	 *
-	 * @return string The detailed description for the category.
+	 * @return string The detailed description for the ability category.
 	 */
 	public function get_description(): string {
 		return $this->description;
 	}
 
 	/**
-	 * Retrieves the metadata for the category.
+	 * Retrieves the metadata for the ability category.
 	 *
-	 * @since 0.3.0
+	 * @since 6.9.0
 	 *
-	 * @return array<string,mixed> The metadata for the category.
+	 * @return array<string,mixed> The metadata for the ability category.
 	 */
 	public function get_meta(): array {
 		return $this->meta;
@@ -184,20 +195,22 @@ final class WP_Ability_Category {
 	/**
 	 * Wakeup magic method.
 	 *
-	 * @since 0.3.0
-	 * @throws \LogicException If the category is unserialized. This is a security hardening measure to prevent unserialization of the category.
+	 * @since 6.9.0
+	 * @throws LogicException If the ability category object is unserialized.
+	 *                        This is a security hardening measure to prevent unserialization of the ability category.
 	 */
 	public function __wakeup(): void {
-		throw new \LogicException( self::class . ' must not be unserialized.' );
+		throw new LogicException( __CLASS__ . ' should never be unserialized.' );
 	}
 
 	/**
-	 * Serialization magic method.
+	 * Sleep magic method.
 	 *
-	 * @since 0.3.0
-	 * @throws \LogicException If the category is serialized. This is a security hardening measure to prevent serialization of the category.
+	 * @since 6.9.0
+	 * @throws LogicException If the ability category object is serialized.
+	 *                        This is a security hardening measure to prevent serialization of the ability category.
 	 */
 	public function __sleep(): array {
-		throw new \LogicException( self::class . ' must not be serialized.' );
+		throw new LogicException( __CLASS__ . ' should never be serialized.' );
 	}
 }
