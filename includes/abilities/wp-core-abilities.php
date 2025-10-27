@@ -4,19 +4,18 @@
  *
  * @package WordPress
  * @subpackage Abilities_API
- * @since 0.3.0
+ * @since 6.9.0
  */
 
 declare( strict_types = 1 );
 
 /**
- * Registers the core abilities categories.
+ * Registers the core ability categories.
  *
- * @since 0.3.0
+ * @since 6.9.0
  *
  * @return void
  */
-// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
 function wp_register_core_ability_categories(): void {
 	wp_register_ability_category(
 		'site',
@@ -38,25 +37,49 @@ function wp_register_core_ability_categories(): void {
 /**
  * Registers the default core abilities.
  *
- * @since 0.3.0
+ * @since 6.9.0
  *
  * @return void
  */
-// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
 function wp_register_core_abilities(): void {
 	$category_site = 'site';
 	$category_user = 'user';
 
-	$site_info_fields = array(
-		'name',
-		'description',
-		'url',
-		'wpurl',
-		'admin_email',
-		'charset',
-		'language',
-		'version',
+	$site_info_properties = array(
+		'name'        => array(
+			'type'        => 'string',
+			'description' => __( 'The site title.' ),
+		),
+		'description' => array(
+			'type'        => 'string',
+			'description' => __( 'The site tagline.' ),
+		),
+		'url'         => array(
+			'type'        => 'string',
+			'description' => __( 'The site home URL.' ),
+		),
+		'wpurl'       => array(
+			'type'        => 'string',
+			'description' => __( 'The WordPress installation URL.' ),
+		),
+		'admin_email' => array(
+			'type'        => 'string',
+			'description' => __( 'The site administrator email address.' ),
+		),
+		'charset'     => array(
+			'type'        => 'string',
+			'description' => __( 'The site character encoding.' ),
+		),
+		'language'    => array(
+			'type'        => 'string',
+			'description' => __( 'The site language locale code.' ),
+		),
+		'version'     => array(
+			'type'        => 'string',
+			'description' => __( 'The WordPress version.' ),
+		),
 	);
+	$site_info_fields = array_keys( $site_info_properties );
 
 	wp_register_ability(
 		'core/get-site-info',
@@ -81,46 +104,12 @@ function wp_register_core_abilities(): void {
 			),
 			'output_schema'       => array(
 				'type'                 => 'object',
-				'properties'           => array(
-					'name'        => array(
-						'type'        => 'string',
-						'description' => __( 'The site title.' ),
-					),
-					'description' => array(
-						'type'        => 'string',
-						'description' => __( 'The site tagline.' ),
-					),
-					'url'         => array(
-						'type'        => 'string',
-						'description' => __( 'The site home URL.' ),
-					),
-					'wpurl'       => array(
-						'type'        => 'string',
-						'description' => __( 'The WordPress installation URL.' ),
-					),
-					'admin_email' => array(
-						'type'        => 'string',
-						'description' => __( 'The site administrator email address.' ),
-					),
-					'charset'     => array(
-						'type'        => 'string',
-						'description' => __( 'The site character encoding.' ),
-					),
-					'language'    => array(
-						'type'        => 'string',
-						'description' => __( 'The site language locale code.' ),
-					),
-					'version'     => array(
-						'type'        => 'string',
-						'description' => __( 'The WordPress version.' ),
-					),
-				),
+				'properties'           => $site_info_properties,
 				'additionalProperties' => false,
 			),
-			'execute_callback'    => static function ( $input = array() ): array {
+			'execute_callback'    => static function ( $input = array() ) use ( $site_info_fields ): array {
 				$input = is_array( $input ) ? $input : array();
-				$all_fields       = array( 'name', 'description', 'url', 'wpurl', 'admin_email', 'charset', 'language', 'version' );
-				$requested_fields = ! empty( $input['fields'] ) ? $input['fields'] : $all_fields;
+				$requested_fields = ! empty( $input['fields'] ) ? $input['fields'] : $site_info_fields;
 
 				$result = array();
 				foreach ( $requested_fields as $field ) {
@@ -246,7 +235,7 @@ function wp_register_core_abilities(): void {
 				$env          = wp_get_environment_type();
 				$php_version  = phpversion();
 				$db_server_info  = '';
-				if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'db_server_info' ) ) {
+				if ( method_exists( $wpdb, 'db_server_info' ) ) {
 					$db_server_info = $wpdb->db_server_info() ?? '';
 				}
 				$wp_version   = get_bloginfo( 'version' );
