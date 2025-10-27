@@ -5,21 +5,22 @@ The Abilities API provides [WordPress Action and Filter Hooks](https://developer
 ## Quick Links
 
 - [Actions](#actions)
-  - [`abilities_api_categories_init`](#abilities_api_categories_init)
-  - [`before_execute_ability`](#before_execute_ability)
-  - [`after_execute_ability`](#after_execute_ability)
+  - [`wp_abilities_api_categories_init`](#wp_abilities_api_categories_init)
+  - [`wp_abilities_api_init`](#wp_abilities_api_init)
+  - [`wp_before_execute_ability`](#wp_before_execute_ability)
+  - [`wp_after_execute_ability`](#wp_after_execute_ability)
 - [Filters](#filters)
-  - [`register_ability_args`](#register_ability_args)
-  - [`register_ability_category_args`](#register_ability_category_args)
+  - [`wp_register_ability_args`](#wp_register_ability_args)
+  - [`wp_register_ability_category_args`](#wp_register_ability_category_args)
 
 ## Actions
 
-### `abilities_api_categories_init`
+### `wp_abilities_api_categories_init`
 
 Fires when the category registry is first initialized. This is the proper hook to use when registering categories.
 
 ```php
-do_action( 'abilities_api_categories_init', $registry );
+do_action( 'wp_abilities_api_categories_init', $registry );
 ```
 
 #### Parameters
@@ -29,7 +30,7 @@ do_action( 'abilities_api_categories_init', $registry );
 #### Usage Example
 
 ```php
-add_action( 'abilities_api_categories_init', 'my_plugin_register_categories' );
+add_action( 'wp_abilities_api_categories_init', 'my_plugin_register_categories' );
 /**
  * Register custom ability categories.
  *
@@ -48,12 +49,12 @@ function my_plugin_register_categories( $registry ) {
 }
 ```
 
-### `abilities_api_init`
+### `wp_abilities_api_init`
 
 Fires when the abilities registry has been initialized. This is the proper hook to use when registering abilities.
 
 ```php
-do_action( 'abilities_api_init', $registry );
+do_action( 'wp_abilities_api_init', $registry );
 ```
 
 #### Parameters
@@ -63,7 +64,7 @@ do_action( 'abilities_api_init', $registry );
 #### Usage Example
 
 ```php
-add_action('abilities_api_init', 'my_plugin_register_abilities');
+add_action('wp_abilities_api_init', 'my_plugin_register_abilities');
 /**
  * Register custom abilities.
  */
@@ -89,12 +90,12 @@ function function my_plugin_register_abilities() {
     ) );
 }
 ```
-### `before_execute_ability`
+### `wp_before_execute_ability`
 
 Fires immediately before an ability gets executed, after permission checks have passed but before the execution callback is called.
 
 ```php
-do_action( 'before_execute_ability', $ability_name, $input );
+do_action( 'wp_before_execute_ability', $ability_name, $input );
 ```
 
 #### Parameters
@@ -105,7 +106,7 @@ do_action( 'before_execute_ability', $ability_name, $input );
 #### Usage Example
 
 ```php
-add_action( 'before_execute_ability', 'log_ability_execution', 10, 2 );
+add_action( 'wp_before_execute_ability', 'log_ability_execution', 10, 2 );
 /**
  * Log each ability execution attempt.
  * @param string $ability_name The name of the ability being executed.
@@ -119,12 +120,12 @@ function log_ability_execution( string $ability_name, $input ) {
 }
 ```
 
-### `after_execute_ability`
+### `wp_after_execute_ability`
 
 Fires immediately after an ability has finished executing successfully, after output validation has passed.
 
 ```php
-do_action( 'after_execute_ability', string $ability_name, $input, $result );
+do_action( 'wp_after_execute_ability', string $ability_name, $input, $result );
 ```
 
 #### Parameters
@@ -136,7 +137,7 @@ do_action( 'after_execute_ability', string $ability_name, $input, $result );
 #### Usage Example
 
 ```php
-add_action( 'after_execute_ability', 'log_ability_result', 10, 3 );
+add_action( 'wp_after_execute_ability', 'log_ability_result', 10, 3 );
 /**
  * Log the result of each ability execution.
  *
@@ -152,12 +153,12 @@ function log_ability_result( string $ability_name, $input, $result ) {
 
 ## Filters
 
-### `register_ability_args`
+### `wp_register_ability_args`
 
 Allows modification of an Ability's args before they are validated and used to instantiate the Ability.
 
 ```php
-$args = apply_filters( 'register_ability_args', array $args, string $ability_name );
+$args = apply_filters( 'wp_register_ability_args', array $args, string $ability_name );
 ```
 
 #### Parameters
@@ -168,7 +169,7 @@ $args = apply_filters( 'register_ability_args', array $args, string $ability_nam
 #### Usage Example
 
 ```php
-add_filter( 'register_ability_args', 'my_modify_ability_args', 10, 2 );
+add_filter( 'wp_register_ability_args', 'my_modify_ability_args', 10, 2 );
 /**
  * Modify ability args before validation.
  *
@@ -210,12 +211,12 @@ function my_modify_ability_args( array $args, string $ability_name ): array {
 }
 ```
 
-### `register_ability_category_args`
+### `wp_register_ability_category_args`
 
 Allows modification of a category's arguments before validation.
 
 ```php
-$args = apply_filters( 'register_ability_category_args', array $args, string $slug );
+$args = apply_filters( 'wp_register_ability_category_args', array $args, string $slug );
 ```
 
 #### Parameters
@@ -226,7 +227,7 @@ $args = apply_filters( 'register_ability_category_args', array $args, string $sl
 #### Usage Example
 
 ```php
-add_filter( 'register_ability_category_args', 'my_modify_category_args', 10, 2 );
+add_filter( 'wp_register_ability_category_args', 'my_modify_category_args', 10, 2 );
 /**
  * Modify category args before validation.
  *
