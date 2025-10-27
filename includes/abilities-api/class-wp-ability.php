@@ -33,7 +33,7 @@ class WP_Ability {
 	 * They are not guaranteed to provide a faithful description of ability behavior.
 	 *
 	 * @since 6.9.0
-	 * @var array<string, (bool|null)>
+	 * @var array<string, (null|bool)>
 	 */
 	protected static $default_annotations = array(
 		// If true, the ability does not modify its environment.
@@ -150,7 +150,7 @@ class WP_Ability {
 	 *     @type array<string, mixed> $meta                  {
 	 *         Optional. Additional metadata for the ability.
 	 *
-	 *         @type array<string, bool|null> $annotations  Optional. Annotation metadata for the ability.
+	 *         @type array<string, null|bool> $annotations  Optional. Annotation metadata for the ability.
 	 *         @type bool                     $show_in_rest Optional. Whether to expose this ability in the REST API. Default false.
 	 *     }
 	 * }
@@ -169,7 +169,7 @@ class WP_Ability {
 						__( 'Property "%1$s" is not a valid property for ability "%2$s". Please check the %3$s class for allowed properties.' ),
 						'<code>' . esc_html( $property_name ) . '</code>',
 						'<code>' . esc_html( $this->name ) . '</code>',
-						'<code>' . self::class . '</code>'
+						'<code>' . __CLASS__ . '</code>'
 					),
 					'6.9.0'
 				);
@@ -205,7 +205,7 @@ class WP_Ability {
 	 *     @type array<string, mixed> $meta                  {
 	 *         Optional. Additional metadata for the ability.
 	 *
-	 *         @type array<string, bool|null> $annotations  Optional. Annotation metadata for the ability.
+	 *         @type array<string, null|bool> $annotations  Optional. Annotation metadata for the ability.
 	 *         @type bool                     $show_in_rest Optional. Whether to expose this ability in the REST API. Default false.
 	 *     }
 	 * }
@@ -224,7 +224,7 @@ class WP_Ability {
 	 *     @type array<string, mixed> $meta                  {
 	 *         Additional metadata for the ability.
 	 *
-	 *         @type array<string, bool|null> $annotations  Optional. Annotation metadata for the ability.
+	 *         @type array<string, null|bool> $annotations  Optional. Annotation metadata for the ability.
 	 *         @type bool                     $show_in_rest Whether to expose this ability in the REST API. Default false.
 	 *     }
 	 * }
@@ -445,7 +445,7 @@ class WP_Ability {
 				sprintf(
 					/* translators: %s ability name. */
 					__( 'Ability "%s" does not define an input schema required to validate the provided input.' ),
-					$this->name
+					esc_html( $this->name )
 				)
 			);
 		}
@@ -457,7 +457,7 @@ class WP_Ability {
 				sprintf(
 					/* translators: %1$s ability name, %2$s error message. */
 					__( 'Ability "%1$s" has invalid input. Reason: %2$s' ),
-					$this->name,
+					esc_html( $this->name ),
 					$valid_input->get_error_message()
 				)
 			);
@@ -514,7 +514,7 @@ class WP_Ability {
 			return new WP_Error(
 				'ability_invalid_execute_callback',
 				/* translators: %s ability name. */
-				sprintf( __( 'Ability "%s" does not have a valid execute callback.' ), $this->name )
+				sprintf( __( 'Ability "%s" does not have a valid execute callback.' ), esc_html( $this->name ) )
 			);
 		}
 
@@ -542,7 +542,7 @@ class WP_Ability {
 				sprintf(
 					/* translators: %1$s ability name, %2$s error message. */
 					__( 'Ability "%1$s" has invalid output. Reason: %2$s' ),
-					$this->name,
+					esc_html( $this->name ),
 					$valid_output->get_error_message()
 				)
 			);
@@ -581,7 +581,7 @@ class WP_Ability {
 			return new WP_Error(
 				'ability_invalid_permissions',
 				/* translators: %s ability name. */
-				sprintf( __( 'Ability "%s" does not have necessary permission.' ), $this->name )
+				sprintf( __( 'Ability "%s" does not have necessary permission.' ), esc_html( $this->name ) )
 			);
 		}
 
@@ -638,6 +638,6 @@ class WP_Ability {
 	 *                        This is a security hardening measure to prevent serialization of the ability.
 	 */
 	public function __sleep(): array {
-		throw new LogicException( __CLASS__ . ' should never be serialized' );
+		throw new LogicException( __CLASS__ . ' should never be serialized.' );
 	}
 }
