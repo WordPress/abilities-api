@@ -33,7 +33,7 @@ class WP_Ability {
 	 * They are not guaranteed to provide a faithful description of ability behavior.
 	 *
 	 * @since 6.9.0
-	 * @var array<string, (null|bool)>
+	 * @var array<string, (bool|null)>
 	 */
 	protected static $default_annotations = array(
 		// If true, the ability does not modify its environment.
