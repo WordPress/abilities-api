@@ -12,7 +12,7 @@
  * Plugin URI:        https://github.com/WordPress/abilities-api
  * Description:       Provides a framework for registering and executing AI abilities in WordPress.
  * Requires at least: 6.8
- * Version:           0.3.0
+ * Version:           0.4.0
  * Requires PHP:      7.2
  * Author:            WordPress.org Contributors
  * Author URI:        https://github.com/WordPress/abilities-api/graphs/contributors

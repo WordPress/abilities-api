@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Version of the plugin.
 if ( ! defined( 'WP_ABILITIES_API_VERSION' ) ) {
-	define( 'WP_ABILITIES_API_VERSION', '0.3.0' );
+	define( 'WP_ABILITIES_API_VERSION', '0.4.0' );
 }
 
 // Load core classes if they are not already defined (for non-Composer installs or direct includes).
