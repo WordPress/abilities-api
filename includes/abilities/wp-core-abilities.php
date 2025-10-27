@@ -16,6 +16,7 @@ declare( strict_types = 1 );
  *
  * @return void
  */
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
 function wp_register_core_ability_categories(): void {
 	wp_register_ability_category(
 		'site',
@@ -41,6 +42,7 @@ function wp_register_core_ability_categories(): void {
  *
  * @return void
  */
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
 function wp_register_core_abilities(): void {
 	$category_site = 'site';
 	$category_user = 'user';
@@ -236,6 +238,7 @@ function wp_register_core_abilities(): void {
 				$php_version  = phpversion();
 				$db_server_info  = '';
 				if ( method_exists( $wpdb, 'db_server_info' ) ) {
+					/** @phpstan-ignore-next-line */
 					$db_server_info = $wpdb->db_server_info() ?? '';
 				}
 				$wp_version   = get_bloginfo( 'version' );
