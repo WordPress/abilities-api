@@ -27,7 +27,7 @@ Returns an array of all registered abilities (both server-side and client-side).
 **Example:**
 
 ```javascript
-import { getAbilities } from `@wordpress/abilities`;
+import { getAbilities } from '@wordpress/abilities';
 
 const abilities = await getAbilities();
 console.log(`Found ${abilities.length} abilities`);
