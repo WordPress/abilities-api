@@ -68,7 +68,7 @@ add_action('wp_abilities_api_init', 'my_plugin_register_abilities');
 /**
  * Register custom abilities.
  */
-function function my_plugin_register_abilities() {
+function my_plugin_register_abilities() {
     wp_register_ability( 'my-plugin/ability', array(
         'label'               => __( 'Title', 'my-plugin' ),
         'description'         => __( 'Description.', 'my-plugin' ),
