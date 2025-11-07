@@ -103,18 +103,14 @@ function my_plugin_get_site_title( array $input = array() ): string {
 }
 
 // 2. Register the ability when the Abilities API is initialized.
-// Using `abilities_api_init` ensures the API is fully loaded.
-add_action( 'abilities_api_init', 'my_plugin_register_abilities' );
+// Using `wp_abilities_api_init` ensures the API is fully loaded.
+add_action( 'wp_abilities_api_init', 'my_plugin_register_abilities' );
 
 function my_plugin_register_abilities() {
     wp_register_ability( 'my-plugin/get-site-title', array(
         'label'               => __( 'Get Site Title', 'my-plugin' ),
         'description'         => __( 'Retrieves the title of the current WordPress site.', 'my-plugin' ),
-        'input_schema'        => array(
-            'type'                 => 'object',
-            'properties'           => array(),
-            'additionalProperties' => false,
-        ),
+        'category'            => 'site',
         'output_schema'       => array(
             'type'        => 'string',
             'description' => 'The site title.',
