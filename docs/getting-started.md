@@ -110,6 +110,7 @@ function my_plugin_register_abilities() {
     wp_register_ability( 'my-plugin/get-site-title', array(
         'label'               => __( 'Get Site Title', 'my-plugin' ),
         'description'         => __( 'Retrieves the title of the current WordPress site.', 'my-plugin' ),
+        'category'            => 'site-info',
         'input_schema'        => array(
             'type'                 => 'object',
             'properties'           => array(),
@@ -122,8 +123,8 @@ function my_plugin_register_abilities() {
         'execute_callback'    => 'my_plugin_get_site_title',
         'permission_callback' => '__return_true', // Everyone can access this
         'meta'                => array(
-            'category'    => 'site-info',
             'show_in_rest' => true, // Optional: expose via REST API
+        ),
     ) );
 }
 

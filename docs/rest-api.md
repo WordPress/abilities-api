@@ -11,7 +11,7 @@ Access to all Abilities REST API endpoints requires an authenticated user (see t
 By default, registered abilities are **not** exposed via the REST API. You can control whether an individual ability appears in the REST API by using the `show_in_rest` meta when registering the ability:
 
 - `show_in_rest => true`: The ability is listed in REST API responses and can be executed via REST endpoints.
-- `show_in_rest => false` (default): The ability is hidden from REST API listings and cannot be executed via REST endpoints. The ability remains available for internal PHP usage via `wp_execute_ability()`.
+- `show_in_rest => false` (default): The ability is hidden from REST API listings and cannot be executed via REST endpoints. The ability remains available for internal PHP usage via `wp_get_ability()` and `$ability->execute()`.
 
 Abilities with meta `show_in_rest => false` will return a `rest_ability_not_found` error if accessed via REST endpoints.
 

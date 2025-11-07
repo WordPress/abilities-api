@@ -25,7 +25,7 @@ do_action( 'wp_abilities_api_categories_init', $registry );
 
 #### Parameters
 
-- `$registry` (`\WP_Abilities_Category_Registry`): The category registry instance.
+- `$registry` (`\WP_Ability_Categories_Registry`): The category registry instance.
 
 #### Usage Example
 
@@ -34,7 +34,7 @@ add_action( 'wp_abilities_api_categories_init', 'my_plugin_register_categories' 
 /**
  * Register custom ability categories.
  *
- * @param \WP_Abilities_Category_Registry $registry The category registry instance.
+ * @param \WP_Ability_Categories_Registry $registry The category registry instance.
  */
 function my_plugin_register_categories( $registry ) {
     wp_register_ability_category( 'ecommerce', array(
@@ -85,8 +85,8 @@ function my_plugin_register_abilities() {
         'execute_callback'    => 'my_plugin_get_site_title',
         'permission_callback' => '__return_true', // Everyone can access this
         'meta'                => array(
-            'category'    => 'site-info',
             'show_in_rest' => true, // Optional: expose via REST API
+        ),
     ) );
 }
 ```
