@@ -105,11 +105,11 @@ The primary way to add functionality to the Abilities API is by using the `wp_re
 ### Function Signature
 
 ```php
-wp_register_ability( string $id, array $args ): ?\WP_Ability
+wp_register_ability( string $name, array $args ): ?\WP_Ability
 ```
 
 **Parameters:**
-- `$id` (`string`): A unique identifier for the ability.
+- `$name` (`string`): A unique identifier for the ability.
 - `$args` (`array`): An array of arguments defining the ability configuration.
 
 - **Return:** (`?\WP_Ability`) An instance of the registered ability if it was successfully registered, `null` on failure (e.g., invalid arguments, duplicate ID).
@@ -143,9 +143,9 @@ The `$args` array accepts the following keys:
     - When `false`, the ability will be hidden from REST API listings and cannot be executed via REST endpoints, but remains available for internal PHP usage.
 - `ability_class` (`string`, **Optional**): The fully-qualified class name of a custom ability class that extends `WP_Ability`. This allows you to customize the behavior of an ability by extending the base `WP_Ability` class and overriding its methods. The custom class must extend `WP_Ability`. Default: `WP_Ability`.
 
-### Ability ID Convention
+### Ability Name Convention
 
-The `$id` parameter must follow the pattern `namespace/ability-name`:
+The `$name` parameter must follow the pattern `namespace/ability-name`:
 
 - **Format:** Must contain only lowercase alphanumeric characters (`a-z`, `0-9`), hyphens (`-`), and one forward slash (`/`) for namespacing.
 - **Convention:** Use your plugin slug as the namespace, like `my-plugin/ability-name`.
