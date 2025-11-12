@@ -7,7 +7,7 @@
  *
  * @see https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/#json-schema-basics
  */
-import Ajv from 'ajv-draft-04';
+import Ajv from 'ajv/dist/2020';
 import addFormats from 'ajv-formats';
 import type { ValidationError } from './types';
 
@@ -169,7 +169,7 @@ export function validateValueFromSchema(
 
 	try {
 		const validate = ajv.compile( args );
-		const valid = validate( value );
+		const valid = validate( value || {} );
 
 		if ( valid ) {
 			return true;
