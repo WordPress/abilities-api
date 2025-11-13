@@ -22,6 +22,8 @@ parameters:
 		paths:
 				- abilities-api.php
 				- includes/
+		ignoreErrors:
+				- identifier: missingType.generics
 		excludePaths:
 			analyse:
 				- tests/

@@ -19,12 +19,12 @@ wp_register_ability_category( string $slug, array $args ): ?\WP_Ability_Category
 
 **Return:** (`?\WP_Ability_Category`) An instance of the registered category if it was successfully registered, `null` on failure (e.g., invalid arguments, duplicate slug).
 
-**Note:** Categories must be registered during the `abilities_api_categories_init` action hook.
+**Note:** Categories must be registered during the `wp_abilities_api_categories_init` action hook.
 
 ### Code Example
 
 ```php
-add_action( 'abilities_api_categories_init', 'my_plugin_register_categories' );
+add_action( 'wp_abilities_api_categories_init', 'my_plugin_register_categories' );
 function my_plugin_register_categories() {
     wp_register_ability_category( 'data-retrieval', array(
         'label' => __( 'Data Retrieval', 'my-plugin' ),
@@ -100,16 +100,18 @@ wp_get_ability_categories() array
 
 ## Registering Abilities (`wp_register_ability`)
 
-The primary way to add functionality to the Abilities API is by using the `wp_register_ability()` function, typically hooked into the `abilities_api_init` action.
+The primary way to add functionality to the Abilities API is by using the `wp_register_ability()` function, typically hooked into the `wp_abilities_api_init` action.
 
 ### Function Signature
 
 ```php
-wp_register_ability( string $id, array $args ): ?\WP_Ability
+wp_register_ability( string $name, array $args ): ?\WP_Ability
 ```
 
-- `$id` (`string`): A unique identifier for the ability.
+**Parameters:**
+- `$name` (`string`): A unique identifier for the ability.
 - `$args` (`array`): An array of arguments defining the ability configuration.
+
 - **Return:** (`?\WP_Ability`) An instance of the registered ability if it was successfully registered, `null` on failure (e.g., invalid arguments, duplicate ID).
 
 ### Parameters Explained
@@ -119,8 +121,8 @@ The `$args` array accepts the following keys:
 - `label` (`string`, **Required**): A human-readable name for the ability. Used for display purposes. Should be translatable.
 - `description` (`string`, **Required**): A detailed description of what the ability does, its purpose, and its parameters or return values. This is crucial for AI agents to understand how and when to use the ability. Should be translatable.
 - `category` (`string`, **Required**): The slug of the category this ability belongs to. The category must be registered before registering the ability using `wp_register_ability_category()`. Categories help organize and filter abilities by their purpose. See [Registering Categories](#registering-categories) for details.
-- `input_schema` (`array`, **Optional**): A JSON Schema definition describing the expected input parameters for the ability's execute callback. Only needed when creating Abilities that require inputs. Defaults to `null` only when no schema is provided. Used for validation and documentation.
-- `output_schema` (`array`, **Required**): A JSON Schema definition describing the expected format of the data returned by the ability. Used for validation and documentation.
+- `input_schema` (`array`, **Optional**): A [JSON Schema](https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/) definition describing the expected input parameters for the ability's execute callback. Only needed when creating Abilities that require inputs. Defaults to `null` only when no schema is provided. Used for validation and documentation.
+- `output_schema` (`array`, **Required**): A [JSON Schema](https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/) definition describing the expected format of the data returned by the ability. Used for validation and documentation.
 - `execute_callback` (`callable`, **Required**): The PHP function or method to execute when this ability is called.
   - The callback receives one optional argument, the input data for the ability. The argument is required when the input schema is defined.
   - The input argument will have the same type as defined in the input schema (e.g., `array`, `object`, `string`, etc.).
@@ -141,9 +143,9 @@ The `$args` array accepts the following keys:
     - When `false`, the ability will be hidden from REST API listings and cannot be executed via REST endpoints, but remains available for internal PHP usage.
 - `ability_class` (`string`, **Optional**): The fully-qualified class name of a custom ability class that extends `WP_Ability`. This allows you to customize the behavior of an ability by extending the base `WP_Ability` class and overriding its methods. The custom class must extend `WP_Ability`. Default: `WP_Ability`.
 
-### Ability ID Convention
+### Ability Name Convention
 
-The `$id` parameter must follow the pattern `namespace/ability-name`:
+The `$name` parameter must follow the pattern `namespace/ability-name`:
 
 - **Format:** Must contain only lowercase alphanumeric characters (`a-z`, `0-9`), hyphens (`-`), and one forward slash (`/`) for namespacing.
 - **Convention:** Use your plugin slug as the namespace, like `my-plugin/ability-name`.
@@ -154,7 +156,7 @@ The `$id` parameter must follow the pattern `namespace/ability-name`:
 #### Registering a simple data retrieval Ability without an input schema
 
 ```php
-add_action( 'abilities_api_init', 'my_plugin_register_site_info_ability' );
+add_action( 'wp_abilities_api_init', 'my_plugin_register_site_info_ability' );
 function my_plugin_register_site_info_ability() {
     wp_register_ability( 'my-plugin/get-site-info', array(
         'label' => __( 'Get Site Information', 'my-plugin' ),
@@ -199,7 +201,7 @@ function my_plugin_register_site_info_ability() {
 #### Registering an Ability with Input Parameters
 
 ```php
-add_action( 'abilities_api_init', 'my_plugin_register_update_option_ability' );
+add_action( 'wp_abilities_api_init', 'my_plugin_register_update_option_ability' );
 function my_plugin_register_update_option_ability() {
     wp_register_ability( 'my-plugin/update-option', array(
         'label' => __( 'Update WordPress Option', 'my-plugin' ),
@@ -260,7 +262,7 @@ function my_plugin_register_update_option_ability() {
 #### Registering an Ability with Plugin Dependencies
 
 ```php
-add_action( 'abilities_api_init', 'my_plugin_register_woo_stats_ability' );
+add_action( 'wp_abilities_api_init', 'my_plugin_register_woo_stats_ability' );
 function my_plugin_register_woo_stats_ability() {
     // Only register if WooCommerce is active
     if ( ! class_exists( 'WooCommerce' ) ) {
@@ -318,7 +320,7 @@ function my_plugin_register_woo_stats_ability() {
 #### Registering an Ability That May Fail
 
 ```php
-add_action( 'abilities_api_init', 'my_plugin_register_send_email_ability' );
+add_action( 'wp_abilities_api_init', 'my_plugin_register_send_email_ability' );
 function my_plugin_register_send_email_ability() {
     wp_register_ability( 'my-plugin/send-email', array(
         'label' => __( 'Send Email', 'my-plugin' ),
@@ -433,7 +435,7 @@ class My_Plugin_Post_Validator_Ability extends WP_Ability {
 /**
  * Register the ability using the custom ability class.
  */
-add_action( 'abilities_api_init', 'my_plugin_register_post_validator_ability' );
+add_action( 'wp_abilities_api_init', 'my_plugin_register_post_validator_ability' );
 function my_plugin_register_post_validator_ability() {
     wp_register_ability( 'my-plugin/validate-post', array(
         'label' => __( 'Validate Post', 'my-plugin' ),
@@ -515,6 +517,30 @@ function my_plugin_register_post_validator_ability() {
 - You can add custom methods to provide additional functionality specific to your ability
 - The custom class receives the same `$name` and `$args` parameters in its constructor as the base `WP_Ability` class
 - If the specified class does not exist or does not extend `WP_Ability`, registration will fail with a `_doing_it_wrong()` notice
+
+## Checking if an Ability is Registered
+
+You can check if an ability is registered using the `wp_has_ability()` function.
+
+### Function Signature
+
+```php
+wp_has_ability( string $name ): bool
+```
+
+**Parameters:**
+- `$name` (`string`): The name of the ability to check (namespace/ability-name).
+
+**Return:** (`bool`) `true` if the ability is registered, `false` otherwise.
+
+### Code Example
+
+```php
+$ability_name = 'my-plugin/get-site-info';
+if ( wp_has_ability( $ability_name ) ) {
+    // Ability is registered
+}
+```
 
 ## Using Abilities (`wp_get_ability`, `wp_get_abilities`)
 

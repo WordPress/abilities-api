@@ -17,7 +17,7 @@ Abilities with meta `show_in_rest => false` will return a `rest_ability_not_foun
 
 ## Schema
 
-The Abilities API endpoints are available under the `/wp/v2/abilities` namespace.
+The Abilities API endpoints are available under the `/wp-abilities/v1` namespace.
 
 ### Ability Object
 
@@ -58,7 +58,7 @@ Abilities are represented in JSON with the following structure:
 
 ### Definition
 
-`GET /wp/v2/abilities`
+`GET /wp-abilities/v1/abilities`
 
 ### Arguments
 
@@ -69,7 +69,7 @@ Abilities are represented in JSON with the following structure:
 ### Example Request
 
 ```bash
-curl https://example.com/wp-json/wp/v2/abilities
+curl https://example.com/wp-json/wp-abilities/v1/abilities
 ```
 
 ### Example Response
@@ -111,7 +111,7 @@ curl https://example.com/wp-json/wp/v2/abilities
 
 ### Definition
 
-`GET /wp/v2/abilities/categories`
+`GET /wp-abilities/v1/categories`
 
 ### Arguments
 
@@ -122,7 +122,7 @@ curl https://example.com/wp-json/wp/v2/abilities
 
 ```bash
 curl -u 'USERNAME:APPLICATION_PASSWORD' \
-  https://example.com/wp-json/wp/v2/abilities/categories
+  https://example.com/wp-json/wp-abilities/v1/categories
 ```
 
 ### Example Response
@@ -137,17 +137,17 @@ curl -u 'USERNAME:APPLICATION_PASSWORD' \
     "_links": {
       "self": [
         {
-          "href": "https://example.com/wp-json/wp/v2/abilities/categories/data-retrieval"
+          "href": "https://example.com/wp-json/wp-abilities/v1/categories/data-retrieval"
         }
       ],
       "collection": [
         {
-          "href": "https://example.com/wp-json/wp/v2/abilities/categories"
+          "href": "https://example.com/wp-json/wp-abilities/v1/categories"
         }
       ],
       "abilities": [
         {
-          "href": "https://example.com/wp-json/wp/v2/abilities?category=data-retrieval"
+          "href": "https://example.com/wp-json/wp-abilities/v1/?category=data-retrieval"
         }
       ]
     }
@@ -159,7 +159,7 @@ curl -u 'USERNAME:APPLICATION_PASSWORD' \
 
 ### Definition
 
-`GET /wp/v2/abilities/categories/{slug}`
+`GET /wp-abilities/v1/categories/{slug}`
 
 ### Arguments
 
@@ -169,7 +169,7 @@ curl -u 'USERNAME:APPLICATION_PASSWORD' \
 
 ```bash
 curl -u 'USERNAME:APPLICATION_PASSWORD' \
-  https://example.com/wp-json/wp/v2/abilities/categories/data-retrieval
+  https://example.com/wp-json/wp-abilities/v1/categories/data-retrieval
 ```
 
 ### Example Response
@@ -183,17 +183,17 @@ curl -u 'USERNAME:APPLICATION_PASSWORD' \
   "_links": {
     "self": [
       {
-        "href": "https://example.com/wp-json/wp/v2/abilities/categories/data-retrieval"
+        "href": "https://example.com/wp-json/wp-abilities/v1/categories/data-retrieval"
       }
     ],
     "collection": [
       {
-        "href": "https://example.com/wp-json/wp/v2/abilities/categories"
+        "href": "https://example.com/wp-json/wp-abilities/v1/categories"
       }
     ],
     "abilities": [
       {
-        "href": "https://example.com/wp-json/wp/v2/abilities?category=data-retrieval"
+        "href": "https://example.com/wp-json/wp-abilities/v1?category=data-retrieval"
       }
     ]
   }
@@ -204,7 +204,7 @@ curl -u 'USERNAME:APPLICATION_PASSWORD' \
 
 ### Definition
 
-`GET /wp/v2/abilities/(?P<namespace>[a-z0-9-]+)/(?P<ability>[a-z0-9-]+)`
+`GET /wp-abilities/v1/(?P<namespace>[a-z0-9-]+)/(?P<ability>[a-z0-9-]+)`
 
 ### Arguments
 
@@ -214,7 +214,7 @@ curl -u 'USERNAME:APPLICATION_PASSWORD' \
 ### Example Request
 
 ```bash
-curl https://example.com/wp-json/wp/v2/abilities/my-plugin/get-site-info
+curl https://example.com/wp-json/wp-abilities/v1/my-plugin/get-site-info
 ```
 
 ### Example Response
@@ -261,7 +261,7 @@ This distinction ensures read-only operations use safe HTTP methods that can be 
 
 ### Definition
 
-`GET|POST /wp/v2/abilities/(?P<namespace>[a-z0-9-]+)/(?P<ability>[a-z0-9-]+)/run`
+`GET|POST /wp-abilities/v1/(?P<namespace>[a-z0-9-]+)/(?P<ability>[a-z0-9-]+)/run`
 
 ### Arguments
 
@@ -275,23 +275,23 @@ This distinction ensures read-only operations use safe HTTP methods that can be 
 
 ```bash
 # No input
-curl https://example.com/wp-json/wp/v2/abilities/my-plugin/get-site-info/run
+curl https://example.com/wp-json/wp-abilities/v1/my-plugin/get-site-info/run
 
 # With input (URL-encoded)
-curl "https://example.com/wp-json/wp/v2/abilities/my-plugin/get-user-info/run?input=%7B%22user_id%22%3A1%7D"
+curl "https://example.com/wp-json/wp-abilities/v1/my-plugin/get-user-info/run?input=%7B%22user_id%22%3A1%7D"
 ```
 
 ### Example Request (Regular, POST)
 
 ```bash
 # No input
-curl -X POST https://example.com/wp-json/wp/v2/abilities/my-plugin/create-draft/run
+curl -X POST https://example.com/wp-json/wp-abilities/v1/my-plugin/create-draft/run
 
 # With input
 curl -X POST \
   -H "Content-Type: application/json" \
   -d '{"input":{"option_name":"blogname","option_value":"New Site Name"}}' \
-  https://example.com/wp-json/wp/v2/abilities/my-plugin/update-option/run
+  https://example.com/wp-json/wp-abilities/v1/my-plugin/update-option/run
 ```
 
 ### Example Response (Success)
@@ -327,7 +327,7 @@ The Abilities API supports all WordPress REST API authentication methods:
 
 ```bash
 curl -u 'USERNAME:APPLICATION_PASSWORD' \
-  https://example.com/wp-json/wp/v2/abilities
+  https://example.com/wp-json/wp-abilities/v1
 ```
 
 ## Error Responses
@@ -340,6 +340,6 @@ The API returns standard WordPress REST API error responses with these common co
 - `ability_invalid_output` - output validation failed according to the ability's schema.
 - `ability_invalid_execute_callback` - the ability's execute callback is not callable.
 - `rest_ability_not_found` - the requested ability is not registered.
-- `rest_category_not_found` - the requested category is not registered.
+- `rest_ability_category_not_found` - the requested category is not registered.
 - `rest_ability_invalid_method` - the requested HTTP method is not allowed for executing the selected ability (e.g., using GET on a read-only ability, or POST on a regular ability).
 - `rest_ability_cannot_execute` - the ability cannot be executed due to insufficient permissions.

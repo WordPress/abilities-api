@@ -18,25 +18,6 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 
-		// Register category during the hook.
-		add_action(
-			'abilities_api_categories_init',
-			function () {
-				if ( ! WP_Abilities_Category_Registry::get_instance()->is_registered( 'math' ) ) {
-					wp_register_ability_category(
-						'math',
-						array(
-							'label'       => 'Math',
-							'description' => 'Mathematical operations and calculations.',
-						)
-					);
-				}
-			}
-		);
-
-		// Fire the hook to allow category registration.
-		do_action( 'abilities_api_categories_init' );
-
 		self::$test_ability_properties = array(
 			'label'               => 'Calculator',
 			'description'         => 'Calculates the result of math operations.',
@@ -65,17 +46,33 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	 * Tear down after each test.
 	 */
 	public function tear_down(): void {
-		// Clean up registered categories.
-		$category_registry = WP_Abilities_Category_Registry::get_instance();
-		if ( $category_registry->is_registered( 'math' ) ) {
-			wp_unregister_ability_category( 'math' );
-		}
-
 		parent::tear_down();
+	}
+
+	/**
+	 * Direct instantiation of WP_Ability with invalid properties should throw an exception.
+	 *
+	 * @ticket 64098
+	 *
+	 * @covers WP_Ability::__construct
+	 * @covers WP_Ability::prepare_properties
+	 */
+	public function test_wp_ability_invalid_properties_throws_exception() {
+		$this->expectException( InvalidArgumentException::class );
+		new WP_Ability(
+			'test/invalid',
+			array(
+				'label'            => '',
+				'description'      => '',
+				'execute_callback' => null,
+			)
+		);
 	}
 
 	/*
 	 * Tests that getting non-existing metadata item returns default value.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_meta_get_non_existing_item_returns_default() {
 		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
@@ -88,6 +85,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that getting non-existing metadata item with custom default returns that default.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_meta_get_non_existing_item_with_custom_default() {
 		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
@@ -101,16 +100,17 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests getting all annotations when selective overrides are applied.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_get_merged_annotations_from_meta() {
 		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
 
-		$this->assertEquals(
+		$this->assertSame(
 			array_merge(
 				self::$test_ability_properties['meta']['annotations'],
 				array(
-					'instructions' => '',
-					'idempotent'   => false,
+					'idempotent' => null,
 				)
 			),
 			$ability->get_meta_item( 'annotations' )
@@ -119,6 +119,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests getting default annotations when not provided.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_get_default_annotations_from_meta() {
 		$args = self::$test_ability_properties;
@@ -128,10 +130,9 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		$this->assertSame(
 			array(
-				'instructions' => '',
-				'readonly'     => false,
-				'destructive'  => true,
-				'idempotent'   => false,
+				'readonly'    => null,
+				'destructive' => null,
+				'idempotent'  => null,
 			),
 			$ability->get_meta_item( 'annotations' )
 		);
@@ -139,13 +140,14 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests getting all annotations when values overridden.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_get_overridden_annotations_from_meta() {
 		$annotations = array(
-			'instructions' => 'Enjoy responsibly.',
-			'readonly'     => true,
-			'destructive'  => false,
-			'idempotent'   => false,
+			'readonly'    => true,
+			'destructive' => false,
+			'idempotent'  => false,
 		);
 		$args        = array_merge(
 			self::$test_ability_properties,
@@ -163,6 +165,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that invalid `annotations` value throws an exception.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_annotations_from_meta_throws_exception() {
 		$args = array_merge(
@@ -182,6 +186,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that `show_in_rest` metadata defaults to false when not provided.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_meta_show_in_rest_defaults_to_false() {
 		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
@@ -194,6 +200,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that `show_in_rest` metadata can be set to true.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_meta_show_in_rest_can_be_set_to_true() {
 		$args    = array_merge(
@@ -214,6 +222,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that `show_in_rest` can be set to false.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_show_in_rest_can_be_set_to_false() {
 		$args    = array_merge(
@@ -234,6 +244,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that invalid `show_in_rest` value throws an exception.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_show_in_rest_throws_exception() {
 		$args = array_merge(
@@ -253,6 +265,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Data provider for testing the execution of the ability.
+	 *
+	 * @return array<string, array{0: array, 1: callable, 2: mixed, 3: mixed}> Data sets with different configurations.
 	 */
 	public function data_execute_input() {
 		return array(
@@ -366,7 +380,14 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	/**
 	 * Tests the execution of the ability.
 	 *
+	 * @ticket 64098
+	 *
 	 * @dataProvider data_execute_input
+	 *
+	 * @param array    $input_schema      The input schema for the ability.
+	 * @param callable $execute_callback  The execute callback for the ability.
+	 * @param mixed    $input             The input to pass to the execute method.
+	 * @param mixed    $result            The expected result from the execute method.
 	 */
 	public function test_execute_input( $input_schema, $execute_callback, $input, $result ) {
 		$args = array_merge(
@@ -404,6 +425,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Data provider for testing different types of execute callbacks.
+	 *
+	 * @return array<string, array{0: callable}> Data sets with different execute callbacks.
 	 */
 	public function data_execute_callback() {
 		return array(
@@ -430,7 +453,11 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 	/**
 	 * Tests the execution of the ability with different types of callbacks.
 	 *
+	 * @ticket 64098
+	 *
 	 * @dataProvider data_execute_callback
+	 *
+	 * @param callable $execute_callback The execute callback to test.
 	 */
 	public function test_execute_with_different_callbacks( $execute_callback ) {
 		$args = array_merge(
@@ -452,6 +479,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests the execution of the ability with no input.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_execute_no_input() {
 		$args = array_merge(
@@ -470,6 +499,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that before_execute_ability action is fired with correct parameters.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_before_execute_ability_action() {
 		$action_ability_name = null;
@@ -494,12 +525,12 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			$action_input        = $input;
 		};
 
-		add_action( 'before_execute_ability', $callback, 10, 2 );
+		add_action( 'wp_before_execute_ability', $callback, 10, 2 );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
 		$result  = $ability->execute( 5 );
 
-		remove_action( 'before_execute_ability', $callback );
+		remove_action( 'wp_before_execute_ability', $callback );
 
 		$this->assertSame( self::$test_ability_name, $action_ability_name, 'Action should receive correct ability name' );
 		$this->assertSame( 5, $action_input, 'Action should receive correct input' );
@@ -508,6 +539,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that before_execute_ability action is fired with null input when no input schema is defined.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_before_execute_ability_action_no_input() {
 		$action_ability_name = null;
@@ -527,12 +560,12 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			$action_input        = $input;
 		};
 
-		add_action( 'before_execute_ability', $callback, 10, 2 );
+		add_action( 'wp_before_execute_ability', $callback, 10, 2 );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
 		$result  = $ability->execute();
 
-		remove_action( 'before_execute_ability', $callback );
+		remove_action( 'wp_before_execute_ability', $callback );
 
 		$this->assertSame( self::$test_ability_name, $action_ability_name, 'Action should receive correct ability name' );
 		$this->assertNull( $action_input, 'Action should receive null input when no input provided' );
@@ -541,6 +574,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that after_execute_ability action is fired with correct parameters.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_after_execute_ability_action() {
 		$action_ability_name = null;
@@ -567,12 +602,12 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			$action_result       = $result;
 		};
 
-		add_action( 'after_execute_ability', $callback, 10, 3 );
+		add_action( 'wp_after_execute_ability', $callback, 10, 3 );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
 		$result  = $ability->execute( 7 );
 
-		remove_action( 'after_execute_ability', $callback );
+		remove_action( 'wp_after_execute_ability', $callback );
 
 		$this->assertSame( self::$test_ability_name, $action_ability_name, 'Action should receive correct ability name' );
 		$this->assertSame( 7, $action_input, 'Action should receive correct input' );
@@ -582,6 +617,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that after_execute_ability action is fired with null input when no input schema is defined.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_after_execute_ability_action_no_input() {
 		$action_ability_name = null;
@@ -604,12 +641,12 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			$action_result       = $result;
 		};
 
-		add_action( 'after_execute_ability', $callback, 10, 3 );
+		add_action( 'wp_after_execute_ability', $callback, 10, 3 );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
 		$result  = $ability->execute();
 
-		remove_action( 'after_execute_ability', $callback );
+		remove_action( 'wp_after_execute_ability', $callback );
 
 		$this->assertSame( self::$test_ability_name, $action_ability_name, 'Action should receive correct ability name' );
 		$this->assertNull( $action_input, 'Action should receive null input when no input provided' );
@@ -619,6 +656,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that neither action is fired when execution fails due to permission issues.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_actions_not_fired_on_permission_failure() {
 		$before_action_fired = false;
@@ -641,14 +680,14 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			$after_action_fired = true;
 		};
 
-		add_action( 'before_execute_ability', $before_callback );
-		add_action( 'after_execute_ability', $after_callback );
+		add_action( 'wp_before_execute_ability', $before_callback );
+		add_action( 'wp_after_execute_ability', $after_callback );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
 		$result  = $ability->execute();
 
-		remove_action( 'before_execute_ability', $before_callback );
-		remove_action( 'after_execute_ability', $after_callback );
+		remove_action( 'wp_before_execute_ability', $before_callback );
+		remove_action( 'wp_after_execute_ability', $after_callback );
 
 		$this->assertFalse( $before_action_fired, 'before_execute_ability action should not be fired on permission failure' );
 		$this->assertFalse( $after_action_fired, 'after_execute_ability action should not be fired on permission failure' );
@@ -657,6 +696,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that after_execute_ability action is not fired when execution callback returns WP_Error.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_after_action_not_fired_on_execution_error() {
 		$before_action_fired = false;
@@ -679,14 +720,14 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			$after_action_fired = true;
 		};
 
-		add_action( 'before_execute_ability', $before_callback );
-		add_action( 'after_execute_ability', $after_callback );
+		add_action( 'wp_before_execute_ability', $before_callback );
+		add_action( 'wp_after_execute_ability', $after_callback );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
 		$result  = $ability->execute();
 
-		remove_action( 'before_execute_ability', $before_callback );
-		remove_action( 'after_execute_ability', $after_callback );
+		remove_action( 'wp_before_execute_ability', $before_callback );
+		remove_action( 'wp_after_execute_ability', $after_callback );
 
 		$this->assertTrue( $before_action_fired, 'before_execute_ability action should be fired even if execution fails' );
 		$this->assertFalse( $after_action_fired, 'after_execute_ability action should not be fired when execution returns WP_Error' );
@@ -695,6 +736,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests that after_execute_ability action is not fired when output validation fails.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_after_action_not_fired_on_output_validation_error() {
 		$before_action_fired = false;
@@ -722,14 +765,14 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 			$after_action_fired = true;
 		};
 
-		add_action( 'before_execute_ability', $before_callback );
-		add_action( 'after_execute_ability', $after_callback );
+		add_action( 'wp_before_execute_ability', $before_callback );
+		add_action( 'wp_after_execute_ability', $after_callback );
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
 		$result  = $ability->execute();
 
-		remove_action( 'before_execute_ability', $before_callback );
-		remove_action( 'after_execute_ability', $after_callback );
+		remove_action( 'wp_before_execute_ability', $before_callback );
+		remove_action( 'wp_after_execute_ability', $after_callback );
 
 		$this->assertTrue( $before_action_fired, 'before_execute_ability action should be fired even if output validation fails' );
 		$this->assertFalse( $after_action_fired, 'after_execute_ability action should not be fired when output validation fails' );

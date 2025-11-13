@@ -23,17 +23,17 @@ if ( ! defined( 'WP_ABILITIES_API_VERSION' ) ) {
 }
 
 // Load core classes if they are not already defined (for non-Composer installs or direct includes).
+if ( ! class_exists( 'WP_Ability_Category' ) ) {
+	require_once __DIR__ . '/abilities-api/class-wp-ability-category.php';
+}
+if ( ! class_exists( 'WP_Ability_Categories_Registry' ) ) {
+	require_once __DIR__ . '/abilities-api/class-wp-ability-categories-registry.php';
+}
 if ( ! class_exists( 'WP_Ability' ) ) {
 	require_once __DIR__ . '/abilities-api/class-wp-ability.php';
 }
 if ( ! class_exists( 'WP_Abilities_Registry' ) ) {
 	require_once __DIR__ . '/abilities-api/class-wp-abilities-registry.php';
-}
-if ( ! class_exists( 'WP_Ability_Category' ) ) {
-	require_once __DIR__ . '/abilities-api/class-wp-ability-category.php';
-}
-if ( ! class_exists( 'WP_Abilities_Category_Registry' ) ) {
-	require_once __DIR__ . '/abilities-api/class-wp-abilities-category-registry.php';
 }
 
 // Ensure procedural functions are available, too.
@@ -41,17 +41,17 @@ if ( ! function_exists( 'wp_register_ability' ) ) {
 	require_once __DIR__ . '/abilities-api.php';
 }
 
-// Load core abilities class.
-if ( ! class_exists( 'WP_Core_Abilities' ) ) {
-	require_once __DIR__ . '/abilities/class-wp-core-abilities.php';
+// Load core abilities registration functions.
+if ( ! function_exists( 'wp_register_core_abilities' ) ) {
+	require_once __DIR__ . '/abilities/wp-core-abilities.php';
 }
 
 // Register core abilities category and abilities when requested via filter or when not in test environment.
 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Plugin-specific hook for feature plugin context.
 if ( ! ( defined( 'WP_RUN_CORE_TESTS' ) || defined( 'WP_TESTS_CONFIG_FILE_PATH' ) || ( function_exists( 'getenv' ) && false !== getenv( 'WP_PHPUNIT__DIR' ) ) ) || apply_filters( 'abilities_api_register_core_abilities', false ) ) {
 	if ( function_exists( 'add_action' ) ) {
-		add_action( 'abilities_api_categories_init', array( 'WP_Core_Abilities', 'register_category' ) );
-		add_action( 'abilities_api_init', array( 'WP_Core_Abilities', 'register' ) );
+		add_action( 'wp_abilities_api_categories_init', 'wp_register_core_ability_categories' );
+		add_action( 'wp_abilities_api_init', 'wp_register_core_abilities' );
 	}
 }
 
@@ -61,7 +61,7 @@ if ( ! class_exists( 'WP_REST_Abilities_Init' ) ) {
 
 	// Initialize REST API routes when WordPress is available.
 	if ( function_exists( 'add_action' ) ) {
-		add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
+		add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ), 11 );
 	}
 }
 

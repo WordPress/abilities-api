@@ -4,7 +4,7 @@
  *
  * @package WordPress
  * @subpackage Abilities_API
- * @since 0.1.0
+ * @since 6.9.0
  */
 
 declare( strict_types = 1 );
@@ -12,24 +12,24 @@ declare( strict_types = 1 );
 /**
  * Core controller used to execute abilities via the REST API.
  *
- * @since 0.1.0
+ * @since 6.9.0
  *
  * @see WP_REST_Controller
  */
-class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
+class WP_REST_Abilities_V1_Run_Controller extends WP_REST_Controller {
 
 	/**
 	 * REST API namespace.
 	 *
-	 * @since 0.1.0
+	 * @since 6.9.0
 	 * @var string
 	 */
-	protected $namespace = 'wp/v2';
+	protected $namespace = 'wp-abilities/v1';
 
 	/**
 	 * REST API base route.
 	 *
-	 * @since 0.1.0
+	 * @since 6.9.0
 	 * @var string
 	 */
 	protected $rest_base = 'abilities';
@@ -37,7 +37,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	/**
 	 * Registers the routes for ability execution.
 	 *
-	 * @since 0.1.0
+	 * @since 6.9.0
 	 *
 	 * @see register_rest_route()
 	 */
@@ -62,8 +62,8 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 				// This was the same issue that we ended up seeing with the Feature API.
 				array(
 					'methods'             => WP_REST_Server::ALLMETHODS,
-					'callback'            => array( $this, 'run_ability_with_method_check' ),
-					'permission_callback' => array( $this, 'run_ability_permissions_check' ),
+					'callback'            => array( $this, 'execute_ability' ),
+					'permission_callback' => array( $this, 'check_ability_permissions' ),
 					'args'                => $this->get_run_args(),
 				),
 				'schema' => array( $this, 'get_run_schema' ),
@@ -72,72 +72,26 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Executes an ability with HTTP method validation.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param \WP_REST_Request<array<string,mixed>> $request Full details about the request.
-	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
-	 */
-	public function run_ability_with_method_check( $request ) {
-		$ability = wp_get_ability( $request->get_param( 'name' ) );
-
-		if ( ! $ability ) {
-			return new \WP_Error(
-				'rest_ability_not_found',
-				__( 'Ability not found.' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		// Check if the HTTP method matches the ability annotations.
-		$annotations = $ability->get_meta_item( 'annotations' );
-		$is_readonly = ! empty( $annotations['readonly'] );
-		$method      = $request->get_method();
-
-		if ( $is_readonly && 'GET' !== $method ) {
-			return new \WP_Error(
-				'rest_ability_invalid_method',
-				__( 'Read-only abilities require GET method.' ),
-				array( 'status' => 405 )
-			);
-		}
-
-		if ( ! $is_readonly && 'POST' !== $method ) {
-			return new \WP_Error(
-				'rest_ability_invalid_method',
-				__( 'Abilities that perform updates require POST method.' ),
-				array( 'status' => 405 )
-			);
-		}
-
-		return $this->run_ability( $request );
-	}
-
-	/**
 	 * Executes an ability.
 	 *
-	 * @since 0.1.0
+	 * @since 6.9.0
 	 *
-	 * @param \WP_REST_Request<array<string,mixed>> $request Full details about the request.
-	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function run_ability( $request ) {
-		$ability = wp_get_ability( $request->get_param( 'name' ) );
+	public function execute_ability( $request ) {
+		$ability = wp_get_ability( $request['name'] );
 		if ( ! $ability ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'rest_ability_not_found',
 				__( 'Ability not found.' ),
 				array( 'status' => 404 )
 			);
 		}
 
-		$input  = $ability->normalize_input( $this->get_input_from_request( $request ) );
+		$input  = $this->get_input_from_request( $request );
 		$result = $ability->execute( $input );
 		if ( is_wp_error( $result ) ) {
-			if ( 'ability_invalid_input' === $result->get_error_code() ) {
-				$result->add_data( array( 'status' => 400 ) );
-			}
 			return $result;
 		}
 
@@ -145,26 +99,80 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Validates if the HTTP method matches the expected method for the ability based on its annotations.
+	 *
+	 * @since 6.9.0
+	 *
+	 * @param string                     $request_method The HTTP method of the request.
+	 * @param array<string, (bool|null)> $annotations    The ability annotations.
+	 * @return true|WP_Error True on success, or WP_Error object on failure.
+	 */
+	public function validate_request_method( string $request_method, array $annotations ) {
+		$expected_method = 'POST';
+		if ( ! empty( $annotations['readonly'] ) ) {
+			$expected_method = 'GET';
+		} elseif ( ! empty( $annotations['destructive'] ) && ! empty( $annotations['idempotent'] ) ) {
+			$expected_method = 'DELETE';
+		}
+
+		if ( $expected_method === $request_method ) {
+			return true;
+		}
+
+		$error_message = __( 'Abilities that perform updates require POST method.' );
+		if ( 'GET' === $expected_method ) {
+			$error_message = __( 'Read-only abilities require GET method.' );
+		} elseif ( 'DELETE' === $expected_method ) {
+			$error_message = __( 'Abilities that perform destructive actions require DELETE method.' );
+		}
+		return new WP_Error(
+			'rest_ability_invalid_method',
+			$error_message,
+			array( 'status' => 405 )
+		);
+	}
+
+	/**
 	 * Checks if a given request has permission to execute a specific ability.
 	 *
-	 * @since 0.1.0
+	 * @since 6.9.0
 	 *
-	 * @param \WP_REST_Request<array<string,mixed>> $request Full details about the request.
-	 * @return true|\WP_Error True if the request has execution permission, WP_Error object otherwise.
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has execution permission, WP_Error object otherwise.
 	 */
-	public function run_ability_permissions_check( $request ) {
-		$ability = wp_get_ability( $request->get_param( 'name' ) );
+	public function check_ability_permissions( $request ) {
+		$ability = wp_get_ability( $request['name'] );
 		if ( ! $ability || ! $ability->get_meta_item( 'show_in_rest' ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'rest_ability_not_found',
 				__( 'Ability not found.' ),
 				array( 'status' => 404 )
 			);
 		}
 
-		$input = $ability->normalize_input( $this->get_input_from_request( $request ) );
-		if ( ! $ability->check_permissions( $input ) ) {
-			return new \WP_Error(
+		$is_valid = $this->validate_request_method(
+			$request->get_method(),
+			$ability->get_meta_item( 'annotations' )
+		);
+		if ( is_wp_error( $is_valid ) ) {
+			return $is_valid;
+		}
+
+		$input    = $this->get_input_from_request( $request );
+		$input    = $ability->normalize_input( $input );
+		$is_valid = $ability->validate_input( $input );
+		if ( is_wp_error( $is_valid ) ) {
+			$is_valid->add_data( array( 'status' => 400 ) );
+			return $is_valid;
+		}
+
+		$result = $ability->check_permissions( $input );
+		if ( is_wp_error( $result ) ) {
+			$result->add_data( array( 'status' => rest_authorization_required_code() ) );
+			return $result;
+		}
+		if ( ! $result ) {
+			return new WP_Error(
 				'rest_ability_cannot_execute',
 				__( 'Sorry, you are not allowed to execute this ability.' ),
 				array( 'status' => rest_authorization_required_code() )
@@ -177,14 +185,14 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	/**
 	 * Extracts input parameters from the request.
 	 *
-	 * @since 0.1.0
+	 * @since 6.9.0
 	 *
-	 * @param \WP_REST_Request<array<string,mixed>> $request The request object.
+	 * @param WP_REST_Request $request The request object.
 	 * @return mixed|null The input parameters.
 	 */
 	private function get_input_from_request( $request ) {
-		if ( 'GET' === $request->get_method() ) {
-			// For GET requests, look for 'input' query parameter.
+		if ( in_array( $request->get_method(), array( 'GET', 'DELETE' ), true ) ) {
+			// For GET and DELETE requests, look for 'input' query parameter.
 			$query_params = $request->get_query_params();
 			return $query_params['input'] ?? null;
 		}
@@ -197,7 +205,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	/**
 	 * Retrieves the arguments for ability execution endpoint.
 	 *
-	 * @since 0.1.0
+	 * @since 6.9.0
 	 *
 	 * @return array<string, mixed> Arguments for the run endpoint.
 	 */
@@ -214,7 +222,7 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 	/**
 	 * Retrieves the schema for ability execution endpoint.
 	 *
-	 * @since 0.1.0
+	 * @since 6.9.0
 	 *
 	 * @return array<string, mixed> Schema for the run endpoint.
 	 */
@@ -226,7 +234,8 @@ class WP_REST_Abilities_Run_Controller extends WP_REST_Controller {
 			'properties' => array(
 				'result' => array(
 					'description' => __( 'The result of the ability execution.' ),
-					'context'     => array( 'view' ),
+					'type'        => array( 'integer', 'number', 'boolean', 'string', 'array', 'object', 'null' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 			),

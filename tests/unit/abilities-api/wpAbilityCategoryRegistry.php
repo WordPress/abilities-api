@@ -4,20 +4,16 @@
  * Tests for the ability category functionality.
  *
  * @covers WP_Ability_Category
- * @covers WP_Abilities_Category_Registry
- * @covers wp_register_ability_category
- * @covers wp_unregister_ability_category
- * @covers wp_get_ability_category
- * @covers wp_get_ability_categories
+ * @covers WP_Ability_Categories_Registry
  *
  * @group abilities-api
  */
-class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
+class Tests_Abilities_API_WpAbilityCategoryRegistry extends WP_UnitTestCase {
 
 	/**
 	 * Category registry instance.
 	 *
-	 * @var \WP_Abilities_Category_Registry
+	 * @var WP_Ability_Categories_Registry
 	 */
 	private $registry;
 
@@ -34,7 +30,7 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 
-		$this->registry           = WP_Abilities_Category_Registry::get_instance();
+		$this->registry           = new WP_Ability_Categories_Registry();
 		$this->doing_it_wrong_log = array();
 
 		add_action( 'doing_it_wrong_run', array( $this, 'record_doing_it_wrong' ), 10, 3 );
@@ -47,14 +43,7 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		remove_action( 'doing_it_wrong_run', array( $this, 'record_doing_it_wrong' ) );
 		$this->doing_it_wrong_log = array();
 
-		// Clean up all test categories.
-		$categories = $this->registry->get_all_registered();
-		foreach ( $categories as $category ) {
-			if ( 0 !== strpos( $category->get_slug(), 'test-' ) ) {
-				continue;
-			}
-			$this->registry->unregister( $category->get_slug() );
-		}
+		$this->registry = null;
 
 		parent::tear_down();
 	}
@@ -105,26 +94,12 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Helper to register a category during the hook.
-	 */
-	private function register_category_during_hook( string $slug, array $args ): ?WP_Ability_Category {
-		$result   = null;
-		$callback = static function () use ( $slug, $args, &$result ): void {
-			$result = wp_register_ability_category( $slug, $args );
-		};
-
-		add_action( 'abilities_api_categories_init', $callback );
-		do_action( 'abilities_api_categories_init', WP_Abilities_Category_Registry::get_instance() );
-		remove_action( 'abilities_api_categories_init', $callback );
-
-		return $result;
-	}
-
-	/**
 	 * Test registering a valid category.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_register_valid_category(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-math',
 			array(
 				'label'       => 'Math',
@@ -141,11 +116,13 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	/**
 	 * Test registering category with invalid slug format.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
 	 */
 	public function test_register_category_invalid_slug_format(): void {
 		// Uppercase characters not allowed.
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'Test-Math',
 			array(
 				'label'       => 'Math',
@@ -154,16 +131,18 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		);
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register', 'slug must contain only lowercase' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register', 'slug must contain only lowercase' );
 	}
 
 	/**
 	 * Test registering category with invalid slug - underscore.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
 	 */
 	public function test_register_category_invalid_slug_underscore(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test_math',
 			array(
 				'label'       => 'Math',
@@ -172,16 +151,18 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		);
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register', 'slug must contain only lowercase' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register', 'slug must contain only lowercase' );
 	}
 
 	/**
 	 * Test registering category without label.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
 	 */
 	public function test_register_category_missing_label(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-math',
 			array(
 				'description' => 'Mathematical operations.',
@@ -189,16 +170,18 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		);
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register' );
 	}
 
 	/**
 	 * Test registering category without description.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
 	 */
 	public function test_register_category_missing_description(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-math',
 			array(
 				'label' => 'Math',
@@ -206,78 +189,18 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		);
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register' );
-	}
-
-	/**
-	 * Test registering category before abilities_api_categories_init hook.
-	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
-	 */
-	public function test_register_category_before_init_hook(): void {
-		global $wp_actions;
-
-		// Store original count.
-		$original_count = isset( $wp_actions['abilities_api_categories_init'] ) ? $wp_actions['abilities_api_categories_init'] : 0;
-
-		// Reset to simulate hook not fired.
-		unset( $wp_actions['abilities_api_categories_init'] );
-
-		$result = wp_register_ability_category(
-			'test-math',
-			array(
-				'label'       => 'Math',
-				'description' => 'Mathematical operations.',
-			)
-		);
-
-		// Restore original count.
-		if ( $original_count > 0 ) {
-			$wp_actions['abilities_api_categories_init'] = $original_count;
-		}
-
-		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register', 'abilities_api_categories_init' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register' );
 	}
 
 	/**
 	 * Test registering duplicate category.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
 	 */
 	public function test_register_duplicate_category(): void {
-		$result   = null;
-		$callback = static function () use ( &$result ): void {
-			wp_register_ability_category(
-				'test-math',
-				array(
-					'label'       => 'Math',
-					'description' => 'Mathematical operations.',
-				)
-			);
-
-			$result = wp_register_ability_category(
-				'test-math',
-				array(
-					'label'       => 'Math 2',
-					'description' => 'Another math category.',
-				)
-			);
-		};
-
-		add_action( 'abilities_api_categories_init', $callback );
-		do_action( 'abilities_api_categories_init', WP_Abilities_Category_Registry::get_instance() );
-		remove_action( 'abilities_api_categories_init', $callback );
-
-		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register', 'already registered' );
-	}
-
-	/**
-	 * Test unregistering existing category.
-	 */
-	public function test_unregister_existing_category(): void {
-		$this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-math',
 			array(
 				'label'       => 'Math',
@@ -285,7 +208,35 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 			)
 		);
 
-		$result = wp_unregister_ability_category( 'test-math' );
+		$this->assertInstanceOf( WP_Ability_Category::class, $result );
+
+		$result = $this->registry->register(
+			'test-math',
+			array(
+				'label'       => 'Math 2',
+				'description' => 'Another math category.',
+			)
+		);
+
+		$this->assertNull( $result );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register', 'already registered' );
+	}
+
+	/**
+	 * Test unregistering existing category.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_unregister_existing_category(): void {
+		$this->registry->register(
+			'test-math',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+			)
+		);
+
+		$result = $this->registry->unregister( 'test-math' );
 
 		$this->assertInstanceOf( WP_Ability_Category::class, $result );
 		$this->assertFalse( $this->registry->is_registered( 'test-math' ) );
@@ -294,20 +245,24 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	/**
 	 * Test unregistering non-existent category.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::unregister
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::unregister
 	 */
 	public function test_unregister_nonexistent_category(): void {
-		$result = wp_unregister_ability_category( 'test-nonexistent' );
+		$result = $this->registry->unregister( 'test-nonexistent' );
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::unregister' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::unregister' );
 	}
 
 	/**
 	 * Test retrieving existing category.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_get_existing_category(): void {
-		$this->register_category_during_hook(
+		$this->registry->register(
 			'test-math',
 			array(
 				'label'       => 'Math',
@@ -315,7 +270,7 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 			)
 		);
 
-		$result = wp_get_ability_category( 'test-math' );
+		$result = $this->registry->get_registered( 'test-math' );
 
 		$this->assertInstanceOf( WP_Ability_Category::class, $result );
 		$this->assertSame( 'test-math', $result->get_slug() );
@@ -324,20 +279,55 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	/**
 	 * Test retrieving non-existent category.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::get_registered
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::get_registered
 	 */
 	public function test_get_nonexistent_category(): void {
-		$result = wp_get_ability_category( 'test-nonexistent' );
+		$result = $this->registry->get_registered( 'test-nonexistent' );
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::get_registered' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::get_registered' );
+	}
+
+	/**
+	 * Tests checking if an ability category is registered.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_has_registered_ability_category(): void {
+		$category_slug = 'test-math';
+		$this->registry->register(
+			$category_slug,
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations.',
+			)
+		);
+
+		$result = $this->registry->is_registered( $category_slug );
+
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Tests checking if a non-existent ability category is registered.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_has_registered_nonexistent_ability_category(): void {
+		$result = $this->registry->is_registered( 'test/non-existent' );
+
+		$this->assertFalse( $result );
 	}
 
 	/**
 	 * Test retrieving all registered categories.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_get_all_categories(): void {
-		$this->register_category_during_hook(
+		$this->registry->register(
 			'test-math',
 			array(
 				'label'       => 'Math',
@@ -345,7 +335,7 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 			)
 		);
 
-		$this->register_category_during_hook(
+		$this->registry->register(
 			'test-system',
 			array(
 				'label'       => 'System',
@@ -353,7 +343,7 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 			)
 		);
 
-		$categories = wp_get_ability_categories();
+		$categories = $this->registry->get_all_registered();
 
 		$this->assertIsArray( $categories );
 		$this->assertCount( 2, $categories );
@@ -363,11 +353,13 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 
 	/**
 	 * Test category is_registered method.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_category_is_registered(): void {
 		$this->assertFalse( $this->registry->is_registered( 'test-math' ) );
 
-		$this->register_category_during_hook(
+		$this->registry->register(
 			'test-math',
 			array(
 				'label'       => 'Math',
@@ -379,91 +371,12 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ability can only be registered with existing category.
-	 *
-	 * @expectedIncorrectUsage WP_Abilities_Registry::register
-	 */
-	public function test_ability_requires_existing_category(): void {
-		do_action( 'abilities_api_init' );
-
-		// Ensure category doesn't exist - test should fail if it does.
-		$this->assertFalse(
-			WP_Abilities_Category_Registry::get_instance()->is_registered( 'test-nonexistent' ),
-			'The test-nonexistent category should not be registered - test isolation may be broken'
-		);
-
-		// Try to register ability with non-existent category.
-		$result = wp_register_ability(
-			'test/calculator',
-			array(
-				'label'               => 'Calculator',
-				'description'         => 'Performs calculations.',
-				'category'            => 'test-nonexistent',
-				'execute_callback'    => static function () {
-					return 42;
-				},
-				'permission_callback' => '__return_true',
-			)
-		);
-
-		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Registry::register', 'not registered' );
-	}
-
-	/**
-	 * Test ability can be registered with valid category.
-	 */
-	public function test_ability_with_valid_category(): void {
-		$category_callback = static function (): void {
-			wp_register_ability_category(
-				'test-math',
-				array(
-					'label'       => 'Math',
-					'description' => 'Mathematical operations.',
-				)
-			);
-		};
-
-		add_action( 'abilities_api_categories_init', $category_callback );
-		do_action( 'abilities_api_categories_init', WP_Abilities_Category_Registry::get_instance() );
-		remove_action( 'abilities_api_categories_init', $category_callback );
-		do_action( 'abilities_api_init' );
-
-		$result = wp_register_ability(
-			'test/calculator',
-			array(
-				'label'               => 'Calculator',
-				'description'         => 'Performs calculations.',
-				'category'            => 'test-math',
-				'execute_callback'    => static function () {
-					return 42;
-				},
-				'permission_callback' => '__return_true',
-			)
-		);
-
-		$this->assertInstanceOf( WP_Ability::class, $result );
-		$this->assertSame( 'test-math', $result->get_category() );
-
-		// Cleanup.
-		wp_unregister_ability( 'test/calculator' );
-	}
-
-	/**
-	 * Test category registry singleton.
-	 */
-	public function test_category_registry_singleton(): void {
-		$instance1 = WP_Abilities_Category_Registry::get_instance();
-		$instance2 = WP_Abilities_Category_Registry::get_instance();
-
-		$this->assertSame( $instance1, $instance2 );
-	}
-
-	/**
 	 * Test category with special characters in label and description.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_category_with_special_characters(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-special',
 			array(
 				'label'       => 'Math & Science <tag>',
@@ -477,11 +390,11 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Data provider for valid category slugs.
+	 * Data provider for valid ability category slugs.
 	 *
-	 * @return array<int,array<string>>
+	 * @return array<int, array<string>> Valid ability category slugs.
 	 */
-	public function valid_slug_provider(): array {
+	public function data_valid_slug_provider(): array {
 		return array(
 			array( 'test-simple' ),
 			array( 'test-multiple-words' ),
@@ -494,10 +407,14 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	/**
 	 * Test category slug validation with valid formats.
 	 *
-	 * @dataProvider valid_slug_provider
+	 * @ticket 64098
+	 *
+	 * @dataProvider data_valid_slug_provider
+	 *
+	 * @param string $slug The category slug to test.
 	 */
 	public function test_category_slug_valid_formats( string $slug ): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			$slug,
 			array(
 				'label'       => 'Test',
@@ -509,11 +426,11 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Data provider for invalid category slugs.
+	 * Data provider for invalid ability category slugs.
 	 *
-	 * @return array<int,array<string>>
+	 * @return array<int, array<string>> Invalid ability category slugs.
 	 */
-	public function invalid_slug_provider(): array {
+	public function data_invalid_slug_provider(): array {
 		return array(
 			array( 'Test-Uppercase' ),
 			array( 'test_underscore' ),
@@ -529,11 +446,15 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	/**
 	 * Test category slug validation with invalid formats.
 	 *
-	 * @dataProvider invalid_slug_provider
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @dataProvider data_invalid_slug_provider
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
+	 *
+	 * @param string $slug The category slug to test.
 	 */
 	public function test_category_slug_invalid_formats( string $slug ): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			$slug,
 			array(
 				'label'       => 'Test',
@@ -542,16 +463,18 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		);
 
 		$this->assertNull( $result, "Slug '{$slug}' should be invalid" );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register' );
 	}
 
 	/**
 	 * Test registering category with non-string label.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
 	 */
 	public function test_category_constructor_non_string_label(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-invalid',
 			array(
 				'label'       => 123, // Integer instead of string
@@ -560,16 +483,18 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		);
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register' );
 	}
 
 	/**
 	 * Test registering category with empty label.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
 	 */
 	public function test_category_constructor_empty_label(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-invalid',
 			array(
 				'label'       => '',
@@ -578,16 +503,18 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		);
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register' );
 	}
 
 	/**
 	 * Test registering category with non-string description.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
 	 */
 	public function test_category_constructor_non_string_description(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-invalid',
 			array(
 				'label'       => 'Valid Label',
@@ -596,16 +523,18 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		);
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register' );
 	}
 
 	/**
 	 * Test registering category with empty description.
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
 	 */
 	public function test_category_constructor_empty_description(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-invalid',
 			array(
 				'label'       => 'Valid Label',
@@ -614,15 +543,17 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		);
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register' );
 	}
 
 	/**
 	 * Test register_ability_category_args filter.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_register_category_args_filter(): void {
 		add_filter(
-			'register_ability_category_args',
+			'wp_register_ability_category_args',
 			static function ( $args, $slug ) {
 				if ( 'test-filtered' === $slug ) {
 					$args['label']       = 'Filtered Label';
@@ -634,7 +565,7 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 			2
 		);
 
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-filtered',
 			array(
 				'label'       => 'Original Label',
@@ -649,9 +580,11 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 
 	/**
 	 * Test that WP_Ability_Category cannot be unserialized.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_category_wakeup_throws_exception(): void {
-		$category = $this->register_category_during_hook(
+		$category = $this->registry->register(
 			'test-serialize',
 			array(
 				'label'       => 'Test',
@@ -659,13 +592,15 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 			)
 		);
 
-		$this->expectException( \LogicException::class );
+		$this->expectException( LogicException::class );
 		$serialized = serialize( $category );
 		unserialize( $serialized );
 	}
 
 	/**
 	 * Test registering a category with valid meta.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_register_category_with_valid_meta(): void {
 		$meta = array(
@@ -674,7 +609,7 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 			'custom'   => array( 'key' => 'value' ),
 		);
 
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-meta',
 			array(
 				'label'       => 'Math',
@@ -690,9 +625,11 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 
 	/**
 	 * Test registering a category with empty meta array.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_register_category_with_empty_meta(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-empty-meta',
 			array(
 				'label'       => 'Math',
@@ -707,9 +644,11 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 
 	/**
 	 * Test registering a category without meta returns empty array.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_register_category_without_meta_returns_empty_array(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-no-meta',
 			array(
 				'label'       => 'Math',
@@ -724,10 +663,12 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 	/**
 	 * Test registering a category with invalid meta (non-array).
 	 *
-	 * @expectedIncorrectUsage WP_Abilities_Category_Registry::register
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Ability_Categories_Registry::register
 	 */
 	public function test_register_category_with_invalid_meta(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-invalid-meta',
 			array(
 				'label'       => 'Math',
@@ -737,16 +678,18 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		);
 
 		$this->assertNull( $result );
-		$this->assertDoingItWrongTriggered( 'WP_Abilities_Category_Registry::register', 'valid `meta` array' );
+		$this->assertDoingItWrongTriggered( 'WP_Ability_Categories_Registry::register', 'valid `meta` array' );
 	}
 
 	/**
 	 * Test registering a category with unknown property triggers _doing_it_wrong.
 	 *
+	 * @ticket 64098
+	 *
 	 * @expectedIncorrectUsage WP_Ability_Category::__construct
 	 */
 	public function test_register_category_with_unknown_property(): void {
-		$result = $this->register_category_during_hook(
+		$result = $this->registry->register(
 			'test-unknown-property',
 			array(
 				'label'            => 'Math',
@@ -1024,5 +967,14 @@ class Tests_Abilities_API_WpAbilityCategory extends WP_UnitTestCase {
 		$this->assertSame( $meta, $array['meta'] );
 		$this->assertSame( 'deep value', $array['meta']['level1']['level2']['level3'] );
 		$this->assertSame( array( 1, 2, 3 ), $array['meta']['level1']['level2']['array'] );
+	 * Test category registry singleton.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_category_registry_singleton(): void {
+		$instance1 = WP_Ability_Categories_Registry::get_instance();
+		$instance2 = WP_Ability_Categories_Registry::get_instance();
+
+		$this->assertSame( $instance1, $instance2 );
 	}
 }

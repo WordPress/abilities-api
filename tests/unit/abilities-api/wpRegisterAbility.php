@@ -15,6 +15,7 @@ class Mock_Custom_Ability extends WP_Ability {
  * @covers wp_register_ability
  * @covers wp_unregister_ability
  * @covers wp_get_ability
+ * @covers wp_has_ability
  * @covers wp_get_all_abilities
  *
  * @group abilities-api
@@ -28,26 +29,19 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	 * Set up before each test.
 	 */
 	public function set_up(): void {
+		global $wp_current_filter;
+
 		parent::set_up();
 
-		// Register category during the hook.
-		add_action(
-			'abilities_api_categories_init',
-			function () {
-				if ( ! WP_Abilities_Category_Registry::get_instance()->is_registered( 'math' ) ) {
-					wp_register_ability_category(
-						'math',
-						array(
-							'label'       => 'Math',
-							'description' => 'Mathematical operations and calculations.',
-						)
-					);
-				}
-			}
+		// Simulate the init hook for ability categories to allow test ability category registration.
+		$wp_current_filter[] = 'wp_abilities_api_categories_init';
+		wp_register_ability_category(
+			'math',
+			array(
+				'label'       => 'Math',
+				'description' => 'Mathematical operations and calculations.',
+			)
 		);
-
-		// Fire the hook to allow category registration.
-		do_action( 'abilities_api_categories_init' );
 
 		self::$test_ability_args = array(
 			'label'               => 'Add numbers',
@@ -94,6 +88,8 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	 * Tear down after each test.
 	 */
 	public function tear_down(): void {
+		global $wp_current_filter;
+
 		foreach ( wp_get_abilities() as $ability ) {
 			if ( ! str_starts_with( $ability->get_name(), 'test/' ) ) {
 				continue;
@@ -102,22 +98,30 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 			wp_unregister_ability( $ability->get_name() );
 		}
 
-		// Clean up registered categories.
-		$category_registry = WP_Abilities_Category_Registry::get_instance();
-		if ( $category_registry->is_registered( 'math' ) ) {
-			wp_unregister_ability_category( 'math' );
-		}
+		// Clean up registered test ability category.
+		wp_unregister_ability_category( 'math' );
 
 		parent::tear_down();
 	}
 
 	/**
+	 * Simulates the `wp_abilities_api_init` action.
+	 */
+	private function simulate_doing_wp_abilities_init_action() {
+		global $wp_current_filter;
+
+		$wp_current_filter[] = 'wp_abilities_api_init';
+	}
+
+	/**
 	 * Tests registering an ability with invalid name.
+	 *
+	 * @ticket 64098
 	 *
 	 * @expectedIncorrectUsage WP_Abilities_Registry::register
 	 */
 	public function test_register_ability_invalid_name(): void {
-		do_action( 'abilities_api_init' );
+		$this->simulate_doing_wp_abilities_init_action();
 
 		$result = wp_register_ability( 'invalid_name', array() );
 
@@ -125,24 +129,43 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests registering an ability when `abilities_api_init` hook is not fired.
+	 * Tests registering an ability when `wp_abilities_api_init` action has not fired.
+	 *
+	 * @ticket 64098
 	 *
 	 * @expectedIncorrectUsage wp_register_ability
 	 */
-	public function test_register_ability_no_abilities_api_init_hook(): void {
-		global $wp_actions;
-
-		// Store the original action count
-		$original_count = isset( $wp_actions['abilities_api_init'] ) ? $wp_actions['abilities_api_init'] : 0;
-
-		// Reset the action count to simulate it not being fired
-		unset( $wp_actions['abilities_api_init'] );
+	public function test_register_ability_no_abilities_api_init_action(): void {
+		$this->assertFalse( doing_action( 'wp_abilities_api_init' ) );
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
-		// Restore the original action count
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * Tests registering an ability when `init` action has not fired.
+	 *
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Abilities_Registry::get_instance
+	 */
+	public function test_register_ability_no_init_action(): void {
+		global $wp_actions;
+
+		// Store the original action count.
+		$original_count = isset( $wp_actions['init'] ) ? $wp_actions['init'] : 0;
+
+		// Reset the action count to simulate it not being fired.
+		unset( $wp_actions['init'] );
+
+		$this->simulate_doing_wp_abilities_init_action();
+
+		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
+
+		// Restore the original action count.
 		if ( $original_count > 0 ) {
-			$wp_actions['abilities_api_init'] = $original_count;
+			$wp_actions['init'] = $original_count;
 		}
 
 		$this->assertNull( $result );
@@ -150,17 +173,18 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests registering a valid ability.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_register_valid_ability(): void {
-		do_action( 'abilities_api_init' );
+		$this->simulate_doing_wp_abilities_init_action();
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
 		$expected_annotations = array_merge(
 			self::$test_ability_args['meta']['annotations'],
 			array(
-				'instructions' => '',
-				'idempotent'   => false,
+				'idempotent' => false,
 			)
 		);
 		$expected_meta        = array_merge(
@@ -199,9 +223,11 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests executing an ability with no permissions.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_register_ability_no_permissions(): void {
-		do_action( 'abilities_api_init' );
+		$this->simulate_doing_wp_abilities_init_action();
 
 		self::$test_ability_args['permission_callback'] = static function (): bool {
 			return false;
@@ -232,9 +258,11 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests registering an ability with a custom ability class.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_register_ability_custom_ability_class(): void {
-		do_action( 'abilities_api_init' );
+		$this->simulate_doing_wp_abilities_init_action();
 
 		$result = wp_register_ability(
 			self::$test_ability_name,
@@ -272,9 +300,11 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests executing an ability with input not matching schema.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_execute_ability_no_input_schema_match(): void {
-		do_action( 'abilities_api_init' );
+		$this->simulate_doing_wp_abilities_init_action();
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
@@ -299,9 +329,11 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests executing an ability with output not matching schema.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_execute_ability_no_output_schema_match(): void {
-		do_action( 'abilities_api_init' );
+		$this->simulate_doing_wp_abilities_init_action();
 
 		self::$test_ability_args['execute_callback'] = static function (): bool {
 			return true;
@@ -327,14 +359,16 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests permission callback receiving input not matching schema.
+	 * Tests input validation failing due to schema mismatch.
+	 *
+	 * @ticket 64098
 	 */
-	public function test_permission_callback_no_input_schema_match(): void {
-		do_action( 'abilities_api_init' );
+	public function test_validate_input_no_input_schema_match(): void {
+		$this->simulate_doing_wp_abilities_init_action();
 
 		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
-		$actual = $result->check_permissions(
+		$actual = $result->validate_input(
 			array(
 				'a'       => 2,
 				'b'       => 3,
@@ -344,7 +378,7 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$this->assertWPError(
 			$actual,
-			'Permission check should fail due to input not matching schema.'
+			'Input validation should fail due to input not matching schema.'
 		);
 		$this->assertSame( 'ability_invalid_input', $actual->get_error_code() );
 		$this->assertSame(
@@ -354,31 +388,12 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that deprecated has_permission() method still works.
-	 *
-	 * @expectedDeprecated WP_Ability::has_permission
-	 */
-	public function test_has_permission_deprecated_coverage(): void {
-		do_action( 'abilities_api_init' );
-
-		$result = wp_register_ability( self::$test_ability_name, self::$test_ability_args );
-
-		// Test that deprecated method still works
-		$this->assertTrue(
-			$result->has_permission(
-				array(
-					'a' => 2,
-					'b' => 3,
-				)
-			)
-		);
-	}
-
-	/**
 	 * Tests permission callback receiving input for contextual permission checks.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_permission_callback_receives_input(): void {
-		do_action( 'abilities_api_init' );
+		$this->simulate_doing_wp_abilities_init_action();
 
 		$received_input                                 = null;
 		self::$test_ability_args['permission_callback'] = static function ( array $input ) use ( &$received_input ): bool {
@@ -425,10 +440,40 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests unregistering an ability when `init` action has not fired.
+	 *
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Abilities_Registry::get_instance
+	 */
+	public function test_unregister_ability_no_init_action(): void {
+		global $wp_actions;
+
+		// Store the original action count.
+		$original_count = isset( $wp_actions['init'] ) ? $wp_actions['init'] : 0;
+
+		// Reset the action count to simulate it not being fired.
+		unset( $wp_actions['init'] );
+
+		$this->simulate_doing_wp_abilities_init_action();
+
+		$result = wp_unregister_ability( self::$test_ability_name );
+
+		// Restore the original action count.
+		if ( $original_count > 0 ) {
+			$wp_actions['init'] = $original_count;
+		}
+
+		$this->assertNull( $result );
+	}
+
+	/**
 	 * Tests unregistering existing ability.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_unregister_existing_ability() {
-		do_action( 'abilities_api_init' );
+		$this->simulate_doing_wp_abilities_init_action();
 
 		wp_register_ability( self::$test_ability_name, self::$test_ability_args );
 
@@ -441,26 +486,60 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests retrieving existing ability.
+	 * Tests retrieving an ability when `init` action has not fired.
+	 *
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Abilities_Registry::get_instance
 	 */
-	public function test_get_existing_ability() {
+	public function test_get_ability_no_init_action(): void {
+		global $wp_actions;
+
+		// Store the original action count.
+		$original_count = isset( $wp_actions['init'] ) ? $wp_actions['init'] : 0;
+
+		// Reset the action count to simulate it not being fired.
+		unset( $wp_actions['init'] );
+
+		$this->simulate_doing_wp_abilities_init_action();
+
+		$result = wp_get_ability( self::$test_ability_name );
+
+		// Restore the original action count.
+		if ( $original_count > 0 ) {
+			$wp_actions['init'] = $original_count;
+		}
+
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * Tests retrieving existing ability registered with the `wp_abilities_api_init` callback.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_get_existing_ability_using_callback() {
+		$this->simulate_doing_wp_abilities_init_action();
+
 		$name     = self::$test_ability_name;
 		$args     = self::$test_ability_args;
 		$callback = static function ( $instance ) use ( $name, $args ) {
 			wp_register_ability( $name, $args );
 		};
 
-		add_action( 'abilities_api_init', $callback );
+		add_action( 'wp_abilities_api_init', $callback );
 
 		// Reset the Registry, to ensure it's empty before the test.
 		$registry_reflection = new ReflectionClass( WP_Abilities_Registry::class );
 		$instance_prop       = $registry_reflection->getProperty( 'instance' );
-		$instance_prop->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$instance_prop->setAccessible( true );
+		}
 		$instance_prop->setValue( null, null );
 
 		$result = wp_get_ability( $name );
 
-		remove_action( 'abilities_api_init', $callback );
+		remove_action( 'wp_abilities_api_init', $callback );
 
 		$this->assertEquals(
 			new WP_Ability( $name, $args ),
@@ -470,10 +549,96 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests checking if an ability is registered when `init` action has not fired.
+	 *
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Abilities_Registry::get_instance
+	 */
+	public function test_has_ability_no_init_action(): void {
+		global $wp_actions;
+
+		// Store the original action count.
+		$original_count = isset( $wp_actions['init'] ) ? $wp_actions['init'] : 0;
+
+		// Reset the action count to simulate it not being fired.
+		unset( $wp_actions['init'] );
+
+		$this->simulate_doing_wp_abilities_init_action();
+
+		$result = wp_has_ability( self::$test_ability_name );
+
+		// Restore the original action count.
+		if ( $original_count > 0 ) {
+			$wp_actions['init'] = $original_count;
+		}
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Tests checking if an ability is registered.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_has_registered_ability() {
+		$this->simulate_doing_wp_abilities_init_action();
+
+		wp_register_ability( self::$test_ability_name, self::$test_ability_args );
+
+		$result = wp_has_ability( self::$test_ability_name );
+
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Tests checking if a non-existent ability is registered.
+	 *
+	 * @ticket 64098
+	 */
+	public function test_has_registered_nonexistent_ability() {
+		$this->simulate_doing_wp_abilities_init_action();
+
+		$result = wp_has_ability( 'test/non-existent' );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Tests retrieving all registered abilities when `init` action has not fired.
+	 *
+	 * @ticket 64098
+	 *
+	 * @expectedIncorrectUsage WP_Abilities_Registry::get_instance
+	 */
+	public function test_get_abilities_no_init_action(): void {
+		global $wp_actions;
+
+		// Store the original action count.
+		$original_count = isset( $wp_actions['init'] ) ? $wp_actions['init'] : 0;
+
+		// Reset the action count to simulate it not being fired.
+		unset( $wp_actions['init'] );
+
+		$this->simulate_doing_wp_abilities_init_action();
+
+		$result = wp_get_abilities();
+
+		// Restore the original action count.
+		if ( $original_count > 0 ) {
+			$wp_actions['init'] = $original_count;
+		}
+
+		$this->assertSame( array(), $result );
+	}
+
+	/**
 	 * Tests retrieving all registered abilities.
+	 *
+	 * @ticket 64098
 	 */
 	public function test_get_all_registered_abilities() {
-		do_action( 'abilities_api_init' );
+		$this->simulate_doing_wp_abilities_init_action();
 
 		$ability_one_name = 'test/ability-one';
 		$ability_one_args = self::$test_ability_args;
@@ -495,29 +660,5 @@ class Test_Abilities_API_WpRegisterAbility extends WP_UnitTestCase {
 
 		$result = wp_get_abilities();
 		$this->assertEquals( $expected, $result );
-	}
-
-	/**
-	 * Tests registering an ability with non-existent category.
-	 *
-	 * @expectedIncorrectUsage WP_Abilities_Registry::register
-	 */
-	public function test_register_ability_nonexistent_category(): void {
-		do_action( 'abilities_api_init' );
-
-		// Ensure category doesn't exist - test should fail if it does.
-		$this->assertFalse(
-			WP_Abilities_Category_Registry::get_instance()->is_registered( 'nonexistent' ),
-			'The nonexistent category should not be registered - test isolation may be broken'
-		);
-
-		$args = array_merge(
-			self::$test_ability_args,
-			array( 'category' => 'nonexistent' )
-		);
-
-		$result = wp_register_ability( self::$test_ability_name, $args );
-
-		$this->assertNull( $result, 'Should return null when category does not exist' );
 	}
 }
