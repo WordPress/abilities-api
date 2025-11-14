@@ -2,7 +2,7 @@
 
 ## Registering Categories
 
-Before registering abilities, you must need at least one category. Categories help organize abilities and make them easier to discover and filter.
+Before registering abilities, you need at least one category. Categories help organize abilities and make them easier to discover and filter.
 
 The Abilities API ships with two default Ability categories:
 
