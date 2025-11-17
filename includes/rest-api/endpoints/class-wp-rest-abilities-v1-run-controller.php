@@ -40,6 +40,7 @@ class WP_REST_Abilities_V1_Run_Controller extends WP_REST_Controller {
 	 * @since 6.9.0
 	 *
 	 * @see register_rest_route()
+	 * @return void
 	 */
 	public function register_routes(): void {
 		register_rest_route(
@@ -188,7 +189,7 @@ class WP_REST_Abilities_V1_Run_Controller extends WP_REST_Controller {
 	 * @since 6.9.0
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @return mixed|null The input parameters.
+	 * @return mixed|null The input parameters, or null if not provided.
 	 */
 	private function get_input_from_request( $request ) {
 		if ( in_array( $request->get_method(), array( 'GET', 'DELETE' ), true ) ) {

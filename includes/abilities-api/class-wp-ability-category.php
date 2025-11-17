@@ -2,7 +2,8 @@
 /**
  * Abilities API
  *
- * Defines WP_Ability_Category class.
+ * Defines the WP_Ability_Category class for organizing and categorizing
+ * related abilities within the Abilities API.
  *
  * @package WordPress
  * @subpackage Abilities API
@@ -186,7 +187,7 @@ final class WP_Ability_Category {
 	 *
 	 * @since 6.9.0
 	 *
-	 * @return array<string,mixed> The metadata for the ability category.
+	 * @return array<string, mixed> The metadata for the ability category.
 	 */
 	public function get_meta(): array {
 		return $this->meta;
