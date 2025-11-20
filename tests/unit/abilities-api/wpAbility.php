@@ -801,12 +801,12 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		add_filter(
 			'wp_ability_validate_input',
-			static function ( $is_valid, $input, $ability_name, $ability ) use ( &$captured ) {
-				$captured = array( $is_valid, $input, $ability_name, $ability );
+			static function ( $is_valid, $input, $ability_name ) use ( &$captured ) {
+				$captured = array( $is_valid, $input, $ability_name );
 				return $is_valid;
 			},
 			10,
-			4
+			3
 		);
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
@@ -815,7 +815,6 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$this->assertTrue( $captured[0] );
 		$this->assertSame( 'hello', $captured[1] );
 		$this->assertSame( self::$test_ability_name, $captured[2] );
-		$this->assertInstanceOf( WP_Ability::class, $captured[3] );
 	}
 
 	/**
@@ -878,12 +877,12 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 		add_filter(
 			'wp_ability_validate_output',
-			static function ( $is_valid, $output, $ability_name, $ability ) use ( &$captured ) {
-				$captured = array( $is_valid, $output, $ability_name, $ability );
+			static function ( $is_valid, $output, $ability_name ) use ( &$captured ) {
+				$captured = array( $is_valid, $output, $ability_name );
 				return $is_valid;
 			},
 			10,
-			4
+			3
 		);
 
 		$ability = new WP_Ability( self::$test_ability_name, $args );
@@ -892,7 +891,6 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$this->assertTrue( $captured[0] );
 		$this->assertSame( 42, $captured[1] );
 		$this->assertSame( self::$test_ability_name, $captured[2] );
-		$this->assertInstanceOf( WP_Ability::class, $captured[3] );
 	}
 
 	/**

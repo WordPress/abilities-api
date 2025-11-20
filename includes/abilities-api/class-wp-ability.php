@@ -505,9 +505,8 @@ class WP_Ability {
 		 * @param true|WP_Error $is_valid      The validation result from default validation.
 		 * @param mixed         $input         The input data being validated.
 		 * @param string        $ability_name  The name of the ability.
-		 * @param WP_Ability    $ability       The ability instance.
 		 */
-		return apply_filters( 'wp_ability_validate_input', $is_valid, $input, $this->name, $this );
+		return apply_filters( 'wp_ability_validate_input', $is_valid, $input, $this->name );
 	}
 
 	/**
@@ -615,9 +614,8 @@ class WP_Ability {
 		 * @param true|WP_Error $is_valid      The validation result from default validation.
 		 * @param mixed         $output        The output data being validated.
 		 * @param string        $ability_name  The name of the ability.
-		 * @param WP_Ability    $ability       The ability instance.
 		 */
-		return apply_filters( 'wp_ability_validate_output', $is_valid, $output, $this->name, $this );
+		return apply_filters( 'wp_ability_validate_output', $is_valid, $output, $this->name );
 	}
 
 	/**
