@@ -89,7 +89,7 @@ git push -u origin release/0.6
 
   
 
-Post an announcement in the #core slack channel saying a new RC version is ready for testing, and ask users/developers to report any issues found in that version.
+Post an announcement in the #core-ai slack channel saying a new RC version is ready for testing, and ask users/developers to report any issues found in that version.
 
   
 
