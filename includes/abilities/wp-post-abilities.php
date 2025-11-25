@@ -308,6 +308,7 @@ function wp_register_post_abilities(): void {
 					return false;
 				}
 
+				// phpcs:ignore WordPress.WP.Capabilities.Undetermined -- Dynamic capability from post type object.
 				return current_user_can( $post_type_obj->cap->read );
 			},
 			'meta'                => array(
@@ -423,12 +424,14 @@ function wp_register_post_abilities(): void {
 				}
 
 				// Check create capability.
+				// phpcs:ignore WordPress.WP.Capabilities.Undetermined -- Dynamic capability from post type object.
 				if ( ! current_user_can( $post_type_obj->cap->create_posts ) ) {
 					return false;
 				}
 
 				// Check publish capability if status is publish.
 				$status = sanitize_key( $input['status'] ?? 'draft' );
+				// phpcs:ignore WordPress.WP.Capabilities.Undetermined -- Dynamic capability from post type object.
 				return 'publish' !== $status || current_user_can( $post_type_obj->cap->publish_posts );
 			},
 			'meta'                => array(
@@ -565,6 +568,7 @@ function wp_register_post_abilities(): void {
 				// Check publish capability if changing to publish.
 				if ( isset( $input['status'] ) && 'publish' === $input['status'] && 'publish' !== $post->post_status ) {
 					$post_type_obj = get_post_type_object( $post->post_type );
+					// phpcs:ignore WordPress.WP.Capabilities.Undetermined -- Dynamic capability from post type object.
 					if ( ! $post_type_obj || ! current_user_can( $post_type_obj->cap->publish_posts ) ) {
 						return false;
 					}
