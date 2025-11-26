@@ -781,6 +781,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests wp_ability_validate_input filter receives all parameters.
+	 *
+	 * @ticket 64311
 	 */
 	public function test_validate_input_filter_receives_all_parameters() {
 		$captured = array();
@@ -819,6 +821,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests wp_ability_validate_input filter can override validation failure.
+	 *
+	 * @ticket 64311
 	 */
 	public function test_validate_input_filter_overrides_validation_failure() {
 		$args = array_merge(
@@ -857,6 +861,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests wp_ability_validate_output filter receives all parameters.
+	 *
+	 * @ticket 64311
 	 */
 	public function test_validate_output_filter_receives_all_parameters() {
 		$captured = array();
@@ -895,6 +901,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests wp_ability_validate_output filter can override validation failure.
+	 *
+	 * @ticket 64311
 	 */
 	public function test_validate_output_filter_overrides_validation_failure() {
 		$args = array_merge(
@@ -928,6 +936,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests wp_ability_validate_input filter receives WP_Error on validation failure.
+	 *
+	 * @ticket 64311
 	 */
 	public function test_validate_input_filter_receives_error_on_invalid_input() {
 		$error_code = null;
@@ -966,6 +976,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests wp_ability_validate_input filter can replace error with custom error.
+	 *
+	 * @ticket 64311
 	 */
 	public function test_validate_input_filter_replaces_error_with_custom() {
 		$args = array_merge(
@@ -1000,6 +1012,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests wp_ability_validate_output filter receives WP_Error on validation failure.
+	 *
+	 * @ticket 64311
 	 */
 	public function test_validate_output_filter_receives_error_on_invalid_output() {
 		$error_code = null;
@@ -1038,6 +1052,8 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 
 	/**
 	 * Tests wp_ability_validate_output filter can replace error with custom error.
+	 *
+	 * @ticket 64311
 	 */
 	public function test_validate_output_filter_replaces_error_with_custom() {
 		$args = array_merge(
