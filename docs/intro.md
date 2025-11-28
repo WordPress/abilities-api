@@ -37,7 +37,7 @@ It acts as a central registry, making it easier for different parts of WordPress
 
 ```php
 // First, register a category, or use one of the existing categories.
-add_action( 'abilities_api_categories_init', 'my_plugin_register_category');
+add_action( 'wp_abilities_api_categories_init', 'my_plugin_register_category');
 function my_plugin_register_category(){
 	wp_register_ability_category( 'site-information', array(
 		'label' => __( 'Site Information', 'my-plugin' ),
@@ -46,7 +46,7 @@ function my_plugin_register_category(){
 }
 
 // Then, register an ability in that category
-add_action( 'abilities_api_init', 'my_plugin_register_ability');
+add_action( 'wp_abilities_api_init', 'my_plugin_register_ability');
 function my_plugin_register_ability(){
 	wp_register_ability( 'my-plugin/site-info', array(
 		'label' => __( 'Site Info', 'my-plugin' ),

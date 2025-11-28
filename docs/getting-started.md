@@ -118,8 +118,8 @@ function my_plugin_register_abilities() {
         'execute_callback'    => 'my_plugin_get_site_title',
         'permission_callback' => '__return_true', // Everyone can access this
         'meta'                => array(
-            'category'    => 'site-info',
             'show_in_rest' => true, // Optional: expose via REST API
+        ),
     ) );
 }
 

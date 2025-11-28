@@ -112,11 +112,11 @@ The primary way to add functionality to the Abilities API is by using the `wp_re
 ### Function Signature
 
 ```php
-wp_register_ability( string $id, array $args ): ?\WP_Ability
+wp_register_ability( string $name, array $args ): ?\WP_Ability
 ```
 
 **Parameters:**
-- `$id` (`string`): A unique identifier for the ability.
+- `$name` (`string`): A unique identifier for the ability.
 - `$args` (`array`): An array of arguments defining the ability configuration.
 
 - **Return:** (`?\WP_Ability`) An instance of the registered ability if it was successfully registered, `null` on failure (e.g., invalid arguments, duplicate ID).
@@ -128,8 +128,8 @@ The `$args` array accepts the following keys:
 - `label` (`string`, **Required**): A human-readable name for the ability. Used for display purposes. Should be translatable.
 - `description` (`string`, **Required**): A detailed description of what the ability does, its purpose, and its parameters or return values. This is crucial for AI agents to understand how and when to use the ability. Should be translatable.
 - `category` (`string`, **Required**): The slug of the category this ability belongs to. The category must be registered before registering the ability using `wp_register_ability_category()`. Categories help organize and filter abilities by their purpose. See [Registering Categories](#registering-categories) for details.
-- `input_schema` (`array`, **Optional**): A JSON Schema definition describing the expected input parameters for the ability's execute callback. Only needed when creating Abilities that require inputs. Defaults to `null` only when no schema is provided. Used for validation and documentation.
-- `output_schema` (`array`, **Required**): A JSON Schema definition describing the expected format of the data returned by the ability. Used for validation and documentation.
+- `input_schema` (`array`, **Optional**): A [JSON Schema](https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/) definition describing the expected input parameters for the ability's execute callback. Only needed when creating Abilities that require inputs. Defaults to `null` only when no schema is provided. Used for validation and documentation.
+- `output_schema` (`array`, **Required**): A [JSON Schema](https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/) definition describing the expected format of the data returned by the ability. Used for validation and documentation.
 - `execute_callback` (`callable`, **Required**): The PHP function or method to execute when this ability is called.
   - The callback receives one optional argument, the input data for the ability. The argument is required when the input schema is defined.
   - The input argument will have the same type as defined in the input schema (e.g., `array`, `object`, `string`, etc.).
@@ -150,9 +150,9 @@ The `$args` array accepts the following keys:
     - When `false`, the ability will be hidden from REST API listings and cannot be executed via REST endpoints, but remains available for internal PHP usage.
 - `ability_class` (`string`, **Optional**): The fully-qualified class name of a custom ability class that extends `WP_Ability`. This allows you to customize the behavior of an ability by extending the base `WP_Ability` class and overriding its methods. The custom class must extend `WP_Ability`. Default: `WP_Ability`.
 
-### Ability ID Convention
+### Ability Name Convention
 
-The `$id` parameter must follow the pattern `namespace/ability-name`:
+The `$name` parameter must follow the pattern `namespace/ability-name`:
 
 - **Format:** Must contain only lowercase alphanumeric characters (`a-z`, `0-9`), hyphens (`-`), and one forward slash (`/`) for namespacing.
 - **Convention:** Use your plugin slug as the namespace, like `my-plugin/ability-name`.
