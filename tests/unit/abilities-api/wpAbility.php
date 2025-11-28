@@ -778,4 +778,363 @@ class Tests_Abilities_API_WpAbility extends WP_UnitTestCase {
 		$this->assertFalse( $after_action_fired, 'after_execute_ability action should not be fired when output validation fails' );
 		$this->assertInstanceOf( WP_Error::class, $result, 'Should return WP_Error for output validation failure' );
 	}
+
+	/**
+	 * Tests that to_array() returns correct structure with all expected keys.
+	 */
+	public function test_to_array_returns_correct_structure() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$array   = $ability->to_array();
+
+		$this->assertIsArray( $array, 'to_array() should return an array' );
+		$this->assertArrayHasKey( 'name', $array, 'Array should contain name key' );
+		$this->assertArrayHasKey( 'label', $array, 'Array should contain label key' );
+		$this->assertArrayHasKey( 'description', $array, 'Array should contain description key' );
+		$this->assertArrayHasKey( 'input_schema', $array, 'Array should contain input_schema key' );
+		$this->assertArrayHasKey( 'output_schema', $array, 'Array should contain output_schema key' );
+		$this->assertArrayHasKey( 'meta', $array, 'Array should contain meta key' );
+
+		$this->assertSame( self::$test_ability_name, $array['name'], 'Name should match' );
+		$this->assertSame( 'Calculator', $array['label'], 'Label should match' );
+		$this->assertSame( 'Calculates the result of math operations.', $array['description'], 'Description should match' );
+	}
+
+	/**
+	 * Tests that to_array() does not include callbacks.
+	 */
+	public function test_to_array_excludes_callbacks() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$array   = $ability->to_array();
+
+		$this->assertArrayNotHasKey( 'execute_callback', $array, 'Array should not contain execute_callback' );
+		$this->assertArrayNotHasKey( 'permission_callback', $array, 'Array should not contain permission_callback' );
+	}
+
+	/**
+	 * Tests to_array() with both input and output schemas.
+	 */
+	public function test_to_array_with_full_schemas() {
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'input_schema' => array(
+					'type'        => 'integer',
+					'description' => 'Test input.',
+				),
+			)
+		);
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+		$array   = $ability->to_array();
+
+		$this->assertIsArray( $array['input_schema'], 'Input schema should be an array' );
+		$this->assertSame( 'integer', $array['input_schema']['type'], 'Input schema type should match' );
+		$this->assertIsArray( $array['output_schema'], 'Output schema should be an array' );
+		$this->assertSame( 'number', $array['output_schema']['type'], 'Output schema type should match' );
+	}
+
+	/**
+	 * Tests to_array() without input schema.
+	 */
+	public function test_to_array_without_input_schema() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$array   = $ability->to_array();
+
+		$this->assertArrayHasKey( 'input_schema', $array, 'input_schema key should exist' );
+		$this->assertIsArray( $array['input_schema'], 'input_schema should be an array' );
+		$this->assertEmpty( $array['input_schema'], 'input_schema should be empty' );
+	}
+
+	/**
+	 * Tests to_array() meta structure.
+	 */
+	public function test_to_array_meta_structure() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$array   = $ability->to_array();
+
+		$this->assertIsArray( $array['meta'], 'Meta should be an array' );
+		$this->assertArrayHasKey( 'annotations', $array['meta'], 'Meta should contain annotations' );
+		$this->assertArrayHasKey( 'show_in_rest', $array['meta'], 'Meta should contain show_in_rest' );
+
+		$this->assertIsArray( $array['meta']['annotations'], 'Annotations should be an array' );
+		$this->assertArrayHasKey( 'readonly', $array['meta']['annotations'], 'Annotations should contain readonly' );
+		$this->assertArrayHasKey( 'destructive', $array['meta']['annotations'], 'Annotations should contain destructive' );
+		$this->assertArrayHasKey( 'idempotent', $array['meta']['annotations'], 'Annotations should contain idempotent' );
+		$this->assertArrayHasKey( 'instructions', $array['meta']['annotations'], 'Annotations should contain instructions' );
+
+		$this->assertTrue( $array['meta']['annotations']['readonly'], 'Readonly should be true' );
+		$this->assertFalse( $array['meta']['annotations']['destructive'], 'Destructive should be false' );
+		$this->assertFalse( $array['meta']['show_in_rest'], 'show_in_rest should default to false' );
+	}
+
+	/**
+	 * Tests to_array() with custom meta properties.
+	 */
+	public function test_to_array_with_custom_meta() {
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'meta' => array(
+					'custom_property' => 'custom_value',
+					'another_prop'    => 123,
+				),
+			)
+		);
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+		$array   = $ability->to_array();
+
+		$this->assertArrayHasKey( 'custom_property', $array['meta'], 'Custom meta property should be included' );
+		$this->assertSame( 'custom_value', $array['meta']['custom_property'], 'Custom meta value should match' );
+		$this->assertArrayHasKey( 'another_prop', $array['meta'], 'Another custom meta property should be included' );
+		$this->assertSame( 123, $array['meta']['another_prop'], 'Another custom meta value should match' );
+	}
+
+	/**
+	 * Tests that to_json_schema() returns valid JSON Schema structure.
+	 */
+	public function test_to_json_schema_returns_valid_structure() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$schema  = $ability->to_json_schema();
+
+		$this->assertIsArray( $schema, 'to_json_schema() should return an array' );
+		$this->assertArrayHasKey( '$schema', $schema, 'Schema should contain $schema key' );
+		$this->assertSame( 'http://json-schema.org/draft-04/schema#', $schema['$schema'], 'Schema version should be Draft 4' );
+		$this->assertArrayHasKey( 'type', $schema, 'Schema should contain type key' );
+		$this->assertSame( 'object', $schema['type'], 'Schema type should be object' );
+		$this->assertArrayHasKey( 'title', $schema, 'Schema should contain title key' );
+		$this->assertSame( 'Calculator', $schema['title'], 'Schema title should match label' );
+		$this->assertArrayHasKey( 'description', $schema, 'Schema should contain description key' );
+		$this->assertSame( 'Calculates the result of math operations.', $schema['description'], 'Schema description should match' );
+	}
+
+	/**
+	 * Tests to_json_schema() with both input and output schemas.
+	 */
+	public function test_to_json_schema_with_both_schemas() {
+		$args = array_merge(
+			self::$test_ability_properties,
+			array(
+				'input_schema' => array(
+					'type'        => 'integer',
+					'description' => 'Test input.',
+				),
+			)
+		);
+
+		$ability = new WP_Ability( self::$test_ability_name, $args );
+		$schema  = $ability->to_json_schema();
+
+		$this->assertArrayHasKey( 'properties', $schema, 'Schema should contain properties' );
+		$this->assertArrayHasKey( 'input_schema', $schema['properties'], 'Properties should contain input_schema' );
+		$this->assertArrayHasKey( 'output_schema', $schema['properties'], 'Properties should contain output_schema' );
+
+		$this->assertSame( 'integer', $schema['properties']['input_schema']['type'], 'Input schema should be preserved' );
+		$this->assertSame( 'number', $schema['properties']['output_schema']['type'], 'Output schema should be preserved' );
+
+		$this->assertContains( 'input_schema', $schema['required'], 'input_schema should be in required array' );
+		$this->assertContains( 'output_schema', $schema['required'], 'output_schema should be in required array' );
+	}
+
+	/**
+	 * Tests to_json_schema() without input schema.
+	 */
+	public function test_to_json_schema_without_input_schema() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$schema  = $ability->to_json_schema();
+
+		$this->assertArrayNotHasKey( 'input_schema', $schema['properties'], 'Properties should not contain input_schema when not defined' );
+		$this->assertNotContains( 'input_schema', $schema['required'], 'input_schema should not be in required array when not defined' );
+		$this->assertArrayHasKey( 'output_schema', $schema['properties'], 'Properties should contain output_schema' );
+		$this->assertContains( 'output_schema', $schema['required'], 'output_schema should be in required array' );
+	}
+
+	/**
+	 * Tests to_json_schema() meta structure.
+	 */
+	public function test_to_json_schema_meta_structure() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$schema  = $ability->to_json_schema();
+
+		$this->assertArrayHasKey( 'meta', $schema['properties'], 'Properties should contain meta' );
+		$this->assertSame( 'object', $schema['properties']['meta']['type'], 'Meta type should be object' );
+		$this->assertArrayHasKey( 'properties', $schema['properties']['meta'], 'Meta should have properties' );
+		$this->assertArrayHasKey( 'annotations', $schema['properties']['meta']['properties'], 'Meta properties should contain annotations' );
+		$this->assertArrayHasKey( 'show_in_rest', $schema['properties']['meta']['properties'], 'Meta properties should contain show_in_rest' );
+
+		$annotations = $schema['properties']['meta']['properties']['annotations'];
+		$this->assertSame( 'object', $annotations['type'], 'Annotations type should be object' );
+		$this->assertArrayHasKey( 'properties', $annotations, 'Annotations should have properties' );
+		$this->assertArrayHasKey( 'readonly', $annotations['properties'], 'Annotations properties should contain readonly' );
+		$this->assertArrayHasKey( 'destructive', $annotations['properties'], 'Annotations properties should contain destructive' );
+		$this->assertArrayHasKey( 'idempotent', $annotations['properties'], 'Annotations properties should contain idempotent' );
+		$this->assertArrayHasKey( 'instructions', $annotations['properties'], 'Annotations properties should contain instructions' );
+
+		$this->assertSame( 'boolean', $schema['properties']['meta']['properties']['show_in_rest']['type'], 'show_in_rest type should be boolean' );
+	}
+
+	/**
+	 * Tests to_json_schema() name property uses enum for constant value.
+	 */
+	public function test_to_json_schema_name_is_constant() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$schema  = $ability->to_json_schema();
+
+		$this->assertArrayHasKey( 'name', $schema['properties'], 'Properties should contain name' );
+		$this->assertArrayHasKey( 'enum', $schema['properties']['name'], 'Name should have enum keyword' );
+		$this->assertIsArray( $schema['properties']['name']['enum'], 'Name enum should be an array' );
+		$this->assertCount( 1, $schema['properties']['name']['enum'], 'Name enum should have exactly one value' );
+		$this->assertSame( self::$test_ability_name, $schema['properties']['name']['enum'][0], 'Name enum value should match ability name' );
+		$this->assertContains( 'name', $schema['required'], 'name should be in required array' );
+	}
+
+	/**
+	 * Tests that to_array() filter is applied.
+	 */
+	public function test_to_array_filter() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$filter_callback = static function ( $array, $ability_instance ) {
+			$array['custom_field'] = 'custom_value';
+			return $array;
+		};
+
+		add_filter( 'wp_ability_test/calculator_to_array', $filter_callback, 10, 2 );
+
+		$array = $ability->to_array();
+
+		remove_filter( 'wp_ability_test/calculator_to_array', $filter_callback );
+
+		$this->assertArrayHasKey( 'custom_field', $array, 'Filtered array should contain custom field' );
+		$this->assertSame( 'custom_value', $array['custom_field'], 'Custom field value should match' );
+	}
+
+	/**
+	 * Tests that to_json_schema() filter is applied.
+	 */
+	public function test_to_json_schema_filter() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$filter_callback = static function ( $schema, $ability_instance ) {
+			$schema['custom_property'] = 'custom_schema_value';
+			return $schema;
+		};
+
+		add_filter( 'wp_ability_test/calculator_to_json_schema', $filter_callback, 10, 2 );
+
+		$schema = $ability->to_json_schema();
+
+		remove_filter( 'wp_ability_test/calculator_to_json_schema', $filter_callback );
+
+		$this->assertArrayHasKey( 'custom_property', $schema, 'Filtered schema should contain custom property' );
+		$this->assertSame( 'custom_schema_value', $schema['custom_property'], 'Custom property value should match' );
+	}
+
+	/**
+	 * Tests that to_array() filter receives ability instance as second parameter.
+	 */
+	public function test_to_array_filter_receives_ability_instance() {
+		$ability          = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$received_ability = null;
+
+		$filter_callback = static function ( $array, $ability_instance ) use ( &$received_ability ) {
+			$received_ability = $ability_instance;
+			return $array;
+		};
+
+		add_filter( 'wp_ability_test/calculator_to_array', $filter_callback, 10, 2 );
+
+		$ability->to_array();
+
+		remove_filter( 'wp_ability_test/calculator_to_array', $filter_callback );
+
+		$this->assertInstanceOf( WP_Ability::class, $received_ability, 'Filter should receive WP_Ability instance' );
+		$this->assertSame( self::$test_ability_name, $received_ability->get_name(), 'Received ability should match' );
+	}
+
+	/**
+	 * Tests that to_json_schema() filter receives ability instance as second parameter.
+	 */
+	public function test_to_json_schema_filter_receives_ability_instance() {
+		$ability          = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+		$received_ability = null;
+
+		$filter_callback = static function ( $schema, $ability_instance ) use ( &$received_ability ) {
+			$received_ability = $ability_instance;
+			return $schema;
+		};
+
+		add_filter( 'wp_ability_test/calculator_to_json_schema', $filter_callback, 10, 2 );
+
+		$ability->to_json_schema();
+
+		remove_filter( 'wp_ability_test/calculator_to_json_schema', $filter_callback );
+
+		$this->assertInstanceOf( WP_Ability::class, $received_ability, 'Filter should receive WP_Ability instance' );
+		$this->assertSame( self::$test_ability_name, $received_ability->get_name(), 'Received ability should match' );
+	}
+
+	/**
+	 * Tests that WP_Ability implements JsonSerializable.
+	 */
+	public function test_implements_json_serializable() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$this->assertInstanceOf( JsonSerializable::class, $ability, 'WP_Ability should implement JsonSerializable' );
+	}
+
+	/**
+	 * Tests that json_encode() works with WP_Ability.
+	 */
+	public function test_json_encode() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$json = json_encode( $ability );
+
+		$this->assertIsString( $json, 'json_encode should return a string' );
+		$this->assertNotFalse( $json, 'json_encode should not fail' );
+
+		$decoded = json_decode( $json, true );
+
+		$this->assertIsArray( $decoded, 'Decoded JSON should be an array' );
+		$this->assertArrayHasKey( 'name', $decoded, 'Decoded array should contain name' );
+		$this->assertSame( self::$test_ability_name, $decoded['name'], 'Name should match' );
+		$this->assertArrayHasKey( 'label', $decoded, 'Decoded array should contain label' );
+		$this->assertArrayHasKey( 'description', $decoded, 'Decoded array should contain description' );
+		$this->assertArrayHasKey( 'meta', $decoded, 'Decoded array should contain meta' );
+	}
+
+	/**
+	 * Tests that jsonSerialize() returns same data as to_array().
+	 */
+	public function test_json_serialize_matches_to_array() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$array          = $ability->to_array();
+		$json_serialize = $ability->jsonSerialize();
+
+		$this->assertSame( $array, $json_serialize, 'jsonSerialize() should return the same data as to_array()' );
+	}
+
+	/**
+	 * Tests that json_encode() applies to_array() filter.
+	 */
+	public function test_json_encode_applies_filter() {
+		$ability = new WP_Ability( self::$test_ability_name, self::$test_ability_properties );
+
+		$filter_callback = static function ( $array, $ability_instance ) {
+			$array['filtered'] = true;
+			return $array;
+		};
+
+		add_filter( 'wp_ability_test/calculator_to_array', $filter_callback, 10, 2 );
+
+		$json = json_encode( $ability );
+		$decoded = json_decode( $json, true );
+
+		remove_filter( 'wp_ability_test/calculator_to_array', $filter_callback );
+
+		$this->assertArrayHasKey( 'filtered', $decoded, 'json_encode should apply to_array filter' );
+		$this->assertTrue( $decoded['filtered'], 'Filtered value should be present' );
+	}
 }

@@ -18,7 +18,7 @@ declare( strict_types = 1 );
  *
  * @see WP_Abilities_Registry
  */
-class WP_Ability {
+class WP_Ability implements \JsonSerializable {
 
 	/**
 	 * The default value for the `show_in_rest` meta.
@@ -371,17 +371,6 @@ class WP_Ability {
 	}
 
 	/**
-	 * Retrieves the ability category for the ability.
-	 *
-	 * @since 6.9.0
-	 *
-	 * @return string The ability category for the ability.
-	 */
-	public function get_category(): string {
-		return $this->category;
-	}
-
-	/**
 	 * Retrieves the input schema for the ability.
 	 *
 	 * @since 6.9.0
@@ -450,6 +439,134 @@ class WP_Ability {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Retrieves the category for the ability.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return string The category for the ability.
+	 */
+	public function get_category(): string {
+		return $this->category;
+	}
+
+	/**
+	 * Converts the ability to an array representation.
+	 *
+	 * Returns a complete array representation of the ability including name, label,
+	 * description, schemas, and metadata. Callbacks are excluded as they are not serializable.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string,mixed> {
+	 *     The ability as an associative array.
+	 *
+	 *     @type string $name          The ability name with namespace.
+	 *     @type string $label         The human-readable label.
+	 *     @type string $description   The detailed description.
+	 *     @type array  $input_schema  The input validation schema.
+	 *     @type array  $output_schema The output validation schema.
+	 *     @type array  $meta {
+	 *         Metadata for the ability. May contain additional custom keys beyond those documented below.
+	 *
+	 *         @type array $annotations {
+	 *             Behavior annotations.
+	 *
+	 *             @type string $instructions Usage instructions.
+	 *             @type bool   $readonly     Whether the ability is read-only.
+	 *             @type bool   $destructive  Whether the ability is destructive.
+	 *             @type bool   $idempotent   Whether the ability is idempotent.
+	 *         }
+	 *         @type bool  $show_in_rest Whether the ability is exposed in REST API.
+	 *         @type mixed ...$0          Additional custom metadata keys.
+	 *     }
+	 * }
+	 */
+	public function to_array(): array {
+		$array = array(
+			'name'          => $this->get_name(),
+			'label'         => $this->get_label(),
+			'description'   => $this->get_description(),
+			'input_schema'  => $this->get_input_schema(),
+			'output_schema' => $this->get_output_schema(),
+			'meta'          => $this->get_meta(),
+		);
+
+		return $array;
+	}
+
+	/**
+	 * Serializes the ability to a value that can be serialized natively by json_encode().
+	 *
+	 * Implements the JsonSerializable interface to allow the ability to be passed
+	 * directly to json_encode() without manually calling to_array().
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string,mixed> The ability as an associative array.
+	 */
+	public function jsonSerialize(): array {
+		return $this->to_array();
+	}
+
+	/**
+	 * Converts the ability to a JSON Schema representation.
+	 *
+	 * Generates a JSON Schema Draft 4 compliant schema describing the ability's
+	 * structure, including input/output schemas and metadata.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string,mixed> A JSON Schema representation of the ability.
+	 */
+	public function to_json_schema(): array {
+		$input_schema  = $this->get_input_schema();
+		$output_schema = $this->get_output_schema();
+
+		$schema = array(
+			'$schema'     => 'http://json-schema.org/draft-04/schema#',
+			'type'        => 'object',
+			'title'       => $this->get_label(),
+			'description' => $this->get_description(),
+			'properties'  => array(
+				'name' => array(
+					'type' => 'string',
+					'enum' => array( $this->get_name() ),
+				),
+				'meta' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'annotations'  => array(
+							'type'       => 'object',
+							'properties' => array(
+								'instructions' => array( 'type' => 'string' ),
+								'readonly'     => array( 'type' => 'boolean' ),
+								'destructive'  => array( 'type' => 'boolean' ),
+								'idempotent'   => array( 'type' => 'boolean' ),
+							),
+						),
+						'show_in_rest' => array(
+							'type' => 'boolean',
+						),
+					),
+				),
+			),
+			'required'    => array( 'name', 'meta' ),
+		);
+
+		if ( ! empty( $input_schema ) ) {
+			$schema['properties']['input_schema'] = $input_schema;
+			$schema['required'][]                 = 'input_schema';
+		}
+
+		if ( ! empty( $output_schema ) ) {
+			$schema['properties']['output_schema'] = $output_schema;
+			$schema['required'][]                  = 'output_schema';
+		}
+
+		return $schema;
 	}
 
 	/**

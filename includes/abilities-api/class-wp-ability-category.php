@@ -18,7 +18,7 @@ declare( strict_types = 1 );
  *
  * @see WP_Ability_Categories_Registry
  */
-final class WP_Ability_Category {
+final class WP_Ability_Category implements \JsonSerializable {
 
 	/**
 	 * The unique slug for the ability category.
@@ -190,6 +190,56 @@ final class WP_Ability_Category {
 	 */
 	public function get_meta(): array {
 		return $this->meta;
+	}
+
+	/**
+	 * Converts the category to an array representation.
+	 *
+	 * Returns a complete array representation of the category including slug, label,
+	 * description, and metadata.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string,mixed> {
+	 *     The category as an associative array.
+	 *
+	 *     @type string $slug        The unique category slug.
+	 *     @type string $label       The human-readable label.
+	 *     @type string $description The detailed description.
+	 *     @type array  $meta        Optional metadata for the category.
+	 * }
+	 */
+	public function to_array(): array {
+		$array = array(
+			'slug'        => $this->get_slug(),
+			'label'       => $this->get_label(),
+			'description' => $this->get_description(),
+			'meta'        => $this->get_meta(),
+		);
+
+		/**
+		 * Filters the array representation of a category.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param array<string,mixed>     $array    The category as an associative array.
+		 * @param \WP_Ability_Category    $category The category instance.
+		 */
+		return apply_filters( "wp_ability_category_{$this->get_slug()}_to_array", $array, $this );
+	}
+
+	/**
+	 * Serializes the category to a value that can be serialized natively by json_encode().
+	 *
+	 * Implements the JsonSerializable interface to allow the category to be passed
+	 * directly to json_encode() without manually calling to_array().
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string,mixed> The category as an associative array.
+	 */
+	public function jsonSerialize(): array {
+		return $this->to_array();
 	}
 
 	/**
