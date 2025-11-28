@@ -252,26 +252,27 @@ curl https://example.com/wp-json/wp-abilities/v1/my-plugin/get-site-info
 
 ## Execute an Ability
 
-Abilities are executed via the `/run` endpoint. The required HTTP method depends on the ability's `readonly` annotation:
+Abilities are executed via the `/run` endpoint. The required HTTP method depends on the ability's functionality and [annotations](https://github.com/WordPress/abilities-api/blob/trunk/docs/php-api.md#parameters-explained):
 
-- **Read-only abilities** (`readonly: true`) must use **GET**
-- **Regular abilities** (default) must use **POST**
+- **Read-only abilities** must use **GET** (`readonly: true`)
+- **Regular abilities** must use **GET** when they are readonly (`readonly: true`), and **POST** when they require an input (`readonly: false`)
+- **Destructive abilities** (`destructive: true`) must use **DELETE**
 
 This distinction ensures read-only operations use safe HTTP methods that can be cached and don't modify server state.
 
 ### Definition
 
-`GET|POST /wp-abilities/v1/(?P<namespace>[a-z0-9-]+)/(?P<ability>[a-z0-9-]+)/run`
+`GET|POST|DELETE /wp-abilities/v1/(?P<namespace>[a-z0-9-]+)/(?P<ability>[a-z0-9-]+)/run`
 
 ### Arguments
 
 - `namespace` _(string)_: The namespace part of the ability name.
 - `ability` _(string)_: The ability name part.
 - `input` _(integer|number|boolean|string|array|object|null)_: Optional input data for the ability as defined by its input schema.
-  - For **GET requests**: pass as `input` query parameter (URL-encoded JSON)
-  - For **POST requests**: pass in JSON body
+  - For **GET** and **DELETE**  requests: pass as `input` query parameter (URL-encoded JSON)
+  - For **POST** requests: pass in JSON body
 
-### Example Request (Read-only, GET)
+### Example Request (GET)
 
 ```bash
 # No input
@@ -281,7 +282,7 @@ curl https://example.com/wp-json/wp-abilities/v1/my-plugin/get-site-info/run
 curl "https://example.com/wp-json/wp-abilities/v1/my-plugin/get-user-info/run?input=%7B%22user_id%22%3A1%7D"
 ```
 
-### Example Request (Regular, POST)
+### Example Request (POST)
 
 ```bash
 # No input
@@ -293,6 +294,13 @@ curl -X POST \
   -d '{"input":{"option_name":"blogname","option_value":"New Site Name"}}' \
   https://example.com/wp-json/wp-abilities/v1/my-plugin/update-option/run
 ```
+
+### Example Request (DELETE)
+
+```bash
+# With input (URL-encoded)
+curl -X DELETE "https://example.com/wp-json/wp-abilities/v1/my-plugin/delete-post/run?input=%7B%22post_id%22%3A123%7D"
+``` 
 
 ### Example Response (Success)
 
