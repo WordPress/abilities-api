@@ -40,6 +40,7 @@ class WP_REST_Abilities_V1_Categories_Controller extends WP_REST_Controller {
 	 * @since 6.9.0
 	 *
 	 * @see register_rest_route()
+	 * @return void
 	 */
 	public function register_routes(): void {
 		register_rest_route(
@@ -161,7 +162,7 @@ class WP_REST_Abilities_V1_Categories_Controller extends WP_REST_Controller {
 	 * @since 6.9.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return bool True if the request has read access.
+	 * @return bool True if the request has read access, false otherwise.
 	 */
 	public function get_items_permissions_check( $request ) {
 		return current_user_can( 'read' );
@@ -173,7 +174,7 @@ class WP_REST_Abilities_V1_Categories_Controller extends WP_REST_Controller {
 	 * @since 6.9.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return bool True if the request has read access.
+	 * @return bool True if the request has read access, false otherwise.
 	 */
 	public function get_item_permissions_check( $request ) {
 		return current_user_can( 'read' );

@@ -23,6 +23,7 @@ class WP_REST_Abilities_Init {
 	 *
 	 * @param WP_REST_Server|null $rest_server Optional. The REST server to register routes with. Default null, which
 	 *                                         will use the main REST server instance.
+	 * @return void
 	 */
 	public static function register_routes( $rest_server = null ): void {
 		if ( ! $rest_server instanceof WP_REST_Server ) {
