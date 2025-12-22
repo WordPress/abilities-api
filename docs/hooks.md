@@ -30,21 +30,21 @@ do_action( 'wp_abilities_api_categories_init', $registry );
 #### Usage Example
 
 ```php
-add_action( 'wp_abilities_api_categories_init', 'my_plugin_register_categories' );
+add_action( 'wp_abilities_api_categories_init', 'wporg_register_categories' );
 /**
  * Register custom ability categories.
  *
  * @param \WP_Ability_Categories_Registry $registry The category registry instance.
  */
-function my_plugin_register_categories( $registry ) {
+function wporg_register_categories( $registry ) {
     wp_register_ability_category( 'ecommerce', array(
-        'label' => __( 'E-commerce', 'my-plugin' ),
-        'description' => __( 'Abilities related to e-commerce functionality.', 'my-plugin' ),
+        'label' => __( 'E-commerce', 'textdomain' ),
+        'description' => __( 'Abilities related to e-commerce functionality.', 'textdomain' ),
     ));
 
     wp_register_ability_category( 'analytics', array(
-        'label' => __( 'Analytics', 'my-plugin' ),
-        'description' => __( 'Abilities that provide analytical data and insights.', 'my-plugin' ),
+        'label' => __( 'Analytics', 'textdomain' ),
+        'description' => __( 'Abilities that provide analytical data and insights.', 'textdomain' ),
     ));
 }
 ```
@@ -64,14 +64,14 @@ do_action( 'wp_abilities_api_init', $registry );
 #### Usage Example
 
 ```php
-add_action('wp_abilities_api_init', 'my_plugin_register_abilities');
+add_action('wp_abilities_api_init', 'wporg_register_abilities');
 /**
  * Register custom abilities.
  */
-function my_plugin_register_abilities() {
-    wp_register_ability( 'my-plugin/ability', array(
-        'label'               => __( 'Title', 'my-plugin' ),
-        'description'         => __( 'Description.', 'my-plugin' ),
+function wporg_register_abilities() {
+    wp_register_ability( 'wporg/ability', array(
+        'label'               => __( 'Title', 'textdomain' ),
+        'description'         => __( 'Description.', 'textdomain' ),
         'category'            => 'analytics',
         'input_schema'        => array(
             'type'                 => 'object',
@@ -82,7 +82,7 @@ function my_plugin_register_abilities() {
             'type'        => 'string',
             'description' => 'The site title.',
         ),
-        'execute_callback'    => 'my_plugin_get_site_title',
+        'execute_callback'    => 'wporg_get_site_title',
         'permission_callback' => '__return_true', // Everyone can access this
         'meta'                => array(
             'show_in_rest' => true, // Optional: expose via REST API
@@ -100,7 +100,7 @@ do_action( 'wp_before_execute_ability', $ability_name, $input );
 
 #### Parameters
 
-- `$ability_name` (`string`): The namespaced name of the ability being executed (e.g., `my-plugin/get-posts`).
+- `$ability_name` (`string`): The namespaced name of the ability being executed (e.g., `wporg/get-posts`).
 - `$input` (`mixed`): The input data passed to the ability.
 
 #### Usage Example
@@ -164,7 +164,7 @@ $args = apply_filters( 'wp_register_ability_args', array $args, string $ability_
 #### Parameters
 
 - `$args` (`array<string,mixed>`): The arguments used to instantiate the ability. See [wp_register_ability()](./3.registering-abilities.md#wp_register_ability) for the full list of args.
-- `$ability_name` (`string`): The namespaced name of the ability being registered (e.g., `my-plugin/get-posts`).
+- `$ability_name` (`string`): The namespaced name of the ability being registered (e.g., `wporg/get-posts`).
 
 #### Usage Example
 
@@ -238,8 +238,8 @@ add_filter( 'wp_register_ability_category_args', 'my_modify_category_args', 10, 
  */
 function my_modify_category_args( array $args, string $slug ): array {
     if ( 'my-category' === $slug ) {
-        $args['label'] = __( 'My Custom Label', 'my-plugin' );
-        $args['description'] = __( 'My custom description for this category.', 'my-plugin' );
+        $args['label'] = __( 'My Custom Label', 'textdomain' );
+        $args['description'] = __( 'My custom description for this category.', 'textdomain' );
     }
     return $args;
 }
