@@ -110,12 +110,7 @@ function my_plugin_register_abilities() {
     wp_register_ability( 'my-plugin/get-site-title', array(
         'label'               => __( 'Get Site Title', 'my-plugin' ),
         'description'         => __( 'Retrieves the title of the current WordPress site.', 'my-plugin' ),
-        'category'            => 'site-info',
-        'input_schema'        => array(
-            'type'                 => 'object',
-            'properties'           => array(),
-            'additionalProperties' => false,
-        ),
+        'category'            => 'site',
         'output_schema'       => array(
             'type'        => 'string',
             'description' => 'The site title.',
