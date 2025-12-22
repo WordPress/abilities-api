@@ -205,7 +205,7 @@ function my_modify_ability_args( array $args, string $ability_name ): array {
         }
 
         return current_user_can( 'my_custom_ability_cap', $ability_name );
-    }
+    };
 
     return $args;
 }
