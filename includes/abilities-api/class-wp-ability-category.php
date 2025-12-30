@@ -88,7 +88,7 @@ final class WP_Ability_Category {
 				_doing_it_wrong(
 					__METHOD__,
 					sprintf(
-						/* translators: %s: Property name. */
+						/* translators: %1$s: Property name, %2$s: Ability category slug, %3$s: Class name. */
 						__( 'Property "%1$s" is not a valid property for ability category "%2$s". Please check the %3$s class for allowed properties.' ),
 						'<code>' . esc_html( $property_name ) . '</code>',
 						'<code>' . esc_html( $this->slug ) . '</code>',
