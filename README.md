@@ -5,6 +5,8 @@
 
 [Handbook](https://make.wordpress.org/ai/handbook/projects/abilities-api/)
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/WordPress/abilities-api)
+
 ## Overview
 
 - **Purpose:** provide a common way for WordPress core, plugins, and themes to describe what they can do ("abilities") in a machine‑readable, human‑friendly form.
